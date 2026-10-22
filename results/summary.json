@@ -1,0 +1,46 @@
+{
+  "report_generated_at": "2026-10-20 16:08:44",
+  "run_metadata": "NOT RUN YET",
+  "dataset": {
+    "raw_rows": 18650,
+    "nulls_dropped": 16,
+    "conflicting_rows_dropped": 533,
+    "conflicting_unique_texts": [
+      "empty"
+    ],
+    "exact_duplicates_dropped": 585,
+    "total_unique_retained": 17513,
+    "augmentation_samples_added_to_train": 2863,
+    "final_balanced_train_size": 14078,
+    "splits_summary": {
+      "train_size": 11215,
+      "train_label_dist": {
+        "0": 7039,
+        "1": 4176
+      },
+      "val_size": 2803,
+      "val_label_dist": {
+        "0": 1765,
+        "1": 1038
+      },
+      "test_size": 3495,
+      "test_label_dist": {
+        "0": 2173,
+        "1": 1322
+      }
+    },
+    "manifest_file": "results\\splits.json"
+  },
+  "tuning": "NOT RUN YET",
+  "final_training_and_test": "NOT RUN YET",
+  "explainability": {
+    "faithfulness": "NOT RUN YET",
+    "alpha_ablation": "NOT RUN YET",
+    "global_words": "NOT RUN YET"
+  },
+  "limitations_and_notes": [
+    "Evaluations conducted with deterministic seed; variance across random seeds may exist.",
+    "Deduplication removes duplicate texts and conflicting labels (e.g. 'empty' placeholders) to ensure clean train/test boundary.",
+    "Synonym-replacement augmentation balances class frequencies on the training split only."
+  ]
+}
