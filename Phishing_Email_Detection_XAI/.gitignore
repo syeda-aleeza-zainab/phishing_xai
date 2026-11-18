@@ -61,3 +61,4 @@ results/**/*.pt
 !results/random_search_results.csv
 !results/RESULTS.md
 !results/summary.json
+*.zip
