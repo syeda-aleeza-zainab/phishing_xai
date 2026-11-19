@@ -9,11 +9,15 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 import torch
-from transformers import AutoTokenizer
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from phishing_xai.baselines import (
+    evaluate_faithfulness_with_proba_fn,
+    explain_word_scores,
+    load_scorer,
+)
 from phishing_xai.data import load_data, truncate_text_to_model_window
 from phishing_xai.explain import (
     LimeExplainer,
@@ -34,7 +38,9 @@ logger = get_logger("run_ablation")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Alpha Ablation Study for LITA")
-    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained model")
+    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained checkpoint (.pt). For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split")
+    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "bilstm"], default="roberta",
+                        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split; no checkpoint needed.")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv", help="Path to raw dataset")
     parser.add_argument("--splits_path", type=str, default="results/splits.json", help="Path to split manifest")
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save ablation artifacts")
@@ -95,10 +101,19 @@ def run_ablation(args: argparse.Namespace) -> Dict[str, Any]:
     eval_df = test_df.sample(n=sample_count, random_state=args.seed).reset_index(drop=True)
     logger.info(f"Running alpha ablation on {len(eval_df)} test samples (debug={args.debug}).")
 
-    # 2. Setup model & explainers
-    model, tokenizer = load_model_and_tokenizer(args.model_path, device)
-    lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=args.max_length, seed=args.seed)
-    ti_explainer = TransformerExplainer(model, tokenizer, device=device)
+    # 2. Setup model & explainers (RoBERTa path, unchanged)
+    is_roberta = getattr(args, "model", "roberta") == "roberta"
+    if is_roberta:
+        model, tokenizer = load_model_and_tokenizer(args.model_path, device)
+        lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=args.max_length, seed=args.seed)
+        ti_explainer = TransformerExplainer(model, tokenizer, device=device)
+        scorer = None
+    else:
+        # Baseline scorer: fitted on the real train split; the HF model /
+        # TransformerExplainer are never loaded here.
+        scorer = load_scorer(args.model, checkpoint=args.model_path, seed=args.seed)
+        model = tokenizer = None
+        lime_explainer = ti_explainer = None
 
     # 3. Resume support
     completed_ids = set()
@@ -126,24 +141,37 @@ def run_ablation(args: argparse.Namespace) -> Dict[str, Any]:
         raw_text = str(row["clean_text"])
         true_label = int(row["label"])
 
-        text = truncate_text_to_model_window(raw_text, tokenizer, max_length=args.max_length)
-        words = split_words(text)
-        if len(words) < 2:
-            continue
+        if is_roberta:
+            text = truncate_text_to_model_window(raw_text, tokenizer, max_length=args.max_length)
+            words = split_words(text)
+            if len(words) < 2:
+                continue
 
-        p_orig_0 = predict_probability(model, tokenizer, text, 0, device=device, max_length=args.max_length)
-        p_orig_1 = predict_probability(model, tokenizer, text, 1, device=device, max_length=args.max_length)
-        pred_class = 1 if p_orig_1 >= p_orig_0 else 0
-        p_orig = p_orig_1 if pred_class == 1 else p_orig_0
+            p_orig_0 = predict_probability(model, tokenizer, text, 0, device=device, max_length=args.max_length)
+            p_orig_1 = predict_probability(model, tokenizer, text, 1, device=device, max_length=args.max_length)
+            pred_class = 1 if p_orig_1 >= p_orig_0 else 0
+            p_orig = p_orig_1 if pred_class == 1 else p_orig_0
 
-        # Base attributions
-        ti_raw = ti_explainer.explain_raw(text, target_class=pred_class)
-        ti_agg = aggregate_subword_attributions_to_words(text, ti_raw, tokenizer, max_length=args.max_length)
-        ti_scores = [item[2] for item in ti_agg]
+            # Base attributions
+            ti_raw = ti_explainer.explain_raw(text, target_class=pred_class)
+            ti_agg = aggregate_subword_attributions_to_words(text, ti_raw, tokenizer, max_length=args.max_length)
+            ti_scores = [item[2] for item in ti_agg]
 
-        lime_raw, _, _ = lime_explainer.explain(text, num_features=None, num_samples=lime_perturbations)
-        lime_map = {w.strip().lower(): s for w, s in lime_raw if w.strip()}
-        lime_scores = [float(lime_map.get(w.lower(), 0.0)) for w in words]
+            lime_raw, _, _ = lime_explainer.explain(text, num_features=None, num_samples=lime_perturbations)
+            lime_map = {w.strip().lower(): s for w, s in lime_raw if w.strip()}
+            lime_scores = [float(lime_map.get(w.lower(), 0.0)) for w in words]
+        else:
+            # Baseline scorer: word-cap truncation, never the HF window.
+            text = scorer.truncate(raw_text, args.max_length)
+            words = scorer.tokenize_words(text)
+            if len(words) < 2:
+                continue
+            probs = scorer.predict_proba([text])[0]
+            pred_class = 1 if float(probs[1]) >= float(probs[0]) else 0
+            p_orig = float(probs[pred_class])
+            words, lime_scores, ti_scores, _method = explain_word_scores(
+                scorer, text, lime_samples=lime_perturbations, seed=args.seed,
+            )
 
         instance_results: Dict[str, Any] = {
             "email_id": email_id,
@@ -157,17 +185,23 @@ def run_ablation(args: argparse.Namespace) -> Dict[str, Any]:
             instance_results["evaluations"][variant] = {}
             for alpha in alphas:
                 lita_scores = compute_lita_scores(lime_scores, ti_scores, alpha=alpha, variant=variant).tolist()
-                res = evaluate_faithfulness_single_method(
-                    model=model,
-                    tokenizer=tokenizer,
-                    words=words,
-                    scores=lita_scores,
-                    target_class=pred_class,
-                    p_orig=p_orig,
-                    ks=[k_eval],
-                    device=device,
-                    max_length=args.max_length,
-                )
+                if is_roberta:
+                    res = evaluate_faithfulness_single_method(
+                        model=model,
+                        tokenizer=tokenizer,
+                        words=words,
+                        scores=lita_scores,
+                        target_class=pred_class,
+                        p_orig=p_orig,
+                        ks=[k_eval],
+                        device=device,
+                        max_length=args.max_length,
+                    )
+                else:
+                    res = evaluate_faithfulness_with_proba_fn(
+                        scorer.predict_proba, words, lita_scores,
+                        pred_class, p_orig, ks=[k_eval],
+                    )
                 instance_results["evaluations"][variant][str(alpha)] = {
                     "comprehensiveness": res["comprehensiveness"][k_eval],
                     "sufficiency": res["sufficiency"][k_eval],
@@ -203,6 +237,7 @@ def run_ablation(args: argparse.Namespace) -> Dict[str, Any]:
             "alphas": alphas,
             "variants": variants,
             "seed": args.seed,
+            "model": getattr(args, "model", "roberta"),
         },
         "summary": summary,
     }

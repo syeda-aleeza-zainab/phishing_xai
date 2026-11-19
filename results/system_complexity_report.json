@@ -1,0 +1,631 @@
+{
+  "systems": [
+    {
+      "system": "S1",
+      "model": "tfidf_lr",
+      "label": "S1 TF-IDF+LR",
+      "status": "ok",
+      "reasons": {
+        "robustness": "no per-seed robustness block in baseline_results.json",
+        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+      },
+      "accuracy": {
+        "mean": 0.9821649976156414,
+        "std": 0.0011563524704799135,
+        "n": 3
+      },
+      "precision": {
+        "mean": 0.9701434913253365,
+        "std": 0.0006258338398549966,
+        "n": 3
+      },
+      "recall": {
+        "mean": 0.9831064044377206,
+        "std": 0.003731378867107573,
+        "n": 3
+      },
+      "f1": {
+        "mean": 0.9765788153914846,
+        "std": 0.0015711835696289392,
+        "n": 3
+      },
+      "roc_auc": {
+        "mean": 0.9980906504181074,
+        "std": 5.744029867954433e-05,
+        "n": 3
+      },
+      "false_positive_rate": {
+        "mean": 0.01840773124712379,
+        "std": 0.00046019328117809406,
+        "n": 3
+      },
+      "precision_ci": {
+        "ci_low": 0.9607396894711305,
+        "ci_high": 0.9793212942750203
+      },
+      "mcnemar_p_vs_roberta": 0.3491037299167903,
+      "params": 40001,
+      "size_mb": 0.8869504928588867,
+      "train_seconds": {
+        "mean": 8.356640502000118,
+        "std": 4.315042934194503,
+        "n": 3
+      },
+      "latency_cpu_ms": {
+        "mean": 1.084115999825978,
+        "std": 0.11197965870541056,
+        "n": 3
+      },
+      "latency_gpu_ms": null,
+      "peak_memory_cpu_mb": 2276.2109375,
+      "peak_memory_cuda_mb": 0.0,
+      "robustness_f1": null,
+      "explanation_time_s_per_email": null,
+      "faithfulness_at_5": {
+        "comprehensiveness": 0.02724601154890917,
+        "sufficiency": 0.553121312062125,
+        "method": "coefficients"
+      },
+      "mm_precision": 0.9411764705882353,
+      "mm_recall": 1.0,
+      "mm_f1": 0.9696969696969697,
+      "mm_n": 120,
+      "mm_status": "ok",
+      "mm_mcnemar_p_vs_roberta": 0.625,
+      "mm_precision_ci": {
+        "ci_low": 0.8717592592592593,
+        "ci_high": 1.0
+      },
+      "mm_untrained_fallback": false
+    },
+    {
+      "system": "S2",
+      "model": "bilstm",
+      "label": "S2 BiLSTM",
+      "status": "ok",
+      "reasons": {
+        "robustness": "no per-seed robustness block in baseline_results.json",
+        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+      },
+      "accuracy": {
+        "mean": 0.9680495946590367,
+        "std": 0.0054613784653201655,
+        "n": 3
+      },
+      "precision": {
+        "mean": 0.9719453883503436,
+        "std": 0.0015159451479251388,
+        "n": 3
+      },
+      "recall": {
+        "mean": 0.942763489662128,
+        "std": 0.016439660426326788,
+        "n": 3
+      },
+      "f1": {
+        "mean": 0.9570747183670113,
+        "std": 0.007695694211501395,
+        "n": 3
+      },
+      "roc_auc": {
+        "mean": 0.9942262336162025,
+        "std": 0.001107426950718798,
+        "n": 3
+      },
+      "false_positive_rate": {
+        "mean": 0.01656695812241141,
+        "std": 0.0012175569770200608,
+        "n": 3
+      },
+      "precision_ci": {
+        "ci_low": 0.9612677009618494,
+        "ci_high": 0.9789229368985503
+      },
+      "mcnemar_p_vs_roberta": 0.00018093252456122036,
+      "params": 6236034,
+      "size_mb": 23.78858184814453,
+      "train_seconds": {
+        "mean": 135.79947025866662,
+        "std": 38.88197920406611,
+        "n": 3
+      },
+      "latency_cpu_ms": {
+        "mean": 8.308459333325876,
+        "std": 0.30537045068581053,
+        "n": 3
+      },
+      "latency_gpu_ms": {
+        "mean": 8.232105666650114,
+        "std": 0.2717468174977155,
+        "n": 3
+      },
+      "peak_memory_cpu_mb": 2554.13671875,
+      "peak_memory_cuda_mb": 166.51611328125,
+      "robustness_f1": null,
+      "explanation_time_s_per_email": null,
+      "faithfulness_at_5": {
+        "comprehensiveness": 0.0950456752507349,
+        "sufficiency": -0.0027057391778856914,
+        "method": "lita_magnitude"
+      },
+      "mm_precision": 1.0,
+      "mm_recall": 1.0,
+      "mm_f1": 1.0,
+      "mm_n": 96,
+      "mm_status": "ok",
+      "mm_mcnemar_p_vs_roberta": 1.0,
+      "mm_precision_ci": {
+        "ci_low": 1.0,
+        "ci_high": 1.0
+      },
+      "mm_untrained_fallback": false
+    },
+    {
+      "system": "S3",
+      "model": "distilbert",
+      "label": "S3 DistilBERT",
+      "status": "ok",
+      "reasons": {
+        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json",
+        "robustness": "no per-seed robustness block in baseline_results.json",
+        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET",
+        "faithfulness": "no faithfulness @5 found (baseline_results.json faithfulness block or faithfulness.json)",
+        "multimodal": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
+      },
+      "accuracy": {
+        "mean": 0.9839771101573677,
+        "std": 0.0,
+        "n": 1
+      },
+      "precision": {
+        "mean": 0.9730941704035875,
+        "std": 0.0,
+        "n": 1
+      },
+      "recall": {
+        "mean": 0.9848714069591528,
+        "std": 0.0,
+        "n": 1
+      },
+      "f1": {
+        "mean": 0.9789473684210527,
+        "std": 0.0,
+        "n": 1
+      },
+      "roc_auc": {
+        "mean": 0.9982932468550559,
+        "std": 0.0,
+        "n": 1
+      },
+      "false_positive_rate": {
+        "mean": 0.016566958122411414,
+        "std": 0.0,
+        "n": 1
+      },
+      "precision_ci": {
+        "ci_low": 0.9635400497626004,
+        "ci_high": 0.9819532947285957
+      },
+      "mcnemar_p_vs_roberta": 0.602537006105314,
+      "params": 66955010,
+      "size_mb": 255.45360660552979,
+      "train_seconds": {
+        "mean": 518.4906888980004,
+        "std": 0.0,
+        "n": 1
+      },
+      "latency_cpu_ms": null,
+      "latency_gpu_ms": null,
+      "peak_memory_cpu_mb": null,
+      "peak_memory_cuda_mb": null,
+      "robustness_f1": null,
+      "explanation_time_s_per_email": null,
+      "faithfulness_at_5": null,
+      "mm_precision": null,
+      "mm_recall": null,
+      "mm_f1": null,
+      "mm_n": null,
+      "mm_status": "NOT RUN YET",
+      "mm_mcnemar_p_vs_roberta": null,
+      "mm_precision_ci": null,
+      "mm_untrained_fallback": false
+    },
+    {
+      "system": "S4",
+      "model": "roberta_eval",
+      "label": "S4 RoBERTa",
+      "status": "ok",
+      "reasons": {
+        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json",
+        "robustness": "no per-seed robustness block in baseline_results.json",
+        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+      },
+      "accuracy": {
+        "mean": 0.9854077253218884,
+        "std": 0.0,
+        "n": 3
+      },
+      "precision": {
+        "mean": 0.9690036900369003,
+        "std": 0.0,
+        "n": 3
+      },
+      "recall": {
+        "mean": 0.9931921331316188,
+        "std": 0.0,
+        "n": 3
+      },
+      "f1": {
+        "mean": 0.9809488233096749,
+        "std": 1.3597399555105182e-16,
+        "n": 3
+      },
+      "roc_auc": {
+        "mean": 0.9986272524929457,
+        "std": 0.0,
+        "n": 3
+      },
+      "false_positive_rate": {
+        "mean": 0.019328117809479982,
+        "std": 0.0,
+        "n": 3
+      },
+      "precision_ci": null,
+      "mcnemar_p_vs_roberta": null,
+      "params": 124647170,
+      "size_mb": 475.5714359283447,
+      "train_seconds": null,
+      "latency_cpu_ms": null,
+      "latency_gpu_ms": null,
+      "peak_memory_cpu_mb": null,
+      "peak_memory_cuda_mb": null,
+      "robustness_f1": null,
+      "explanation_time_s_per_email": null,
+      "faithfulness_at_5": {
+        "comprehensiveness": 0.10552617425600681,
+        "sufficiency": 0.08087266534182828,
+        "method": "lita_magnitude"
+      },
+      "mm_precision": 1.0,
+      "mm_recall": 0.9791666666666666,
+      "mm_f1": 0.9894736842105264,
+      "mm_n": 96,
+      "mm_status": "ok",
+      "mm_mcnemar_p_vs_roberta": null,
+      "mm_precision_ci": null,
+      "mm_untrained_fallback": false
+    }
+  ],
+  "multimodal_by_system": {
+    "S4": {
+      "status": "ok",
+      "precision": 1.0,
+      "recall": 0.9791666666666666,
+      "f1": 0.9894736842105264,
+      "false_positive_rate": 0.0,
+      "n": 96,
+      "untrained_fallback": false,
+      "ablation": {
+        "a": {
+          "precision": 0.8604651162790697,
+          "recall": 0.7708333333333334,
+          "f1": 0.8131868131868132
+        },
+        "b": {
+          "precision": 0.8775510204081632,
+          "recall": 0.8958333333333334,
+          "f1": 0.8865979381443299
+        },
+        "c": {
+          "precision": 0.9791666666666666,
+          "recall": 0.9791666666666666,
+          "f1": 0.9791666666666666
+        },
+        "d_weighted": {
+          "precision": 1.0,
+          "recall": 0.9791666666666666,
+          "f1": 0.9894736842105264
+        },
+        "d_max": {
+          "precision": 0.9130434782608695,
+          "recall": 0.875,
+          "f1": 0.8936170212765957
+        }
+      },
+      "mcnemar_p_vs_roberta": null,
+      "bootstrap_ci_low": null,
+      "bootstrap_ci_high": null
+    },
+    "S1": {
+      "status": "ok",
+      "precision": 0.9411764705882353,
+      "recall": 1.0,
+      "f1": 0.9696969696969697,
+      "false_positive_rate": 0.05,
+      "n": 120,
+      "ablation": null,
+      "mcnemar_p_vs_roberta": 0.625,
+      "bootstrap_ci_low": 0.8717592592592593,
+      "bootstrap_ci_high": 1.0,
+      "reason": "from baselines.tfidf_lr in multimodal_eval.json (no McNemar/CI stored)"
+    },
+    "S2": {
+      "status": "ok",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "false_positive_rate": 0.0,
+      "n": 96,
+      "untrained_fallback": false,
+      "ablation": {
+        "a": {
+          "precision": 0.9795918367346939,
+          "recall": 1.0,
+          "f1": 0.9896907216494846
+        },
+        "b": {
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "f1": 0.9411764705882353
+        },
+        "c": {
+          "precision": 0.8135593220338984,
+          "recall": 1.0,
+          "f1": 0.897196261682243
+        },
+        "d_weighted": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "d_max": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666
+        }
+      },
+      "mcnemar_p_vs_roberta": 1.0,
+      "bootstrap_ci_low": 1.0,
+      "bootstrap_ci_high": 1.0
+    },
+    "S3": {
+      "status": "NOT RUN YET",
+      "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
+    }
+  },
+  "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at unknown latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
+  "recommended_deployment_model": "distilbert (S3, precision 0.9731, recall 0.9849; recall floor 0.85 met)",
+  "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 1.30 precision points (RoBERTa 0.9690 vs tfidf_svm 0.9820; McNemar p = 0.2530) at unknown latency and 31.4x parameters. (F1 gap: -0.45 points, RoBERTa 0.9809 vs tfidf_svm 0.9854) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
+  "agreement": {
+    "status": "ok",
+    "n_emails": 10,
+    "mean_jaccard": 1.0,
+    "mean_spearman": 0.9999999999999998,
+    "n_spearman": 10,
+    "roberta_method": "bilstm",
+    "bilstm_method": "bilstm",
+    "per_email": [
+      {
+        "email_id": "email_1",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "other",
+          "spanish",
+          "the",
+          "spanish",
+          "spanish"
+        ],
+        "bilstm_top5": [
+          "other",
+          "spanish",
+          "the",
+          "spanish",
+          "spanish"
+        ]
+      },
+      {
+        "email_id": "email_17",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "lucky",
+          ":",
+          ":",
+          "issue",
+          "offer"
+        ],
+        "bilstm_top5": [
+          "lucky",
+          ":",
+          ":",
+          "issue",
+          "offer"
+        ]
+      },
+      {
+        "email_id": "email_18",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "look",
+          "enron",
+          "under",
+          "at",
+          "ability"
+        ],
+        "bilstm_top5": [
+          "look",
+          "enron",
+          "under",
+          "at",
+          "ability"
+        ]
+      },
+      {
+        "email_id": "email_25",
+        "jaccard": 1.0,
+        "spearman": 1.0,
+        "roberta_top5": [
+          "her",
+          "legal",
+          "notification",
+          "her",
+          "us"
+        ],
+        "bilstm_top5": [
+          "her",
+          "legal",
+          "notification",
+          "her",
+          "us"
+        ]
+      },
+      {
+        "email_id": "email_27",
+        "jaccard": 1.0,
+        "spearman": 1.0,
+        "roberta_top5": [
+          "pat",
+          "completion",
+          "completion",
+          "completion",
+          "o"
+        ],
+        "bilstm_top5": [
+          "pat",
+          "completion",
+          "completion",
+          "completion",
+          "o"
+        ]
+      },
+      {
+        "email_id": "email_29",
+        "jaccard": 1.0,
+        "spearman": 1.0,
+        "roberta_top5": [
+          "-",
+          "-",
+          "ricki",
+          "thank",
+          "5754"
+        ],
+        "bilstm_top5": [
+          "-",
+          "-",
+          "ricki",
+          "thank",
+          "5754"
+        ]
+      },
+      {
+        "email_id": "email_30",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "cross",
+          "cross",
+          "control",
+          "v",
+          "v"
+        ],
+        "bilstm_top5": [
+          "cross",
+          "cross",
+          "control",
+          "v",
+          "v"
+        ]
+      },
+      {
+        "email_id": "email_37",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "now",
+          "overwritten",
+          "exmh's",
+          "@",
+          "in"
+        ],
+        "bilstm_top5": [
+          "now",
+          "overwritten",
+          "exmh's",
+          "@",
+          "in"
+        ]
+      },
+      {
+        "email_id": "email_42",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "business",
+          "hpl",
+          "enron",
+          "enron",
+          "hpl"
+        ],
+        "bilstm_top5": [
+          "business",
+          "hpl",
+          "enron",
+          "enron",
+          "hpl"
+        ]
+      },
+      {
+        "email_id": "email_44",
+        "jaccard": 1.0,
+        "spearman": 0.9999999999999998,
+        "roberta_top5": [
+          "remove",
+          "adult",
+          "line",
+          "type",
+          "email"
+        ],
+        "bilstm_top5": [
+          "remove",
+          "adult",
+          "line",
+          "type",
+          "email"
+        ]
+      }
+    ]
+  },
+  "precision_first": true,
+  "primary_metric": "phishing-class precision (user decision 2026-11-19)",
+  "recall_floor": 0.85,
+  "precision_tolerance_points": 1.0,
+  "dataset_caveat": "Dataset caveat: this is an old Enron-style dataset that is highly separable, so high simple-model scores do not imply the same performance on modern, AI-written or multimodal phishing. A harder out-of-distribution test is needed before any deployment claim.",
+  "sampling_note": "Sampling comparability (checked against the scripts, 2026-11-19). run_faithfulness.py and run_ablation.py draw their emails with test_df.sample(n=sample_size, random_state=seed) from the same test split, so the SAME --seed and SAME --sample_size give the SAME emails for RoBERTa and for BiLSTM (--model bilstm) \u2014 provided the splits are identical. The sampled email ids are verifiable post-hoc in faithfulness_records.jsonl (one record per email, with email_id); faithfulness.json / alpha_ablation.json themselves store only the summary plus metadata seed/sample_count, no per-email words. run_explain.py is DIFFERENT: it takes test_df.head(num_samples) \u2014 the first N test rows, seed-independent \u2014 so its emails are NOT the faithfulness sample. Agreement between models is still valid from explanations.json because both models explain the same head(N) emails, but only when both runs use the same --num_samples AND different --output_dir values (the default results/explanations/explanations.json would be overwritten by the second run). Per-email top words ARE stored by run_explain.py (word_level_attributions with lita_score per word, plus lime_top_words top 15, keyed by id) \u2014 so no code change is needed for agreement; the discipline is CLI-level (same --num_samples, separate --output_dir). If a future explain run stops storing per-email words, agreement falls back to NOT RUN YET.",
+  "ood_csv": null,
+  "ood_status": "NOT RUN YET",
+  "inputs_status": {
+    "baselines/baseline_results.json": "ok",
+    "metrics.json": "ok",
+    "bilstm/tuning.json": "ok",
+    "bilstm/faithfulness.json": "ok",
+    "bilstm/alpha_ablation.json": "ok",
+    "bilstm/explanations/explanations.json": "ok",
+    "bilstm/explanations.json": "missing: /home/hatch/workspace/kaggle_downloads/regen/bilstm/explanations.json not found",
+    "explanations/explanations.json": "ok",
+    "faithfulness.json": "ok",
+    "alpha_ablation.json": "ok",
+    "multimodal_eval/multimodal_eval.json": "ok",
+    "bilstm/multimodal_eval.json": "ok",
+    "bilstm/multimodal_eval/multimodal_eval.json": "missing: /home/hatch/workspace/kaggle_downloads/regen/bilstm/multimodal_eval/multimodal_eval.json not found",
+    "multimodal_eval_rule_based/multimodal_eval.json": "ok"
+  },
+  "plots": {
+    "precision_vs_latency": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/precision_vs_latency.png",
+    "faithfulness": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/faithfulness_at_5.png",
+    "multimodal_ablation": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/multimodal_ablation.png",
+    "agreement": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/top_word_agreement.png"
+  },
+  "plot_dir": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots"
+}

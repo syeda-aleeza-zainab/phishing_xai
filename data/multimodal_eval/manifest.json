@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "debug": false,
+  "n_total": 120,
+  "n_phishing": 60,
+  "n_benign": 60,
+  "n_validation": 24,
+  "n_test": 96,
+  "validation_fraction": 0.2,
+  "categories": {
+    "image_only_phishing": 10,
+    "text_button_image": 8,
+    "qr_body_image": 8,
+    "qr_in_text_pdf": 7,
+    "scanned_pdf": 7,
+    "html_link_mismatch": 7,
+    "html_attachment_phishing": 6,
+    "fake_invoice_pdf": 7,
+    "newsletter_logo_qr": 20,
+    "real_invoice": 20,
+    "meeting_agenda": 20
+  },
+  "labels_csv": "labels.csv",
+  "split_rule": "Stratified deterministic split (seed+1 stream): 20% of each label to validation; thresholds are fitted on validation only, never test.",
+  "synthetic_caveat": "SYNTHETIC evaluation set: generated images/PDFs from a small set of templates with simulated OCR stressors (font/size variation, low contrast, rotation, noise, JPEG compression). No real-world adversary variation and no real emails. Results measure pipeline behaviour on these templates only and do not generalise to real phishing without a real labelled set.",
+  "threshold_note": "Threshold 0.5 is a PLACEHOLDER. Fit thresholds on the validation slice only (see scripts/run_multimodal_eval.py); never tune on test."
+}

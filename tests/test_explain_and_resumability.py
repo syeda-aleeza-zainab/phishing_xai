@@ -380,3 +380,41 @@ def test_tune_incremental_saving_and_skip_completed(tmp_path: Path):
     assert len(data2["all_results"]) == 2
     iterations = [r["iteration"] for r in data2["all_results"]]
     assert iterations == [1, 2]
+
+
+# =========================================================================
+# Regression (2026-11-19, Stage C): long emails must not crash the
+# explainer. email_27 (896 words / 1029 tokens) raised a CUDA
+# ScatterGather index-out-of-bounds assert because TransformerExplainer
+# passed untruncated text to transformers-interpret / Captum while
+# RoBERTa position_embeddings has only 514 rows. Both paths must truncate
+# to 512 tokens (what the model sees in training).
+# =========================================================================
+def test_transformer_explainer_truncates_long_text():
+    """A >512-token email must explain without error and return at most
+    max_length token attributions, on both the TI and Captum paths."""
+    tokenizer = AutoTokenizer.from_pretrained(TINY_MODEL)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        TINY_MODEL,
+        id2label={0: "Safe Email", 1: "Phishing Email"},
+        label2id={"Safe Email": 0, "Phishing Email": 1},
+    )
+    explainer = TransformerExplainer(model, tokenizer, device=torch.device("cpu"))
+
+    long_text = "Please verify your account now. " * 120
+    n_tokens = len(tokenizer.encode(long_text, add_special_tokens=True))
+    assert n_tokens > 512, f"test text should exceed 512 tokens, got {n_tokens}"
+
+    # Primary path (TI on Kaggle; Captum fallback locally where TI is absent).
+    attributions = explainer.explain_raw(long_text, target_class=1)
+    assert isinstance(attributions, list) and len(attributions) > 0
+    assert len(attributions) <= 512, f"expected at most 512 token attributions, got {len(attributions)}"
+    assert all(np.isfinite(s) for _, s in attributions)
+
+    # Captum fallback path directly.
+    captum_attributions = explainer._explain_with_captum(long_text, target_class=1)
+    assert isinstance(captum_attributions, list) and len(captum_attributions) > 0
+    assert len(captum_attributions) <= 512, (
+        f"expected at most 512 token attributions, got {len(captum_attributions)}"
+    )
+    assert all(np.isfinite(s) for _, s in captum_attributions)

@@ -43,9 +43,10 @@ import random
 import re
 import resource
 import time
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Tuple, runtime_checkable
 
 import numpy as np
 import pandas as pd
@@ -1073,6 +1074,268 @@ def build_torch_baseline(
 
 
 # ---------------------------------------------------------------------------
+# Fitted-baseline save / load (6B.2): one file per model, one loader
+# ---------------------------------------------------------------------------
+
+#: Format marker written into every saved baseline artefact. ``load_scorer``
+#: recognises a baseline artefact by this marker (see
+#: :func:`_is_baseline_artefact`); a RoBERTa checkpoint never contains it,
+#: which is what lets a RoBERTa ``.pt`` fall through to fitting instead of
+#: being mistaken for a baseline.
+BASELINE_ARTEFACT_FORMAT = "phishing_xai.baseline.v1"
+
+#: Model kinds a saved baseline artefact may hold.
+BASELINE_ARTEFACT_KINDS: Tuple[str, ...] = ("bilstm", "cnn", "tfidf_lr", "tfidf_svm")
+
+
+def _public_extra(extra: Dict[str, Any]) -> Dict[str, Any]:
+    """Public (JSON-plain, ``_``-free) metadata from a wrapper's ``extra``."""
+    return {k: v for k, v in (extra or {}).items() if not k.startswith("_")}
+
+
+def _torch_config_from_model(model: nn.Module, tokenizer: SimpleTokenizer) -> Dict[str, Any]:
+    """Recover the rebuild config for a fitted torch baseline by introspection.
+
+    The architecture is read off the fitted module itself (embedding dim,
+    LSTM hidden/layers, CNN filters/kernels, dropout), so no
+    :class:`TorchTrainConfig` needs to be carried alongside the wrapper.
+    """
+    config: Dict[str, Any] = {
+        "emb_dim": int(model.embedding.embedding_dim),  # type: ignore[attr-defined]
+        "dropout": float(model.dropout.p),  # type: ignore[attr-defined]
+        "max_len": int(tokenizer.max_len),
+        "max_vocab": int(tokenizer.max_vocab),
+    }
+    if isinstance(model, BiLSTMClassifier):
+        config.update({
+            "hidden": int(model.lstm.hidden_size),
+            "layers": int(model.lstm.num_layers),
+        })
+    elif isinstance(model, CNNClassifier):
+        config.update({
+            "num_filters": int(model.convs[0].out_channels),
+            "kernel_sizes": [int(conv.kernel_size[0]) for conv in model.convs],
+        })
+    else:
+        raise TypeError(
+            f"save_baseline_model: unsupported torch module {type(model).__name__!r}; "
+            "expected BiLSTMClassifier or CNNClassifier."
+        )
+    return config
+
+
+def save_baseline_model(model: BaselineModel, path: str | Path) -> Path:
+    """Save a FITTED baseline to a single file; return the path written.
+
+    Torch baselines (``bilstm`` / ``cnn``) are saved with ``torch.save`` as
+    ``{"format", "kind", "config", "state_dict", "tokenizer", "n_params",
+    "extra"}``; the tokenizer is stored as its full ``word2idx`` mapping
+    plus ``max_vocab`` / ``max_len``, so loading rebuilds it exactly.
+    TF-IDF baselines (``tfidf_lr`` / ``tfidf_svm``) are saved with ``pickle``
+    as ``{"format", "kind", "pipeline", "n_params", "extra"}``. The dummy
+    baseline has no fitted artefact and raises ``ValueError``. Only the
+    public (``_``-free) part of ``extra`` is stored; the fitted module /
+    pipeline / tokenizer are stored under their own keys and re-attached
+    on load. The parent directory is created if needed.
+    """
+    path = Path(path)
+    ensure_dir(path.parent)
+    if model.kind == "torch":
+        fitted = model.extra.get("_model")
+        tokenizer = model.extra.get("_tokenizer")
+        if not isinstance(fitted, nn.Module) or not isinstance(tokenizer, SimpleTokenizer):
+            raise ValueError(
+                f"save_baseline_model: torch baseline {model.name!r} has no fitted "
+                "nn.Module / SimpleTokenizer in extra['_model'] / extra['_tokenizer']."
+            )
+        payload: Dict[str, Any] = {
+            "format": BASELINE_ARTEFACT_FORMAT,
+            "kind": model.name,
+            "config": _torch_config_from_model(fitted, tokenizer),
+            "state_dict": {k: v.detach().cpu().clone() for k, v in fitted.state_dict().items()},
+            "tokenizer": {
+                "word2idx": dict(tokenizer.word2idx),
+                "max_vocab": int(tokenizer.max_vocab),
+                "max_len": int(tokenizer.max_len),
+            },
+            "n_params": int(model.n_params),
+            "extra": _public_extra(model.extra),
+        }
+        torch.save(payload, path)
+    elif model.kind == "sklearn":
+        pipeline = model.extra.get("_pipeline")
+        if pipeline is None:
+            raise ValueError(
+                f"save_baseline_model: sklearn baseline {model.name!r} has no fitted "
+                "pipeline in extra['_pipeline']."
+            )
+        payload = {
+            "format": BASELINE_ARTEFACT_FORMAT,
+            "kind": model.name,
+            "pipeline": pipeline,
+            "n_params": int(model.n_params),
+            "extra": _public_extra(model.extra),
+        }
+        with open(path, "wb") as f:
+            pickle.dump(payload, f, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        raise ValueError(
+            f"save_baseline_model: cannot save baseline {model.name!r} "
+            f"(kind {model.kind!r}); only torch (bilstm/cnn) and sklearn "
+            "(tfidf_lr/tfidf_svm) baselines have a fitted artefact to save."
+        )
+    size_mb = path.stat().st_size / (1024.0 * 1024.0)
+    logger.info(f"Saved fitted baseline {model.name!r} -> {path} ({size_mb:.2f} MB)")
+    return path
+
+
+def _load_artefact_payload(path: Path) -> Dict[str, Any]:
+    """Load a saved baseline artefact, dispatching on the file itself.
+
+    Tries ``torch.load`` first (the torch-save format is a zip), then plain
+    ``pickle`` (the sklearn format). A file neither loader can read raises
+    ``RuntimeError``; a readable file that is not a baseline artefact raises
+    ``ValueError``. Both cases raise — a corrupt or wrong-kind artefact is
+    never silently treated as "no checkpoint".
+    """
+    last_exc: Optional[Exception] = None
+    for loader in (
+        lambda: torch.load(path, map_location="cpu", weights_only=False),
+        lambda: pickle.load(open(path, "rb")),
+    ):
+        try:
+            payload = loader()
+            break
+        except Exception as exc:  # noqa: BLE001 - both loaders must be tried
+            last_exc = exc
+            continue
+    else:  # pragma: no cover - reached only when both loaders raise
+        raise RuntimeError(f"Could not load baseline artefact {path}: {last_exc}") from last_exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"Baseline artefact {path} is not a dict payload (got {type(payload).__name__}).")
+    if payload.get("format") != BASELINE_ARTEFACT_FORMAT:
+        raise ValueError(
+            f"Baseline artefact {path} has format {payload.get('format')!r}, expected "
+            f"{BASELINE_ARTEFACT_FORMAT!r}: not a saved baseline artefact."
+        )
+    if payload.get("kind") not in BASELINE_ARTEFACT_KINDS:
+        raise ValueError(
+            f"Baseline artefact {path} has unknown kind {payload.get('kind')!r}; "
+            f"expected one of {list(BASELINE_ARTEFACT_KINDS)}."
+        )
+    return payload
+
+
+def load_baseline_model(path: str | Path, device: Any = None) -> BaselineModel:
+    """Load a baseline saved by :func:`save_baseline_model`.
+
+    The SAME architecture is rebuilt (torch: the existing
+    :class:`BiLSTMClassifier` / :class:`CNNClassifier` classes, never a
+    duplicated module definition; sklearn: the pickled pipeline is used
+    as-is) and wrapped in a :class:`BaselineModel` with the same name/kind,
+    so ``predict_proba`` behaves identically to the pre-save model.
+    Raises ``FileNotFoundError`` for a missing path, ``RuntimeError`` for a
+    file neither loader can read, and ``ValueError`` for a readable file
+    that is not a baseline artefact (including a RoBERTa checkpoint).
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Baseline artefact not found: {path}")
+    payload = _load_artefact_payload(path)
+    kind = str(payload["kind"])
+    size_mb = path.stat().st_size / (1024.0 * 1024.0)
+    extra = dict(payload.get("extra") or {})
+    if kind in ("bilstm", "cnn"):
+        config = dict(payload["config"])
+        tok_data = dict(payload["tokenizer"])
+        tokenizer = SimpleTokenizer(max_vocab=int(tok_data["max_vocab"]), max_len=int(tok_data["max_len"]))
+        tokenizer.word2idx = {str(w): int(i) for w, i in tok_data["word2idx"].items()}
+        tokenizer.idx2word = {i: w for w, i in tokenizer.word2idx.items()}
+        if kind == "bilstm":
+            fitted: nn.Module = BiLSTMClassifier(
+                vocab_size=len(tokenizer), emb_dim=int(config["emb_dim"]),
+                hidden=int(config["hidden"]), layers=int(config["layers"]),
+                dropout=float(config["dropout"]),
+            )
+        else:
+            fitted = CNNClassifier(
+                vocab_size=len(tokenizer), emb_dim=int(config["emb_dim"]),
+                num_filters=int(config["num_filters"]),
+                kernel_sizes=tuple(int(k) for k in config["kernel_sizes"]),
+                dropout=float(config["dropout"]),
+            )
+        fitted.load_state_dict(payload["state_dict"])
+        fitted.eval()
+        device_obj = device or get_device()
+        fitted.to(device_obj)
+        device_holder: Dict[str, Any] = {"device": device_obj}
+        wrapper = BaselineModel(
+            kind, "torch",
+            lambda texts: torch_predict_proba(fitted, tokenizer, texts, device=device_holder["device"]),
+            n_params=int(payload.get("n_params") or count_params_torch(fitted)),
+            size_mb=size_mb, extra=extra,
+        )
+        wrapper.extra["_device_holder"] = device_holder
+        wrapper.extra["_model"] = fitted  # type: ignore[assignment]
+        wrapper.extra["_tokenizer"] = tokenizer  # type: ignore[assignment]
+        wrapper.extra["_device"] = device_obj  # type: ignore[assignment]
+        return wrapper
+    pipeline = payload["pipeline"]
+    wrapper = BaselineModel(
+        kind, "sklearn", lambda texts: pipeline.predict_proba(list(texts)),
+        n_params=int(payload.get("n_params") or 0), size_mb=size_mb, extra=extra,
+    )
+    wrapper.extra["_pipeline"] = pipeline
+    return wrapper
+
+
+def _is_baseline_artefact(path: str | Path) -> bool:
+    """Cheap check: does an existing file hold a saved baseline artefact?
+
+    The check reads bytes only, never a model: a ``torch.save`` file is a
+    zip, so the marker is searched inside its ``data.pkl`` entry (the
+    entry is ``<stem>/data.pkl`` on torch 2.x, ``archive/data.pkl`` on
+    older torch — either is accepted); a sklearn pickle is scanned in
+    chunks. A zip WITHOUT the marker is a torch checkpoint of another
+    kind (e.g. a RoBERTa ``.pt``) and returns False, so the caller falls
+    through to fitting. A NON-zip file without the marker is neither a
+    torch checkpoint nor a baseline pickle, so it raises ``RuntimeError``
+    instead of silently fitting — a truncated baseline pickle must be
+    loud, not a quiet refit. Unreadable files raise ``RuntimeError`` for
+    the same reason.
+    """
+    path = Path(path)
+    marker = BASELINE_ARTEFACT_FORMAT.encode()
+    try:
+        if zipfile.is_zipfile(path):
+            with zipfile.ZipFile(path) as zf:
+                pkl_names = [n for n in zf.namelist()
+                             if n == "data.pkl" or n.endswith("/data.pkl")]
+                if not pkl_names:
+                    return False
+                return marker in zf.read(pkl_names[0])
+        with open(path, "rb") as f:
+            prev = b""
+            while True:
+                chunk = f.read(1024 * 1024)
+                if not chunk:
+                    break
+                if marker in prev + chunk:
+                    return True
+                prev = chunk[-len(marker):] if len(marker) > 1 else b""
+        raise RuntimeError(
+            f"Checkpoint {path} exists but is neither a saved baseline artefact "
+            "(no format marker) nor a torch checkpoint file; refusing to guess. "
+            "Pass a best_<model>.pt artefact from run_baselines.py, a RoBERTa .pt, "
+            "or no checkpoint at all."
+        )
+    except RuntimeError:
+        raise
+    except (OSError, zipfile.BadZipFile) as exc:
+        raise RuntimeError(f"Checkpoint {path} exists but could not be read: {exc}") from exc
+
+
+# ---------------------------------------------------------------------------
 # Small random search on VALIDATION only (fairness: ~8 trials, never test)
 # ---------------------------------------------------------------------------
 
@@ -1127,6 +1390,50 @@ def random_search_tfidf(
     return {"best_params": best["params"], "best_val_precision": best["val_precision"],
             "best_val_recall": best["val_recall"], "best_val_f1": best["val_f1"],
             "recall_floor": recall_floor, "floor_met": bool(eligible), "trials": trials}
+
+
+def select_best_bilstm_trial(
+    trials: Sequence[Dict[str, Any]], recall_floor: float = 0.85
+) -> Dict[str, Any]:
+    """Select the best BiLSTM tuning trial by the precision-first rule.
+
+    Each trial is a dict with ``val_precision`` / ``val_recall`` / ``val_f1``
+    plus its hyperparameters (under ``params`` or ``config`` — either key is
+    carried through untouched). Among trials with validation recall >=
+    ``recall_floor`` the winner is the highest validation PRECISION (ties:
+    higher recall, then higher F1). If NO trial meets the floor, the winner
+    is the trial with the HIGHEST RECALL, then highest precision — and
+    ``floor_met`` is False, so the caller must SAY SO in its output instead
+    of pretending the floor held.
+
+    NOTE: this fallback differs deliberately from
+    :func:`random_search_tfidf`, whose no-floor fallback is highest
+    precision overall. The tuning driver (``scripts/tune_bilstm.py``) uses
+    this rule: when nothing clears the recall floor, recall is the binding
+    constraint, so the closest-to-the-floor trial wins.
+    """
+    trials = list(trials)
+    if not trials:
+        raise ValueError("select_best_bilstm_trial: no trials to select from.")
+    eligible = [t for t in trials if float(t["val_recall"]) >= recall_floor]
+    if eligible:
+        pool, floor_met = eligible, True
+        key = lambda t: (float(t["val_precision"]), float(t["val_recall"]), float(t["val_f1"]))
+    else:
+        pool, floor_met = trials, False
+        key = lambda t: (float(t["val_recall"]), float(t["val_precision"]), float(t["val_f1"]))
+    best = max(pool, key=key)
+    return {
+        "best": best,
+        "best_params": best.get("params", best.get("config")),
+        "best_val_precision": float(best["val_precision"]),
+        "best_val_recall": float(best["val_recall"]),
+        "best_val_f1": float(best["val_f1"]),
+        "recall_floor": float(recall_floor),
+        "floor_met": floor_met,
+        "n_trials": len(trials),
+        "n_eligible": len(eligible),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1372,6 +1679,15 @@ def integrated_gradients_scores(
     The BiLSTM/CNN tokenizer is word-level, so one token is one word and the
     shared ``split_words`` list aligns directly with the token sequence
     (truncated to ``tokenizer.max_len``).
+
+    The model stays in eval mode (dropout off, so attributions are
+    deterministic) and the Captum attribution runs with cuDNN disabled:
+    cuDNN's RNN backward can only be called in training mode, so on GPU
+    backpropagating through the BiLSTM in eval mode raises
+    ``RuntimeError: cudnn RNN backward can only be called in training mode``.
+    Disabling cuDNN makes the LSTM use the native implementation, which
+    supports backward in eval mode. ``torch.backends.cudnn.flags`` restores
+    the previous flag values on exit, so this affects only this call.
     """
     from captum.attr import LayerIntegratedGradients
 
@@ -1394,11 +1710,24 @@ def integrated_gradients_scores(
         return torch.softmax(logits, dim=1)[:, target_class]
 
     lig = LayerIntegratedGradients(_forward, model.embedding)
-    attributions, _ = lig.attribute(
-        inputs=input_ids, baselines=torch.zeros_like(input_ids),
-        additional_forward_args=(attention_mask,), n_steps=n_steps,
-        return_convergence_delta=True,
-    )
+    # cuDNN RNN backward requires training mode; in eval mode it raises
+    # "cudnn RNN backward can only be called in training mode" on GPU.
+    # Disable cuDNN for this attribution only (flag restored on exit) so
+    # the LSTM runs on the native implementation, which backprops in eval
+    # mode. The model itself stays in eval mode: dropout stays off.
+    with torch.backends.cudnn.flags(enabled=False):
+        # Same bound as explain._explain_with_captum: Captum's default
+        # internal_batch_size=None runs all n_steps interpolated inputs in
+        # one forward (50 x seq_len tokens). Chunking changes nothing
+        # numerically; it only caps peak GPU memory (Stage C v2 OOM).
+        attributions, _ = lig.attribute(
+            inputs=input_ids, baselines=torch.zeros_like(input_ids),
+            additional_forward_args=(attention_mask,), n_steps=n_steps,
+            internal_batch_size=5,
+            return_convergence_delta=True,
+        )
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     token_scores = attributions.sum(dim=-1).squeeze(0).detach().cpu().numpy().tolist()
     scores = [float(s) for s in token_scores[: len(words)]]
     scores += [0.0] * (len(words) - len(scores))
@@ -1623,3 +1952,419 @@ def evaluate_multimodal(
             rows.append({"model": model_name, "modality": modality, "n": len(eval_df),
                          "f1": metrics["f1"], "accuracy": metrics["accuracy"], "status": "ok"})
     return pd.DataFrame(rows, columns=["model", "modality", "n", "f1", "accuracy", "status"])
+
+
+# ---------------------------------------------------------------------------
+# 6B.1 — Minimal scorer adapter (TextScorer)
+# ---------------------------------------------------------------------------
+# One uniform interface so the multimodal / faithfulness / ablation scripts
+# can score text with RoBERTa, TF-IDF+LR or BiLSTM without branching on
+# (model, tokenizer) pairs everywhere. RoBERTa behaviour is unchanged: the
+# default scorer delegates to the existing ``score_text`` /
+# ``load_trained_roberta`` path in ``scripts/run_multimodal_predict.py``.
+# Baselines are fitted on the REAL train split only (never the synthetic
+# eval set) via the same ``load_splits`` / builders Section E already uses.
+
+#: Model kinds ``load_scorer`` accepts (also the ``--model`` CLI choices).
+SCORER_MODELS: Tuple[str, ...] = ("roberta", "tfidf_lr", "tfidf_svm", "bilstm", "cnn", "rule_based")
+
+
+@runtime_checkable
+class TextScorer(Protocol):
+    """Uniform text scorer: ``predict_proba`` + word tokenisation + truncation.
+
+    ``predict_proba(texts)`` returns an ``(n, 2)`` array whose rows sum to 1,
+    with column 1 = P(phishing). ``tokenize_words`` is the shared
+    ``split_words`` segmentation; ``truncate`` caps a text to the scorer's
+    window (HF token window for RoBERTa, a word cap for the baselines).
+    """
+
+    name: str
+
+    def predict_proba(self, texts: List[str]) -> np.ndarray:
+        ...
+
+    def tokenize_words(self, text: str) -> List[str]:
+        ...
+
+    def truncate(self, text: str, max_length: Optional[int] = None) -> str:
+        ...
+
+
+def _load_predict_module() -> Any:
+    """Lazily import ``scripts.run_multimodal_predict`` (avoids import cycles).
+
+    ``scripts`` is importable when the repo root is on ``sys.path`` (tests
+    and the scripts themselves do this); add it if it is not, so
+    ``load_scorer("roberta")`` also works from an installed ``src`` layout.
+    """
+    import sys
+
+    try:
+        from scripts import run_multimodal_predict
+
+        return run_multimodal_predict
+    except ImportError:
+        repo_root = Path(__file__).resolve().parents[2]
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+        from scripts import run_multimodal_predict
+
+        return run_multimodal_predict
+
+
+class RobertaScorer:
+    """TextScorer wrapping a (model, tokenizer, device) RoBERTa pair.
+
+    ``predict_proba`` calls the EXISTING ``score_text`` logic exactly
+    (imported lazily from ``scripts.run_multimodal_predict`` on every call,
+    so a monkeypatched ``score_text`` is honoured): empty text maps to
+    ``(0, 1.0, 0.0)`` and non-empty text is truncated with
+    ``truncate_text_to_model_window`` exactly as before.
+    """
+
+    name: str = "roberta"
+
+    def __init__(
+        self,
+        model: Any,
+        tokenizer: Any,
+        device: Any = None,
+        max_length: int = 512,
+    ) -> None:
+        self.model = model
+        self.tokenizer = tokenizer
+        self.device = device if device is not None else get_device()
+        self.max_length = int(max_length)
+
+    def predict_proba(self, texts: Sequence[str]) -> np.ndarray:
+        _score_text = _load_predict_module().score_text
+
+        texts = ["" if t is None else str(t) for t in texts]
+        if not texts:
+            return np.zeros((0, 2), dtype=float)
+        rows: List[List[float]] = []
+        for text in texts:
+            _pred, p_safe, p_phish = _score_text(
+                self.model, self.tokenizer, text,
+                device=self.device, max_length=self.max_length,
+            )
+            rows.append([float(p_safe), float(p_phish)])
+        return np.asarray(rows, dtype=float)
+
+    def tokenize_words(self, text: str) -> List[str]:
+        return split_words(text)
+
+    def truncate(self, text: str, max_length: Optional[int] = None) -> str:
+        from phishing_xai.data import truncate_text_to_model_window
+
+        return truncate_text_to_model_window(
+            text, self.tokenizer,
+            max_length=int(max_length) if max_length is not None else self.max_length,
+        )
+
+
+class BaselineScorer:
+    """TextScorer wrapping a fitted :class:`BaselineModel` (tfidf_lr/tfidf_svm/bilstm/cnn)."""
+
+    def __init__(self, model: BaselineModel, max_length: int = 512) -> None:
+        self.model = model
+        self.name = str(model.name)
+        self.max_length = int(max_length)
+
+    def predict_proba(self, texts: Sequence[str]) -> np.ndarray:
+        texts = ["" if t is None else str(t) for t in texts]
+        if not texts:
+            return np.zeros((0, 2), dtype=float)
+        return np.asarray(self.model.predict_proba(texts), dtype=float)
+
+    def tokenize_words(self, text: str) -> List[str]:
+        return split_words(text)
+
+    def truncate(self, text: str, max_length: Optional[int] = None) -> str:
+        """Keep the first ``max_length`` words (default 512)."""
+        ml = int(max_length) if max_length is not None else self.max_length
+        words = split_words(text or "")
+        return " ".join(words[:ml])
+
+
+class RuleBasedScorer:
+    """TextScorer with NO text model: score = worst static URL risk in the text.
+
+    RULE-BASED SCORE DEFINITION (6B.2/6B.4, honest statement — read before
+    quoting any number from this scorer): for each text, extract URLs with
+    :func:`phishing_xai.url_risk.extract_urls` and return the WORST (max)
+    :func:`phishing_xai.url_risk.score_url` ``url_score`` in [0, 1] as
+    P(phishing); a text with no URL scores 0.0. Every body word is IGNORED:
+    two texts that differ only in body words but carry the same URLs get
+    the identical score. Header / structural flags are NOT in the text, so
+    they do not enter this score at all — they reach the verdict through
+    ``fuse_email``'s separate flag channel (and URLs in ``extraction["links"]``
+    / QR payloads through its URL channel), exactly as for the other
+    backends, so the (a)-(d) ablation table stays comparable.
+
+    The returned numbers are NOT model probabilities: they are static
+    lexical URL-risk scores, and must never be presented as P(phishing)
+    from a learned model. With this scorer the weighted fusion double-counts
+    URL evidence by construction (the context/part scores ARE URL risk, and
+    the fusion adds its own 0.20 URL channel on top); that is the honest
+    consequence of having no text model, not a bug to hide. No fitting, no
+    data, no checkpoint: ``load_scorer("rule_based")`` builds this directly.
+    """
+
+    name: str = "rule_based"
+
+    def __init__(self, max_length: int = 512) -> None:
+        self.max_length = int(max_length)
+
+    def predict_proba(self, texts: Sequence[str]) -> np.ndarray:
+        from phishing_xai.url_risk import extract_urls, score_url
+
+        texts = ["" if t is None else str(t) for t in texts]
+        if not texts:
+            return np.zeros((0, 2), dtype=float)
+        rows: List[List[float]] = []
+        for text in texts:
+            urls = extract_urls(text)
+            p = 0.0
+            for url in urls:
+                p = max(p, float(score_url(url)["url_score"]))
+            p = max(0.0, min(1.0, p))
+            rows.append([1.0 - p, p])
+        return np.asarray(rows, dtype=float)
+
+    def tokenize_words(self, text: str) -> List[str]:
+        return split_words(text)
+
+    def truncate(self, text: str, max_length: Optional[int] = None) -> str:
+        """Keep the first ``max_length`` words (default 512)."""
+        ml = int(max_length) if max_length is not None else self.max_length
+        words = split_words(text or "")
+        return " ".join(words[:ml])
+
+
+def load_scorer(
+    model: str,
+    checkpoint: Any = None,
+    device: Any = None,
+    *,
+    bilstm_epochs: int = 3,
+    seed: int = 42,
+) -> TextScorer:
+    """Load a :class:`TextScorer` by kind.
+
+    ``"roberta"`` delegates to the existing
+    ``scripts.run_multimodal_predict.load_trained_roberta`` (with
+    ``resolve_default_checkpoint`` when no checkpoint is given) and returns
+    a :class:`RobertaScorer`. ``"tfidf_lr"`` / ``"tfidf_svm"`` / ``"bilstm"`` /
+    ``"cnn"`` load a SAVED baseline artefact when ``checkpoint`` is a path
+    to an existing one (see :func:`save_baseline_model` /
+    :func:`load_baseline_model`); when ``checkpoint`` is None, missing, or
+    a RoBERTa ``.pt`` (which is not a baseline artefact), they fit on the
+    REAL train split via :func:`load_splits` + :func:`build_tfidf_lr` /
+    :func:`build_tfidf_svm` / :func:`build_torch_baseline` exactly as
+    ``run_multimodal_eval.run_cheap_baselines`` does, and the synthetic
+    eval set is never fitted on. A checkpoint that exists but is neither
+    a baseline artefact nor a torch checkpoint (e.g. a truncated pickle)
+    raises instead of silently falling back to fitting, as does a
+    baseline artefact that fails to load. ``"rule_based"`` needs no data,
+    no fitting and no checkpoint: it returns a :class:`RuleBasedScorer`
+    whose score is the worst static URL-risk score in the text (0.0 with
+    no URL) — NOT a model probability.
+    Raises ``ValueError`` on an unknown model kind.
+    """
+    if model == "rule_based":
+        return RuleBasedScorer()
+
+    if model == "roberta":
+        predict_mod = _load_predict_module()
+        ckpt = Path(checkpoint) if checkpoint is not None else predict_mod.resolve_default_checkpoint()
+        tokenizer, fitted_model, used_device = predict_mod.load_trained_roberta(
+            ckpt, device=device,
+        )
+        return RobertaScorer(fitted_model, tokenizer, used_device)
+
+    if model in ("tfidf_lr", "tfidf_svm", "bilstm", "cnn"):
+        if checkpoint is not None:
+            ckpt_path = Path(checkpoint)
+            if ckpt_path.exists() and _is_baseline_artefact(ckpt_path):
+                logger.info(f"Loading saved baseline artefact for {model!r}: {ckpt_path}")
+                return BaselineScorer(load_baseline_model(ckpt_path, device=device))
+            if ckpt_path.exists():
+                logger.info(
+                    f"Checkpoint {ckpt_path} is not a saved baseline artefact "
+                    f"(e.g. a RoBERTa .pt); fitting {model!r} on the real train split."
+                )
+        repo_root = Path(__file__).resolve().parents[2]
+        splits = load_splits(
+            data_path=repo_root / "data" / "Phishing_Email.csv",
+            splits_path=repo_root / "results" / "splits.json",
+            seed=seed,
+        )
+        train = splits["train"]
+        train_texts = train["clean_text"].astype(str).tolist()
+        train_labels = train["label"].astype(int).tolist()
+        if model == "tfidf_lr":
+            return BaselineScorer(build_tfidf_lr(train_texts, train_labels))
+        if model == "tfidf_svm":
+            return BaselineScorer(build_tfidf_svm(train_texts, train_labels))
+        val = splits["val"]
+        val_texts = val["clean_text"].astype(str).tolist()
+        val_labels = val["label"].astype(int).tolist()
+        config = TorchTrainConfig(epochs=int(bilstm_epochs))
+        fitted, _info = build_torch_baseline(
+            model, train_texts, train_labels, val_texts, val_labels,
+            config=config, seed=seed,
+        )
+        return BaselineScorer(fitted)
+
+    raise ValueError(
+        f"Unknown model kind: {model!r}. Expected one of {list(SCORER_MODELS)}."
+    )
+
+
+def evaluate_random_baseline_with_proba_fn(
+    predict_proba: Callable[[List[str]], np.ndarray],
+    words: List[str],
+    target_class: int,
+    p_orig: float,
+    ks: Sequence[int] = FAITHFULNESS_KS,
+    num_seeds: int = 5,
+    base_seed: int = 42,
+) -> Dict[str, Dict[int, float]]:
+    """Random baseline over any ``predict_proba(texts)`` callable.
+
+    Mirrors ``phishing_xai.faithfulness.evaluate_random_baseline`` exactly:
+    the same RNG (``RandomState(base_seed + seed_idx)``), the same
+    ``perturb_text_drop/keep_indices`` + ``compute_instance_faithfulness``
+    helpers, averaged over ``num_seeds`` random permutations.
+    """
+    from phishing_xai.faithfulness import (
+        compute_instance_faithfulness,
+        perturb_text_drop_indices,
+        perturb_text_keep_indices,
+    )
+
+    n_words = len(words)
+    comp_accum: Dict[int, List[float]] = {int(k): [] for k in ks}
+    suff_accum: Dict[int, List[float]] = {int(k): [] for k in ks}
+    for seed_idx in range(num_seeds):
+        rng = np.random.RandomState(base_seed + seed_idx)
+        perm = rng.permutation(n_words).tolist() if n_words > 0 else []
+        for k in ks:
+            actual_k = min(int(k), n_words)
+            chosen = perm[:actual_k]
+            text_drop = perturb_text_drop_indices(words, chosen)
+            text_keep = perturb_text_keep_indices(words, chosen)
+            p_drop = float(predict_proba([text_drop])[0, target_class])
+            p_keep = float(predict_proba([text_keep])[0, target_class])
+            comp, suff = compute_instance_faithfulness(p_orig, p_drop, p_keep)
+            comp_accum[int(k)].append(comp)
+            suff_accum[int(k)].append(suff)
+    return {
+        "comprehensiveness": {k: float(np.mean(comp_accum[k])) for k in ks},
+        "sufficiency": {k: float(np.mean(suff_accum[k])) for k in ks},
+    }
+
+
+def _explain_method_name(scorer: Any) -> str:
+    """Second-method name for a scorer (``lime_only`` when there is none)."""
+    if isinstance(scorer, RobertaScorer):
+        return "lita"
+    if isinstance(scorer, BaselineScorer):
+        if scorer.name == "tfidf_lr":
+            return "lime_coefficients"
+        if scorer.name == "bilstm":
+            return "lime_ig"
+    return "lime_only"
+
+
+def explain_word_scores(
+    scorer: Any,
+    text: str,
+    *,
+    lime_samples: int = 100,
+    seed: int = 42,
+) -> Tuple[List[str], List[float], List[float], str]:
+    """Word-level (LIME, second-method) scores for any scorer.
+
+    Returns ``(words, lime_scores, second_scores, method_name)`` with all
+    three lists aligned to ``scorer.tokenize_words(text)``:
+
+    * RoBERTa (``RobertaScorer`` only): LIME via ``LimeExplainer`` + TI via
+      ``TransformerExplainer`` (aggregated to words); ``method_name="lita"``.
+    * ``tfidf_lr``: LIME via :func:`lime_scores_for_text` + TF-IDF+LR
+      coefficients via :func:`tfidf_lr_coefficient_scores`;
+      ``method_name="lime_coefficients"``.
+    * ``bilstm``: LIME + Captum integrated gradients via
+      :func:`integrated_gradients_scores`; ``method_name="lime_ig"``.
+    * Any other scorer: LIME only, ``second_scores`` is a copy of the LIME
+      scores and ``method_name="lime_only"`` — TI scores are never
+      fabricated. Callers must then record ``explanation_method="lime_only"``,
+      ``ti_available=False`` and ``alpha_effective=1.0``.
+    """
+    words = list(scorer.tokenize_words(text))
+    method_name = _explain_method_name(scorer)
+    if not words:
+        return [], [], [], method_name
+
+    probs = np.asarray(scorer.predict_proba([text])[0], dtype=float)
+    pred_class = int(np.argmax(probs))
+
+    lime_scores = lime_scores_for_text(
+        scorer.predict_proba, text, num_samples=lime_samples, seed=seed,
+    )
+    lime_scores = [float(s) for s in lime_scores]
+    if len(lime_scores) < len(words):
+        lime_scores += [0.0] * (len(words) - len(lime_scores))
+    lime_scores = lime_scores[: len(words)]
+
+    if isinstance(scorer, RobertaScorer):
+        from phishing_xai.explain import (
+            LimeExplainer,
+            TransformerExplainer,
+            aggregate_subword_attributions_to_words,
+        )
+
+        lime_exp = LimeExplainer(
+            model=scorer.model, tokenizer=scorer.tokenizer,
+            device=scorer.device, max_length=scorer.max_length, seed=seed,
+        )
+        ti_exp = TransformerExplainer(
+            model=scorer.model, tokenizer=scorer.tokenizer, device=scorer.device,
+        )
+        lime_attrs, pred_class, _probs = lime_exp.explain(text, num_samples=lime_samples)
+        lime_map = {w.strip().lower(): float(s) for w, s in lime_attrs if w.strip()}
+        lime_scores = [float(lime_map.get(w.lower(), 0.0)) for w in words]
+        raw_ti = ti_exp.explain_raw(text, target_class=pred_class)
+        word_ti = aggregate_subword_attributions_to_words(
+            text, raw_ti, scorer.tokenizer, max_length=scorer.max_length,
+        )
+        second_scores = [float(item[2]) for item in word_ti]
+        second_scores += [0.0] * (len(words) - len(second_scores))
+        return words, lime_scores, second_scores[: len(words)], method_name
+
+    if isinstance(scorer, BaselineScorer) and scorer.name == "tfidf_lr":
+        pipeline = scorer.model.extra.get("_pipeline")
+        if pipeline is None:
+            raise ValueError("tfidf_lr scorer has no fitted pipeline in model.extra['_pipeline'].")
+        second_scores = [float(s) for s in tfidf_lr_coefficient_scores(pipeline, text)]
+        second_scores += [0.0] * (len(words) - len(second_scores))
+        return words, lime_scores, second_scores[: len(words)], method_name
+
+    if isinstance(scorer, BaselineScorer) and scorer.name == "bilstm":
+        torch_model = scorer.model.extra.get("_model")
+        torch_tokenizer = scorer.model.extra.get("_tokenizer")
+        if torch_model is None or torch_tokenizer is None:
+            raise ValueError("bilstm scorer needs a fitted torch model/tokenizer in model.extra.")
+        second_scores = [
+            float(s)
+            for s in integrated_gradients_scores(
+                torch_model, torch_tokenizer, text,
+                target_class=pred_class, device=scorer.model.extra.get("_device"),
+            )
+        ]
+        second_scores += [0.0] * (len(words) - len(second_scores))
+        return words, lime_scores, second_scores[: len(words)], method_name
+
+    return words, lime_scores, list(lime_scores), method_name

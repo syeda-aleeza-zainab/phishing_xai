@@ -126,10 +126,27 @@ class TransformerExplainer:
         model: PreTrainedModel,
         tokenizer: PreTrainedTokenizerFast,
         device: Optional[torch.device] = None,
+        max_length: int = 512,
     ) -> None:
         self.model = model
         self.tokenizer = tokenizer
         self.device = device or get_device()
+        # RoBERTa position ids are cumsum(non-pad mask) + padding_idx, so a
+        # sequence of length L needs position ids up to L+1: the position
+        # table must have more than L+1 rows. roberta-base has 514 rows
+        # (L=512 is safe, matching training); the tiny test model has 512
+        # rows (L=510 max, matching its tokenizer model_max_length).
+        # Cap max_length at the table size minus two when detectable.
+        self.max_length = max_length
+        pos_rows = None
+        for _attr in ("roberta", "distilbert", "bert"):
+            _emb = getattr(getattr(self.model, _attr, None), "embeddings", None)
+            _pe = getattr(_emb, "position_embeddings", None)
+            if _pe is not None:
+                pos_rows = _pe.num_embeddings
+                break
+        if pos_rows is not None:
+            self.max_length = min(self.max_length, pos_rows - 2)
         self.model.to(self.device)
         self.model.eval()
 
@@ -150,16 +167,43 @@ class TransformerExplainer:
             else:
                 class_name = target_class
 
+        # Truncate to the first max_length tokens BEFORE any explainer sees
+        # the text. RoBERTa position_embeddings has 514 rows, so an
+        # untruncated >512-token email makes position_ids exceed the table
+        # and raises a CUDA ScatterGather index-out-of-bounds assert (Stage C
+        # 2026-11-19: email_27, 896 words / 1029 tokens; email_30, 1290
+        # tokens). transformers-interpret tokenizes internally with no
+        # truncation, so the truncation must happen here, not downstream.
+        # The model itself truncates to 512 in training, so this matches
+        # what the model actually sees.
+        ids = self.tokenizer.encode(
+            text, add_special_tokens=True, truncation=True, max_length=self.max_length
+        )
+        text = self.tokenizer.decode(ids, skip_special_tokens=True)
+
         if self.ti_explainer is not None:
             try:
                 # transformers-interpret handles target class mapping
                 attributions = self.ti_explainer(text, class_name=class_name)
+                self._free_cuda()
                 return attributions
             except Exception as e:
                 logger.warning(f"transformers-interpret call failed ({e}); falling back to Captum.")
+                # TI may have left large cached CUDA blocks behind (Stage C
+                # v2: TI OOM'd on a 512-token email); free them before the
+                # Captum fallback or it OOMs on the same memory.
+                self._free_cuda()
 
         # Captum LayerIntegratedGradients fallback
         return self._explain_with_captum(text, target_class=target_class)
+
+    @staticmethod
+    def _free_cuda() -> None:
+        """Release cached CUDA blocks (no-op on CPU). Cheap insurance
+        between explainer calls so a long email's peak memory does not
+        carry over to the next email or the fallback path."""
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     def _clean_text(self, text: str) -> str:
         """Preprocess text to mirror transformers-interpret tokenization behavior."""
@@ -170,7 +214,12 @@ class TransformerExplainer:
     def _explain_with_captum(self, text: str, target_class: Optional[int] = None) -> List[Tuple[str, float]]:
         """Fallback explainer using Captum LayerIntegratedGradients with exact parity to transformers-interpret."""
         clean_text = self._clean_text(text)
-        input_ids_list = self.tokenizer.encode(clean_text, add_special_tokens=True)
+        # Same truncation as explain_raw: without it a >512-token email
+        # overflows RoBERTa position_embeddings (514 rows) and raises a
+        # CUDA ScatterGather index-out-of-bounds assert.
+        input_ids_list = self.tokenizer.encode(
+            clean_text, add_special_tokens=True, truncation=True, max_length=self.max_length
+        )
         input_ids = torch.tensor([input_ids_list], device=self.device)
         attention_mask = torch.ones_like(input_ids, device=self.device)
 
@@ -208,13 +257,25 @@ class TransformerExplainer:
             baseline_ids[0, -1] = eos_id
 
         lig = LayerIntegratedGradients(forward_fn, embedding_layer)
-        attributions, _ = lig.attribute(
-            inputs=input_ids,
-            baselines=baseline_ids,
-            additional_forward_args=(attention_mask,),
-            target=None,
-            return_convergence_delta=True,
-        )
+        # Stage C v2 OOM (2026-11-19, T4 14.56 GiB): Captum's default
+        # internal_batch_size=None runs ALL n_steps interpolated inputs in
+        # one forward, so a 512-token email means a 50 x 512-token batch
+        # (~13 GiB allocated) and transformers-interpret fails the same way
+        # before the fallback. Chunking the interpolation (internal_batch_size)
+        # changes nothing numerically — same 50 steps, same math, smaller
+        # peak memory. n_steps stays 50 so attributions are unchanged.
+        try:
+            attributions, _ = lig.attribute(
+                inputs=input_ids,
+                baselines=baseline_ids,
+                additional_forward_args=(attention_mask,),
+                target=None,
+                n_steps=50,
+                internal_batch_size=5,
+                return_convergence_delta=True,
+            )
+        finally:
+            self._free_cuda()
 
         # Sum across embedding dimensions and apply L2 normalization
         token_attrs = attributions.sum(dim=-1).squeeze(0)

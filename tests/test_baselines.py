@@ -361,6 +361,34 @@ def test_verdict_significant_gain_branch():
     assert "F1 gap" in verdict  # F1 branch kept as a secondary statement
 
 
+def test_verdict_negative_gap_branch():
+    """RoBERTa BELOW the best simple baseline -> 'below by X points', never a 'significant gain'."""
+    summary = _mock_summary(roberta_prec=0.9690, simple_prec=0.9820, p_value=0.253,
+                            ci_low=0.9746, ci_high=0.9889)
+    verdict = build_verdict(summary)
+    assert "below the best simple baseline by 1.30 precision points" in verdict
+    assert "significant precision gain" not in verdict
+    assert "NOT justified by a precision gain" in verdict
+
+
+def test_verdict_positive_gap_nonsignificant_neutral():
+    """Positive gap with McNemar p = 0.625 -> neutral wording, never 'significant gain'."""
+    summary = _mock_summary(roberta_prec=1.0000, simple_prec=0.9412, p_value=0.625,
+                            ci_low=0.9300, ci_high=0.9600)
+    verdict = build_verdict(summary)
+    assert "no statistically significant difference" in verdict
+    assert "significant precision gain" not in verdict
+
+
+def test_verdict_p_exactly_boundary_not_significant():
+    """McNemar p exactly 0.05 is NOT < 0.05, so a positive gap is not a significant gain."""
+    summary = _mock_summary(roberta_prec=0.9900, simple_prec=0.9400, p_value=0.05,
+                            ci_low=0.9300, ci_high=0.9500)
+    verdict = build_verdict(summary)
+    assert "significant precision gain" not in verdict
+    assert "no statistically significant difference" in verdict
+
+
 def test_verdict_not_run_yet():
     """No executed numbers -> NOT RUN YET verdict, no invented claim."""
     verdict = build_verdict({"models": {}, "comparisons_vs_roberta": {}})

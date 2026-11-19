@@ -53,6 +53,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from phishing_xai.baselines import explain_word_scores, load_scorer
 from phishing_xai.config import FusionConfig, ModelConfig, TrainConfig, XAIConfig
 from phishing_xai.data import truncate_text_to_model_window
 from phishing_xai.explain import (
@@ -63,7 +64,7 @@ from phishing_xai.explain import (
     draw_lita_boxes_on_image,
 )
 from phishing_xai.extract import extract_eml
-from phishing_xai.lita import build_hybrid_word_attributions
+from phishing_xai.lita import build_hybrid_word_attributions, compute_lita_scores
 from phishing_xai.model import load_tokenizer_and_model
 from phishing_xai.multimodal import (
     build_concatenated_context,
@@ -71,6 +72,7 @@ from phishing_xai.multimodal import (
     overlay_qr_image,
     overlay_scanned_pdf_page,
     part_id,
+    score_texts,
 )
 from phishing_xai.utils import get_device, get_logger, set_seed
 
@@ -241,6 +243,7 @@ def predict_eml(
     fusion: str = "weighted",
     threshold: Optional[float] = None,
     output_dir: Optional[Path] = None,
+    scorer: Any = None,
 ) -> Dict[str, Any]:
     """Extract parts from an .eml file, score each part + the concatenated context, and fuse.
 
@@ -250,11 +253,24 @@ def predict_eml(
     runs on the concatenated context and overlays are drawn for the winning
     part (image / scanned-PDF page / QR image) into ``output_dir`` when
     given, else next to the .eml file.
+
+    When ``scorer`` is given (a :class:`TextScorer`, e.g. TF-IDF+LR or
+    BiLSTM), it scores every part and the context instead of the RoBERTa
+    ``(model, tokenizer, device)`` triple, which may then be ``None``; no
+    checkpoint is required. Explanation then uses
+    ``baselines.explain_word_scores`` + ``lita.compute_lita_scores`` (no
+    ``TransformerExplainer``).
     """
     if fusion not in ("weighted", "max"):
         raise ValueError(f"fusion must be 'weighted' or 'max', got {fusion!r}")
     thr = float(DEFAULT_THRESHOLD if threshold is None else threshold)
     out_dir = Path(output_dir) if output_dir is not None else None
+
+    def _score_one(text: str) -> Tuple[int, float, float]:
+        if scorer is not None:
+            p_phish = score_texts(scorer, [text])[0]
+            return (1 if p_phish >= 0.5 else 0, 1.0 - p_phish, p_phish)
+        return score_text(model, tokenizer, text, device=device)
 
     extracted = extract_eml(eml_path)
     part_rows: List[Dict[str, Any]] = []
@@ -278,7 +294,7 @@ def predict_eml(
             })
             continue
 
-        pred_cls, p_safe, p_phish = score_text(model, tokenizer, text, device=device)
+        pred_cls, p_safe, p_phish = _score_one(text)
         part_scores[label_name] = p_phish
         part_rows.append({
             "index": idx,
@@ -293,20 +309,26 @@ def predict_eml(
             "boxes": part.get("boxes", []),
         })
 
-    context = build_concatenated_context(
-        extracted, tokenizer=tokenizer, max_length=ModelConfig.max_length
-    )
-    _, _, context_prob_phish = score_text(model, tokenizer, context, device=device)
+    if scorer is not None:
+        context = build_concatenated_context(
+            extracted, scorer=scorer, max_length=ModelConfig.max_length
+        )
+        context_prob_phish = score_texts(scorer, [context])[0] if context.strip() else 0.0
+    else:
+        context = build_concatenated_context(
+            extracted, tokenizer=tokenizer, max_length=ModelConfig.max_length
+        )
+        _, _, context_prob_phish = score_text(model, tokenizer, context, device=device)
 
     fused_weighted = fuse_email(
         extracted, part_scores, fusion="weighted",
         concatenated_score=context_prob_phish, threshold=thr,
-        tokenizer=tokenizer, max_length=ModelConfig.max_length,
+        tokenizer=tokenizer, max_length=ModelConfig.max_length, scorer=scorer,
     )
     fused_max = fuse_email(
         extracted, part_scores, fusion="max",
         concatenated_score=context_prob_phish, threshold=thr,
-        tokenizer=tokenizer, max_length=ModelConfig.max_length,
+        tokenizer=tokenizer, max_length=ModelConfig.max_length, scorer=scorer,
     )
     primary = fused_weighted if fusion == "weighted" else fused_max
     final_class = int(primary["final_class"])
@@ -316,15 +338,47 @@ def predict_eml(
 
     top_words: List[Dict[str, Any]] = []
     explained_image_path: Optional[str] = None
+    explanation_method: Optional[str] = None
+    ti_available: Optional[bool] = None
+    alpha_effective: Optional[float] = None
     if explain and context.strip():
-        top_words = explain_part_lita(
-            model=model,
-            tokenizer=tokenizer,
-            text=context,
-            device=device,
-            num_samples=lime_samples,
-            top_k=5,
-        )
+        if scorer is not None:
+            words, lime_scores, second_scores, method = explain_word_scores(
+                scorer, context, lime_samples=lime_samples,
+            )
+            alpha_eff = 1.0 if method == "lime_only" else XAIConfig.alpha
+            lita_scores = compute_lita_scores(
+                lime_scores, second_scores, alpha=alpha_eff,
+                variant="magnitude_preserving",
+            )
+            ranked = [
+                {
+                    "word_idx": i,
+                    "word": w,
+                    "ti_score": float(s),
+                    "lime_score": float(l),
+                    "lita_score": float(ls),
+                }
+                for i, (w, l, s, ls) in enumerate(
+                    zip(words, lime_scores, second_scores, lita_scores)
+                )
+            ]
+            top_words = sorted(ranked, key=lambda d: d["lita_score"], reverse=True)[:5]
+            explanation_method = method
+            ti_available = method != "lime_only"
+            alpha_effective = float(alpha_eff)
+        else:
+            top_words = explain_part_lita(
+                model=model,
+                tokenizer=tokenizer,
+                text=context,
+                device=device,
+                num_samples=lime_samples,
+                top_k=5,
+            )
+            explanation_method = "lita"
+            ti_available = True
+            alpha_effective = float(XAIConfig.alpha)
         img_dir = out_dir if out_dir is not None else eml_path.parent
         img_dir.mkdir(parents=True, exist_ok=True)
         out_img = img_dir / f"{eml_path.stem}_explained.png"
@@ -370,6 +424,7 @@ def predict_eml(
 
     return {
         "file": eml_path.name,
+        "model": scorer.name if scorer is not None else "roberta",
         "parts": part_rows,
         "fusion": fusion,
         "threshold": thr,
@@ -390,6 +445,9 @@ def predict_eml(
         "most_contributing_modality": primary["most_contributing_modality"],
         "top_reasons": primary["top_reasons"],
         "top_5_lita_words": top_words,
+        "explanation_method": explanation_method,
+        "ti_available": ti_available,
+        "alpha_effective": alpha_effective,
         "explained_image": explained_image_path,
     }
 
@@ -447,10 +505,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         help=".eml file(s) or directory of .eml files (default: samples/multimodal)",
     )
     parser.add_argument(
+        "--model",
+        choices=["roberta", "tfidf_lr", "bilstm", "rule_based"],
+        default="roberta",
+        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split unless --checkpoint points at a saved baseline artefact; rule_based needs no model at all (worst static URL-risk score in the text, NOT a model probability); no checkpoint needed for any of the three.",
+    )
+    parser.add_argument(
         "--checkpoint",
         type=str,
         default=None,
-        help="Path to trained RoBERTa checkpoint (default: Kaggle auto-detect, else results/best_model.pt)",
+        help="Path to trained checkpoint (.pt). For --model roberta: the RoBERTa checkpoint. For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt from run_baselines.py) is loaded instead of fitting; a RoBERTa .pt or a missing file means fit on the real train split (default: Kaggle auto-detect, else results/best_model.pt)",
     )
     parser.add_argument(
         "--output_dir",
@@ -496,7 +560,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     set_seed(TrainConfig.seed)
     ckpt_path = Path(args.checkpoint) if args.checkpoint else resolve_default_checkpoint()
     out_dir = Path(args.output_dir) if args.output_dir else resolve_default_output_dir()
-    if not ckpt_path.exists() and not args.allow_pretrained_fallback:
+    if args.model == "roberta" and not ckpt_path.exists() and not args.allow_pretrained_fallback:
         print(
             f"ERROR: Trained checkpoint is not present locally! Missing file: {ckpt_path.as_posix()}\n"
             "Per project rules, do NOT retrain locally.",
@@ -520,11 +584,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("No .eml files found to score.", file=sys.stderr)
         return 1
 
-    tokenizer, model, device = load_trained_roberta(
-        ckpt_path, allow_pretrained_fallback=args.allow_pretrained_fallback
-    )
-    # True when the fine-tuned checkpoint is absent and base roberta-base is used instead.
-    untrained_fallback = not ckpt_path.exists()
+    if args.model == "roberta":
+        tokenizer, model, device = load_trained_roberta(
+            ckpt_path, allow_pretrained_fallback=args.allow_pretrained_fallback
+        )
+        # True when the fine-tuned checkpoint is absent and base roberta-base is used instead.
+        untrained_fallback = not ckpt_path.exists()
+        scorer = None
+    else:
+        # Baseline / rule-based scorer: tfidf_lr/bilstm load a saved
+        # baseline artefact when --checkpoint points at one, else fit on
+        # the real train split; rule_based needs no fit at all; the
+        # checkpoint is ignored only in the sense that its absence is not
+        # an error for any of them.
+        scorer = load_scorer(args.model, checkpoint=ckpt_path)
+        model = tokenizer = device = None
+        untrained_fallback = False
     all_results: List[Dict[str, Any]] = []
     for eml_path in eml_files:
         res = predict_eml(
@@ -537,6 +612,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             fusion=args.fusion,
             threshold=args.threshold,
             output_dir=out_dir,
+            scorer=scorer,
         )
         res["untrained_fallback"] = untrained_fallback
         print_prediction_report(res)

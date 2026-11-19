@@ -146,7 +146,12 @@ def build_verdict(summary: Dict[str, Any]) -> str:
             "LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling "
             f"that the simple baselines do not provide.{f1_gap}"
         )
-    # Significant-gain branch: quantify the cost of the gain.
+    # Significant-gain branch: "significant" means a POSITIVE precision gap
+    # AND McNemar p < 0.05. A negative gap or a non-significant gap must never
+    # be called a significant gain (fixed 2026-11-19: the old code labelled a
+    # -1.30-point gap "significant" because p <= 0.05 or a non-overlapping CI
+    # alone triggered it, and labelled a +5.88-point gap with p = 0.625
+    # "significant" on the gap size alone).
     roberta_lat = _latency_of(models.get("roberta_eval", {}))
     simple_lat = _latency_of(models.get(best_simple, {}))
     latency_ratio = f"{roberta_lat / simple_lat:.1f}x" if roberta_lat and simple_lat else "unknown"
@@ -157,14 +162,33 @@ def build_verdict(summary: Dict[str, Any]) -> str:
         if roberta_params and simple_params else "unknown"
     )
     p_text = f"McNemar p = {p_value:.4f}" if p_value is not None else "McNemar p unavailable"
+    if gap_points > 0 and p_value is not None and p_value < 0.05:
+        return (
+            f"Verdict (precision-first): Transformer gives a significant precision gain of "
+            f"{gap_points:.2f} points (RoBERTa {roberta_prec:.4f} vs best simple baseline "
+            f"{best_simple} {best_prec:.4f}; {p_text}) at {latency_ratio} latency and "
+            f"{param_ratio} parameters.{f1_gap} Whether that gain justifies the complexity "
+            "depends on the deployment budget: if latency and model size allow it, RoBERTa "
+            "is the precision choice; otherwise the simple baseline is the pragmatic "
+            "deployment model."
+        )
+    if gap_points < 0:
+        return (
+            f"Verdict (precision-first): Transformer is below the best simple baseline by "
+            f"{abs(gap_points):.2f} precision points (RoBERTa {roberta_prec:.4f} vs "
+            f"{best_simple} {best_prec:.4f}; {p_text}) at {latency_ratio} latency and "
+            f"{param_ratio} parameters.{f1_gap} Its complexity is NOT justified by a precision "
+            "gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated "
+            "Gradients / LITA explanations and image/PDF/QR handling that the simple "
+            "baselines do not provide."
+        )
     return (
-        f"Verdict (precision-first): Transformer gives a significant precision gain of "
-        f"{gap_points:.2f} points (RoBERTa {roberta_prec:.4f} vs best simple baseline "
+        f"Verdict (precision-first): no statistically significant difference in precision "
+        f"(gap {gap_points:.2f} points, RoBERTa {roberta_prec:.4f} vs best simple baseline "
         f"{best_simple} {best_prec:.4f}; {p_text}) at {latency_ratio} latency and "
-        f"{param_ratio} parameters.{f1_gap} Whether that gain justifies the complexity "
-        "depends on the deployment budget: if latency and model size allow it, RoBERTa "
-        "is the precision choice; otherwise the simple baseline is the pragmatic "
-        "deployment model."
+        f"{param_ratio} parameters.{f1_gap} The measured difference does not support a "
+        "significance claim, so the Transformer's complexity is not justified by accuracy "
+        "on this dataset; value lies in the XAI/multimodal layer."
     )
 
 

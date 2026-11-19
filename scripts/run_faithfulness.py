@@ -9,11 +9,16 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from phishing_xai.baselines import (
+    evaluate_faithfulness_with_proba_fn,
+    evaluate_random_baseline_with_proba_fn,
+    explain_word_scores,
+    load_scorer,
+)
 from phishing_xai.data import load_data, truncate_text_to_model_window
 from phishing_xai.explain import (
     LimeExplainer,
@@ -35,7 +40,9 @@ logger = get_logger("run_faithfulness")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate XAI Faithfulness")
-    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained model weights or HF model name")
+    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained checkpoint (.pt). For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split")
+    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "bilstm"], default="roberta",
+                        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split; no checkpoint needed.")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv", help="Path to raw dataset")
     parser.add_argument("--splits_path", type=str, default="results/splits.json", help="Path to split manifest")
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save faithfulness artifacts")
@@ -102,10 +109,20 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
     eval_df = test_df.sample(n=sample_count, random_state=args.seed).reset_index(drop=True)
     logger.info(f"Evaluating faithfulness on {len(eval_df)} test samples (debug={args.debug}).")
 
-    # 2. Load model & initialize explainers
-    model, tokenizer = load_model_and_tokenizer(args.model_path, device)
-    lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=args.max_length, seed=args.seed)
-    ti_explainer = TransformerExplainer(model, tokenizer, device=device)
+    is_roberta = getattr(args, "model", "roberta") == "roberta"
+
+    # 2. Load model & initialize explainers (RoBERTa path, unchanged)
+    if is_roberta:
+        model, tokenizer = load_model_and_tokenizer(args.model_path, device)
+        lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=args.max_length, seed=args.seed)
+        ti_explainer = TransformerExplainer(model, tokenizer, device=device)
+        scorer = None
+    else:
+        # Baseline scorer: fitted on the real train split; the HF model /
+        # TransformerExplainer are never loaded here.
+        scorer = load_scorer(args.model, checkpoint=args.model_path, seed=args.seed)
+        model = tokenizer = None
+        lime_explainer = ti_explainer = None
 
     # 3. Resume support
     completed_ids = set()
@@ -125,6 +142,25 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
 
     # Global explanations accumulator: class -> {word: [scores]}
     global_word_scores: Dict[int, Dict[str, List[float]]] = {0: {}, 1: {}}
+    second_method_name = "transformers_interpret"
+
+    def _eval_method(scores) -> Dict[str, Any]:
+        """Faithfulness for one attribution method, via the active scorer."""
+        if is_roberta:
+            return evaluate_faithfulness_single_method(
+                model=model,
+                tokenizer=tokenizer,
+                words=words,
+                scores=scores,
+                target_class=pred_class,
+                p_orig=p_orig,
+                ks=ks,
+                device=device,
+                max_length=args.max_length,
+            )
+        return evaluate_faithfulness_with_proba_fn(
+            scorer.predict_proba, words, scores, pred_class, p_orig, ks=ks,
+        )
 
     for idx, row in eval_df.iterrows():
         email_id = int(row["email_id"])
@@ -134,40 +170,57 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
         raw_text = str(row["clean_text"])
         true_label = int(row["label"])
 
-        # Truncate text strictly to model window
-        text = truncate_text_to_model_window(raw_text, tokenizer, max_length=args.max_length)
-        words = split_words(text)
-        if len(words) < 2:
-            logger.info(f"Skipping email {email_id} (too short after truncation: {len(words)} words).")
-            continue
+        if is_roberta:
+            # Truncate text strictly to model window
+            text = truncate_text_to_model_window(raw_text, tokenizer, max_length=args.max_length)
+            words = split_words(text)
+            if len(words) < 2:
+                logger.info(f"Skipping email {email_id} (too short after truncation: {len(words)} words).")
+                continue
 
-        # Model prediction
-        p_orig_0 = predict_probability(model, tokenizer, text, 0, device=device, max_length=args.max_length)
-        p_orig_1 = predict_probability(model, tokenizer, text, 1, device=device, max_length=args.max_length)
-        pred_class = 1 if p_orig_1 >= p_orig_0 else 0
-        p_orig = p_orig_1 if pred_class == 1 else p_orig_0
+            # Model prediction
+            p_orig_0 = predict_probability(model, tokenizer, text, 0, device=device, max_length=args.max_length)
+            p_orig_1 = predict_probability(model, tokenizer, text, 1, device=device, max_length=args.max_length)
+            pred_class = 1 if p_orig_1 >= p_orig_0 else 0
+            p_orig = p_orig_1 if pred_class == 1 else p_orig_0
 
-        # Method 1: TI (or Captum fallback)
-        ti_raw = ti_explainer.explain_raw(text, target_class=pred_class)
-        ti_agg = aggregate_subword_attributions_to_words(text, ti_raw, tokenizer, max_length=args.max_length)
-        ti_scores = [item[2] for item in ti_agg]
+            # Method 1: TI (or Captum fallback)
+            ti_raw = ti_explainer.explain_raw(text, target_class=pred_class)
+            ti_agg = aggregate_subword_attributions_to_words(text, ti_raw, tokenizer, max_length=args.max_length)
+            ti_scores = [item[2] for item in ti_agg]
 
-        # Method 2: LIME
-        lime_raw, _, _ = lime_explainer.explain(text, num_features=None, num_samples=lime_perturbations)
-        lime_map = {w.strip().lower(): s for w, s in lime_raw if w.strip()}
-        lime_scores = [float(lime_map.get(w.lower(), 0.0)) for w in words]
+            # Method 2: LIME
+            lime_raw, _, _ = lime_explainer.explain(text, num_features=None, num_samples=lime_perturbations)
+            lime_map = {w.strip().lower(): s for w, s in lime_raw if w.strip()}
+            lime_scores = [float(lime_map.get(w.lower(), 0.0)) for w in words]
+            alpha_eff = 0.5
+        else:
+            # Baseline scorer: word-cap truncation, never the HF window.
+            text = scorer.truncate(raw_text, args.max_length)
+            words = scorer.tokenize_words(text)
+            if len(words) < 2:
+                logger.info(f"Skipping email {email_id} (too short after truncation: {len(words)} words).")
+                continue
+            probs = scorer.predict_proba([text])[0]
+            pred_class = 1 if float(probs[1]) >= float(probs[0]) else 0
+            p_orig = float(probs[pred_class])
+            words, lime_scores, ti_scores, second_method_name = explain_word_scores(
+                scorer, text, lime_samples=lime_perturbations, seed=args.seed,
+            )
+            # LIME-only scorers have no second method: LITA is pure LIME.
+            alpha_eff = 1.0 if second_method_name == "lime_only" else 0.5
 
         # Method 3 & 4: LITA variants
-        lita_mag_scores = compute_lita_scores(lime_scores, ti_scores, alpha=0.5, variant="magnitude_preserving").tolist()
-        lita_minmax_scores = compute_lita_scores(lime_scores, ti_scores, alpha=0.5, variant="minmax").tolist()
+        lita_mag_scores = compute_lita_scores(lime_scores, ti_scores, alpha=alpha_eff, variant="magnitude_preserving").tolist()
+        lita_minmax_scores = compute_lita_scores(lime_scores, ti_scores, alpha=alpha_eff, variant="minmax").tolist()
 
         # Evaluate faithfulness for each method
         eval_methods = {
             "lime": lime_scores,
-            "transformers_interpret": ti_scores,
             "lita_magnitude": lita_mag_scores,
             "lita_minmax": lita_minmax_scores,
         }
+        eval_methods[second_method_name] = ti_scores
 
         instance_results: Dict[str, Any] = {
             "email_id": email_id,
@@ -179,31 +232,31 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
         for method_name, scores in eval_methods.items():
-            res = evaluate_faithfulness_single_method(
-                model=model,
-                tokenizer=tokenizer,
-                words=words,
-                scores=scores,
-                target_class=pred_class,
-                p_orig=p_orig,
-                ks=ks,
-                device=device,
-                max_length=args.max_length,
-            )
+            res = _eval_method(scores)
             instance_results["metrics"][method_name] = res
 
         # Random baseline (5 seeds)
-        random_res = evaluate_random_baseline(
-            model=model,
-            tokenizer=tokenizer,
-            words=words,
-            target_class=pred_class,
-            p_orig=p_orig,
-            ks=ks,
-            num_seeds=5,
-            device=device,
-            max_length=args.max_length,
-        )
+        if is_roberta:
+            random_res = evaluate_random_baseline(
+                model=model,
+                tokenizer=tokenizer,
+                words=words,
+                target_class=pred_class,
+                p_orig=p_orig,
+                ks=ks,
+                num_seeds=5,
+                device=device,
+                max_length=args.max_length,
+            )
+        else:
+            random_res = evaluate_random_baseline_with_proba_fn(
+                scorer.predict_proba,
+                words=words,
+                target_class=pred_class,
+                p_orig=p_orig,
+                ks=ks,
+                num_seeds=5,
+            )
         instance_results["metrics"]["random_baseline"] = random_res
 
         # Append to records
@@ -222,7 +275,7 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
         logger.info(f"Processed email {len(records)}/{len(eval_df)} (id={email_id}).")
 
     # 4. Compute aggregate statistics across test instances
-    methods = ["lime", "transformers_interpret", "lita_magnitude", "lita_minmax", "random_baseline"]
+    methods = ["lime", second_method_name, "lita_magnitude", "lita_minmax", "random_baseline"]
     summary_table: Dict[str, Dict[str, Dict[str, float]]] = {}
 
     for method in methods:
@@ -247,6 +300,8 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
             "sample_count": len(records),
             "max_length": args.max_length,
             "seed": args.seed,
+            "model": getattr(args, "model", "roberta"),
+            "explanation_method": "lita" if is_roberta else second_method_name,
         },
         "summary": summary_table,
     }
