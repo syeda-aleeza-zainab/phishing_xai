@@ -297,8 +297,15 @@ def generate_consolidated_report(
 
     # --- Section D: Final Training & Test Evaluation ---
     md_lines.append("## 4. Final Model Training & Test Evaluation")
+    md_lines.append("")
+    md_lines.append(
+        "Primary metric (user decision, 2026-11-19): phishing-class precision "
+        "(minimise false positives / low FPR). F1, accuracy, and recall are secondary — "
+        "reported, not selected on alone. Thresholds are fit on validation only, never on test."
+    )
     if final_metrics and not final_metrics.get("_corrupted"):
         summary["final_training_and_test"] = {
+            "primary_metric": "precision (phishing class)",
             "best_epoch": final_metrics.get("best_epoch"),
             "best_val_f1": final_metrics.get("best_val_f1"),
             "final_test_loss": final_metrics.get("final_test_loss"),
@@ -306,13 +313,18 @@ def generate_consolidated_report(
             "artifacts": final_metrics.get("artifacts", {}),
         }
         tm = final_metrics.get("final_test_metrics", {})
+        # FPR is shown when the metrics artifact records it; it is NOT derived
+        # here, so older metrics.json files honestly report it as not recorded.
+        fpr = tm.get("fpr")
+        fpr_str = f"`{fpr:.4f}`" if isinstance(fpr, (int, float)) else "not recorded in `metrics.json`"
         md_lines.extend([
             f"- **Best Checkpoint Epoch**: `{final_metrics.get('best_epoch')}` (Validation F1: `{final_metrics.get('best_val_f1'):.4f}`)",
             f"- **Test Set Loss**: `{final_metrics.get('final_test_loss'):.4f}`",
+            f"- **Test Precision (phishing class — PRIMARY metric)**: `{tm.get('precision', 0.0):.4f}`",
+            f"- **Test FPR (False Positive Rate)**: {fpr_str}",
             f"- **Test Accuracy**: `{tm.get('accuracy', 0.0) * 100:.2f}%`",
             f"- **Test F1 Score**: `{tm.get('f1', 0.0):.4f}`",
             f"- **Test Recall**: `{tm.get('recall', 0.0):.4f}`",
-            f"- **Test Precision**: `{tm.get('precision', 0.0):.4f}`",
             f"- **Test ROC-AUC**: `{tm.get('roc_auc', 0.0):.4f}`",
             "",
             "### Classification Report",
@@ -385,7 +397,7 @@ def generate_consolidated_report(
         md_lines.extend([
             "Faithfulness metric variation across alpha values and normalization variants (k=3):",
             "",
-            "| Variant | Alpha (TI weight) | Comprehensiveness@3 | Sufficiency@3 |",
+            "| Variant | Alpha (LIME weight) | Comprehensiveness@3 | Sufficiency@3 |",
             "|---|---|---|---|",
         ])
         if "summary" in ablation_data:

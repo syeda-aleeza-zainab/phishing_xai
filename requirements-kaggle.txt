@@ -1,0 +1,41 @@
+# Kaggle requirements: MINIMUMS only, for a Kaggle notebook (GPU, Internet ON).
+# Install with: pip install -r requirements-kaggle.txt   (see notebooks/kaggle_run.ipynb Cell 2)
+#
+# Do NOT add a torch line: Kaggle pre-installs a CUDA torch build, and reinstalling
+# torch would waste time and can break the preinstalled stack. The same applies to
+# the preinstalled scientific stack (numpy / pandas / scikit-learn / matplotlib /
+# seaborn): the minimums below are already satisfied by the Kaggle image and install
+# nothing extra unless the image is older than the floor.
+#
+# transformers: minimum only, no upper bound. transformers-interpret (the TI
+# explainer) needs transformers 4.x; if the Kaggle image ships transformers 5.x the
+# code falls back to Captum automatically (see src/phishing_xai/explain.py), so do
+# NOT force a downgrade here.
+transformers>=4.36.0
+transformers-interpret>=0.10.0
+lime>=0.2.0.1
+captum>=0.7.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+nltk>=3.8.1
+beautifulsoup4>=4.12.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tqdm>=4.66.0
+scipy>=1.11.0
+Pillow>=10.0.0
+
+# Multimodal extension (image/PDF phishing).
+# System tools for these come from apt (see notebook Cell 2): tesseract-ocr, libzbar0.
+pytesseract>=0.3.10
+pdfplumber>=0.11.0
+PyMuPDF>=1.24.0
+pyzbar>=0.1.9
+opencv-python-headless>=4.8.0  # headless: no libGL system dependency
+qrcode>=7.4
+python-docx>=0.8.11  # optional: only needed for .docx attachments in src/phishing_xai/extract.py
+
+# NOT included on purpose:
+# - torch (preinstalled on Kaggle; see note above)
+# - tldextract (optional in src/phishing_xai/url_risk.py; an offline fallback is used when absent)

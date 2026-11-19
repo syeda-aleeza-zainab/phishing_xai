@@ -216,6 +216,7 @@ def main() -> None:
     res = run_ablation(args)
     print("\n" + "=" * 70)
     print(f"ALPHA ABLATION SUMMARY (k={args.k})")
+    print("Alpha is the LIME weight (paper Eq. 2): 0.0 = pure TI, 1.0 = pure LIME.")
     print("=" * 70)
     for variant, alphas_dict in res["summary"].items():
         print(f"\nVariant: {variant}")

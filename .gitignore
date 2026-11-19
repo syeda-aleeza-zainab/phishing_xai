@@ -65,4 +65,10 @@ checkpoints/
 Phishing_Email_Detection_XAI/
 results/debug/
 
+# Raw dataset CSV (large; download via scripts/download_data.py or attach as a Kaggle dataset)
+data/*.csv
+
+# Trained checkpoint (large; *.pt above already excludes it - listed explicitly so it is never committed)
+results/best_model.pt
+
 

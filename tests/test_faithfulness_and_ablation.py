@@ -66,23 +66,26 @@ def test_faithfulness_comprehensiveness_and_sufficiency_mock_model():
 
 
 def test_alpha_ablation_endpoints():
-    """Verify alpha=0 matches pure LIME and alpha=1 matches pure TI across both normalization variants."""
+    """Verify alpha=0 matches pure TI and alpha=1 matches pure LIME across both normalization variants.
+
+    Per paper Eq. 2, alpha is the LIME weight.
+    """
     lime_scores = [0.1, 0.9, -0.4, 0.6]
     ti_scores = [0.8, -0.2, 0.5, 0.3]
 
     for variant in ["magnitude_preserving", "minmax"]:
-        # Alpha = 0.0 -> 100% LIME
+        # Alpha = 0.0 -> 100% TI
         scores_alpha_0 = compute_lita_scores(lime_scores, ti_scores, alpha=0.0, variant=variant)
-        # Compute pure LIME normalized
+        # Compute pure TI normalized
         from phishing_xai.lita import normalize_magnitude_preserving, normalize_minmax
         norm_fn = normalize_magnitude_preserving if variant == "magnitude_preserving" else normalize_minmax
-        expected_lime = norm_fn(np.array(lime_scores))
-        np.testing.assert_allclose(scores_alpha_0, expected_lime, atol=1e-6)
-
-        # Alpha = 1.0 -> 100% TI
-        scores_alpha_1 = compute_lita_scores(lime_scores, ti_scores, alpha=1.0, variant=variant)
         expected_ti = norm_fn(np.array(ti_scores))
-        np.testing.assert_allclose(scores_alpha_1, expected_ti, atol=1e-6)
+        np.testing.assert_allclose(scores_alpha_0, expected_ti, atol=1e-6)
+
+        # Alpha = 1.0 -> 100% LIME
+        scores_alpha_1 = compute_lita_scores(lime_scores, ti_scores, alpha=1.0, variant=variant)
+        expected_lime = norm_fn(np.array(lime_scores))
+        np.testing.assert_allclose(scores_alpha_1, expected_lime, atol=1e-6)
 
         # Alpha = 0.5 -> 50% LIME + 50% TI
         scores_alpha_05 = compute_lita_scores(lime_scores, ti_scores, alpha=0.5, variant=variant)

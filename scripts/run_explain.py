@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sample_text", type=str, default=None, help="Custom single text to explain")
     parser.add_argument("--num_samples", type=int, default=5, help="Number of test instances to explain")
     parser.add_argument("--lime_samples", type=int, default=1000, help="Perturbation sample count for LIME")
-    parser.add_argument("--alpha", type=float, default=0.5, help="Weight parameter for LITA")
+    parser.add_argument("--alpha", type=float, default=0.5, help="LITA alpha: weight for LIME (0.0 = pure TI, 1.0 = pure LIME)")
     parser.add_argument("--variant", type=str, default="magnitude_preserving", choices=["magnitude_preserving", "minmax"])
     parser.add_argument("--output_dir", type=str, default="results/explanations", help="Output directory")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")

@@ -116,17 +116,21 @@ def test_lita_normalization_minmax_vs_magnitude_preserving():
 
 
 def test_lita_combine_scores_alpha_weighting():
-    """Verify alpha parameter linearly blends normalized LIME and TI scores."""
+    """Verify alpha parameter linearly blends normalized LIME and TI scores.
+
+    Per paper Eq. 2, alpha is the LIME weight: alpha=0 is pure TI,
+    alpha=1 is pure LIME, alpha=0.5 is an equal blend.
+    """
     lime_norm = np.array([0.2, 0.6, -0.4])
     ti_norm = np.array([0.8, -0.2, 0.4])
 
-    # Alpha = 0.0: 100% LIME
+    # Alpha = 0.0: 100% TI
     lita_alpha_0 = combine_scores(lime_norm, ti_norm, alpha=0.0)
-    np.testing.assert_allclose(lita_alpha_0, lime_norm)
+    np.testing.assert_allclose(lita_alpha_0, ti_norm)
 
-    # Alpha = 1.0: 100% TI
+    # Alpha = 1.0: 100% LIME
     lita_alpha_1 = combine_scores(lime_norm, ti_norm, alpha=1.0)
-    np.testing.assert_allclose(lita_alpha_1, ti_norm)
+    np.testing.assert_allclose(lita_alpha_1, lime_norm)
 
     # Alpha = 0.5: equal blend
     lita_alpha_05 = combine_scores(lime_norm, ti_norm, alpha=0.5)

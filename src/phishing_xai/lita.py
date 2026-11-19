@@ -53,15 +53,19 @@ def combine_scores(
     ti_norm: np.ndarray,
     alpha: float = 0.5,
 ) -> np.ndarray:
-    """Compute convex combination of normalized attribution scores: (1 - alpha)*LIME + alpha*TI.
-    
-    At alpha=0.0: pure LIME.
-    At alpha=1.0: pure TI.
+    """Compute convex combination of normalized attribution scores: alpha*LIME + (1 - alpha)*TI.
+
+    This matches paper Eq. 2 (alpha is the LIME weight). Note this was
+    previously implemented inverted as (1 - alpha)*LIME + alpha*TI; see
+    decision.md Section A (A1) for the correction.
+
+    At alpha=0.0: pure TI.
+    At alpha=1.0: pure LIME.
     At alpha=0.5: balanced hybrid.
     """
     if not (0.0 <= alpha <= 1.0):
         raise ValueError(f"Alpha must be within [0.0, 1.0], got {alpha}")
-    return (1.0 - alpha) * np.asarray(lime_norm, dtype=float) + alpha * np.asarray(ti_norm, dtype=float)
+    return alpha * np.asarray(lime_norm, dtype=float) + (1.0 - alpha) * np.asarray(ti_norm, dtype=float)
 
 
 def compute_lita_scores(
@@ -75,7 +79,8 @@ def compute_lita_scores(
     Args:
         lime_scores: Attribution scores from LIME.
         ti_scores: Attribution scores from TI / Integrated Gradients.
-        alpha: Weight parameter for LIME (1 - alpha weight for TI). Default 0.5.
+        alpha: Weight parameter for LIME ((1 - alpha) weight for TI). Default 0.5.
+        alpha=0.0 is pure TI, alpha=1.0 is pure LIME.
         variant: Either 'magnitude_preserving' (default) or 'minmax' (legacy).
         
     Returns:
@@ -117,6 +122,7 @@ def build_hybrid_word_attributions(
         word_attributions_ti: List of (word_idx, word_str, ti_score) from aggregate_subword_attributions_to_words.
         word_attributions_lime: List of (word_str, lime_score) from LimeTextExplainer.
         alpha: Weight parameter for LIME (default 0.5).
+        alpha=0.0 is pure TI, alpha=1.0 is pure LIME.
         variant: 'magnitude_preserving' or 'minmax'.
         
     Returns:
