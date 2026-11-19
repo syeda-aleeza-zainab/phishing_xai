@@ -59,3 +59,8 @@ htmlcov/
 *.safetensors
 *.onnx
 checkpoints/
+
+# Zip archives and old nested folders
+*.zip
+Phishing_Email_Detection_XAI/
+
