@@ -1,0 +1,22 @@
+{
+  "model": "roberta",
+  "set": "phishnchips",
+  "n": 2000,
+  "robustness": {
+    "truncated": {
+      "f1": 0.05436893203883495,
+      "accuracy": 0.513,
+      "roc_auc": 0.7787
+    },
+    "urls_removed": {
+      "f1": 0.061895551257253385,
+      "accuracy": 0.515,
+      "roc_auc": 0.7819299999999999
+    },
+    "typo_synonym": {
+      "f1": 0.15187557182067704,
+      "accuracy": 0.5365,
+      "roc_auc": 0.767068
+    }
+  }
+}

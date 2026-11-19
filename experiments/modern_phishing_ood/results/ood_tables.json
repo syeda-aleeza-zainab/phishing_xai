@@ -1,0 +1,873 @@
+{
+  "A_original_vs_modern": {
+    "title": "A: in-distribution test vs modern OOD (PhishNChips v5.2)",
+    "note": "PhishNChips is modern URL-grounded synthetic-stimuli OOD, not real-world phishing.",
+    "rows": {
+      "roberta": {
+        "in_distribution_test": {
+          "precision": {
+            "value": 0.969,
+            "source": "results/RESULTS.md (Stage B)"
+          },
+          "recall": {
+            "value": 0.9932,
+            "source": "results/RESULTS.md (Stage B)"
+          },
+          "f1": {
+            "value": 0.9809,
+            "source": "results/RESULTS.md (Stage B)"
+          },
+          "accuracy": {
+            "value": 0.9854,
+            "source": "results/RESULTS.md (Stage B)"
+          },
+          "roc_auc": {
+            "value": 0.9986,
+            "source": "results/RESULTS.md (Stage B)"
+          },
+          "n": {
+            "value": 3495,
+            "source": "results/RESULTS.md (Stage B)"
+          }
+        },
+        "modern_ood_phishnchips": {
+          "precision": {
+            "value": 0.9333333333333333,
+            "source": "results/phishnchips_roberta_metrics.json"
+          },
+          "recall": {
+            "value": 0.028,
+            "source": "results/phishnchips_roberta_metrics.json"
+          },
+          "f1": {
+            "value": 0.05436893203883495,
+            "source": "results/phishnchips_roberta_metrics.json"
+          },
+          "accuracy": {
+            "value": 0.513,
+            "source": "results/phishnchips_roberta_metrics.json"
+          },
+          "roc_auc": {
+            "value": 0.7787,
+            "source": "results/phishnchips_roberta_metrics.json"
+          },
+          "n": {
+            "value": 2000,
+            "source": "results/phishnchips_roberta_metrics.json"
+          }
+        }
+      },
+      "bilstm": {
+        "in_distribution_test": {
+          "precision": {
+            "value": 0.9719,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          },
+          "recall": {
+            "value": 0.9428,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          },
+          "f1": {
+            "value": 0.9571,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          },
+          "accuracy": {
+            "value": null,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          },
+          "roc_auc": {
+            "value": null,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          },
+          "n": {
+            "value": 3495,
+            "source": "results/RESULTS.md (tuned BiLSTM, 3 seeds: precision 0.9719 +/- 0.0015)"
+          }
+        },
+        "modern_ood_phishnchips": {
+          "precision": {
+            "value": 0.859375,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          },
+          "recall": {
+            "value": 0.055,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          },
+          "f1": {
+            "value": 0.10338345864661654,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          },
+          "accuracy": {
+            "value": 0.523,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          },
+          "roc_auc": {
+            "value": 0.6800909999999999,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          },
+          "n": {
+            "value": 2000,
+            "source": "results/phishnchips_bilstm_metrics.json"
+          }
+        }
+      }
+    }
+  },
+  "B_human_vs_ai": {
+    "title": "B: human-authored vs LLM-generated phishing (synthetic track only)",
+    "note": "Human side is 2007-2008 corpora (TREC-07/CEAS-08/Nazario/Nigerian/Enron), NOT modern. Both phishing sets share the same PhishNChips legit 1,000 as the paired legit set.",
+    "rows": {
+      "roberta": {
+        "human_old_corpora": {
+          "recall_at_0_5": {
+            "value": 0.8402,
+            "source": "results/frontiers_human_roberta_metrics.json"
+          },
+          "precision_at_0_5": {
+            "value": 0.999524149417083,
+            "source": "results/frontiers_human_roberta_metrics.json"
+          },
+          "fpr_on_shared_legit": {
+            "value": 0.002,
+            "source": "results/frontiers_human_roberta_metrics.json"
+          },
+          "n": {
+            "value": 6000,
+            "source": "results/frontiers_human_roberta_metrics.json"
+          }
+        },
+        "llm_generated": {
+          "recall_at_0_5": {
+            "value": 0.9394304051343763,
+            "source": "results/frontiers_llm_roberta_metrics.json"
+          },
+          "precision_at_0_5": {
+            "value": 0.9995731967562953,
+            "source": "results/frontiers_llm_roberta_metrics.json"
+          },
+          "fpr_on_shared_legit": {
+            "value": 0.002,
+            "source": "results/frontiers_llm_roberta_metrics.json"
+          },
+          "n": {
+            "value": 5986,
+            "source": "results/frontiers_llm_roberta_metrics.json"
+          }
+        }
+      },
+      "bilstm": {
+        "human_old_corpora": {
+          "recall_at_0_5": {
+            "value": 0.7226,
+            "source": "results/frontiers_human_bilstm_metrics.json"
+          },
+          "precision_at_0_5": {
+            "value": 0.9975151849806737,
+            "source": "results/frontiers_human_bilstm_metrics.json"
+          },
+          "fpr_on_shared_legit": {
+            "value": 0.009,
+            "source": "results/frontiers_human_bilstm_metrics.json"
+          },
+          "n": {
+            "value": 6000,
+            "source": "results/frontiers_human_bilstm_metrics.json"
+          }
+        },
+        "llm_generated": {
+          "recall_at_0_5": {
+            "value": 0.4787404733253109,
+            "source": "results/frontiers_llm_bilstm_metrics.json"
+          },
+          "precision_at_0_5": {
+            "value": 0.9962437395659433,
+            "source": "results/frontiers_llm_bilstm_metrics.json"
+          },
+          "fpr_on_shared_legit": {
+            "value": 0.009,
+            "source": "results/frontiers_llm_bilstm_metrics.json"
+          },
+          "n": {
+            "value": 5986,
+            "source": "results/frontiers_llm_bilstm_metrics.json"
+          }
+        }
+      }
+    }
+  },
+  "C_temporal": {
+    "title": "C: temporal degradation",
+    "rows": {
+      "status": {
+        "value": "NOT RUN YET",
+        "source": null,
+        "reason": "No per-email timestamps exist in any OOD set (PhishNChips has only the April 2026 release date; PhishFuzzer has Year only). Temporal analysis is not possible without dated emails."
+      }
+    }
+  },
+  "D_robustness": {
+    "title": "D: robustness on PhishNChips (F1 at 0.5)",
+    "rows": {
+      "roberta": {
+        "n": {
+          "value": 2000,
+          "source": "results/robustness_roberta.json"
+        },
+        "truncated": {
+          "value": 0.05436893203883495,
+          "source": "results/robustness_roberta.json"
+        },
+        "urls_removed": {
+          "value": 0.061895551257253385,
+          "source": "results/robustness_roberta.json"
+        },
+        "typo_synonym": {
+          "value": 0.15187557182067704,
+          "source": "results/robustness_roberta.json"
+        },
+        "clean": {
+          "value": 0.05436893203883495,
+          "source": "results/phishnchips_roberta_metrics.json"
+        }
+      },
+      "bilstm": {
+        "n": {
+          "value": 2000,
+          "source": "results/robustness_bilstm.json"
+        },
+        "truncated": {
+          "value": 0.10338345864661654,
+          "source": "results/robustness_bilstm.json"
+        },
+        "urls_removed": {
+          "value": 0.09262759924385633,
+          "source": "results/robustness_bilstm.json"
+        },
+        "typo_synonym": {
+          "value": 0.13419117647058823,
+          "source": "results/robustness_bilstm.json"
+        },
+        "clean": {
+          "value": 0.10338345864661654,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        }
+      }
+    }
+  },
+  "E_statistical_comparison": {
+    "title": "E: RoBERTa vs BiLSTM \u2014 paired statistics (McNemar is errors-only, NOT a precision test)",
+    "rows": {
+      "bec": {
+        "set": "bec",
+        "roberta": {
+          "n": 5181,
+          "bootstrap_precision_ci": {
+            "precision": 0.9987333755541482,
+            "ci_low": 0.996757457846952,
+            "ci_high": 1.0,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.37718249222674,
+            "ci_low": 0.36352632421295605,
+            "ci_high": 0.39114381392583975,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.5475694444444443,
+            "ci_low": 0.5329768812193728,
+            "ci_high": 0.5620643334634652,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.9513405883759867,
+            "roc_auc_ci_low": 0.945403361008198,
+            "roc_auc_ci_high": 0.9570711400513894,
+            "pr_auc": 0.9879706108327236,
+            "pr_auc_ci_low": 0.9858464442619526,
+            "pr_auc_ci_high": 0.989900051511457,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 5181,
+          "bootstrap_precision_ci": {
+            "precision": 0.9898648648648649,
+            "ci_low": 0.9833518312985572,
+            "ci_high": 0.9956143945930399,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.2102367854580244,
+            "ci_low": 0.19817420364557323,
+            "ci_high": 0.22267620991771164,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.3468139672519235,
+            "ci_low": 0.32995069056396703,
+            "ci_high": 0.363708373196507,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.8319626883520688,
+            "roc_auc_ci_low": 0.8191081322731725,
+            "roc_auc_ci_high": 0.8438495250478766,
+            "pr_auc": 0.951826810169742,
+            "pr_auc_ci_low": 0.9459717923333002,
+            "pr_auc_ci_high": 0.9574461084582659,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 5181,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 375,
+          "c": 1080,
+          "statistic": 340.6295532646048,
+          "p_value": 4.6533473294810584e-76
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": 0.008868510689283293,
+            "ci_low": 0.0033094292149952716,
+            "ci_high": 0.0152945387403392,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": 0.1669457067687156,
+            "ci_low": 0.14938877331018507,
+            "ci_high": 0.18438406507345098,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": 0.20075547719252085,
+            "ci_low": 0.18153061430405665,
+            "ci_high": 0.22169114287134717,
+            "n_resamples": 1000
+          }
+        }
+      },
+      "bec_poisoned": {
+        "set": "bec_poisoned",
+        "roberta": {
+          "n": 5181,
+          "bootstrap_precision_ci": {
+            "precision": 0.9988895058300944,
+            "ci_low": 0.9971764562214873,
+            "ci_high": 1.0,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.4302798373594834,
+            "ci_low": 0.4159644850234248,
+            "ci_high": 0.44477002477291494,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.6014710799063858,
+            "ci_low": 0.587239262911346,
+            "ci_high": 0.615493715164687,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.9565055010762976,
+            "roc_auc_ci_low": 0.9511245624041168,
+            "roc_auc_ci_high": 0.961791372958203,
+            "pr_auc": 0.9894197876364624,
+            "pr_auc_ci_low": 0.9875392530102031,
+            "pr_auc_ci_high": 0.9911241687837562,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 5181,
+          "bootstrap_precision_ci": {
+            "precision": 0.9904963041182682,
+            "ci_low": 0.9843908526274714,
+            "ci_high": 0.9958890030832477,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.2243482420473571,
+            "ci_low": 0.2118342520335274,
+            "ci_high": 0.2370163916563845,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.36583463338533545,
+            "ci_low": 0.34913234604827453,
+            "ci_high": 0.3824788252135704,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.8436479311169576,
+            "roc_auc_ci_low": 0.8312031157233638,
+            "roc_auc_ci_high": 0.8553732176887546,
+            "pr_auc": 0.9552939391950308,
+            "pr_auc_ci_low": 0.9498154343299132,
+            "pr_auc_ci_high": 0.9605443019786895,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 5181,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 345,
+          "c": 1213,
+          "statistic": 482.4704749679076,
+          "p_value": 6.196931289086904e-107
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": 0.008393201711826226,
+            "ci_low": 0.00316707347457913,
+            "ci_high": 0.01442534271001293,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": 0.2059315953121263,
+            "ci_low": 0.18873632706988716,
+            "ci_high": 0.22397575170262848,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": 0.23563644652105037,
+            "ci_low": 0.21729517519285835,
+            "ci_high": 0.2545824772138988,
+            "n_resamples": 1000
+          }
+        }
+      },
+      "frontiers_human": {
+        "set": "frontiers_human",
+        "roberta": {
+          "n": 6000,
+          "bootstrap_precision_ci": {
+            "precision": 0.999524149417083,
+            "ci_low": 0.9988029471290691,
+            "ci_high": 1.0,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.8402,
+            "ci_low": 0.8307257176199768,
+            "ci_high": 0.8501312294115806,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.9129631641855915,
+            "ci_low": 0.9073895013839982,
+            "ci_high": 0.9189307203393385,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.9902488,
+            "roc_auc_ci_low": 0.9884770138076169,
+            "roc_auc_ci_high": 0.9919961177663024,
+            "pr_auc": 0.9980516200064995,
+            "pr_auc_ci_low": 0.9976701352473806,
+            "pr_auc_ci_high": 0.9984202126549069,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 6000,
+          "bootstrap_precision_ci": {
+            "precision": 0.9975151849806737,
+            "ci_low": 0.9959147258329718,
+            "ci_high": 0.9988959806284788,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.7226,
+            "ci_low": 0.7095294825865155,
+            "ci_high": 0.734512034656881,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.8380886105311993,
+            "ci_low": 0.8290978871483664,
+            "ci_high": 0.8457564923060353,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.9501246000000001,
+            "roc_auc_ci_low": 0.9443242231429347,
+            "roc_auc_ci_high": 0.9554210201269514,
+            "pr_auc": 0.9901144141118253,
+            "pr_auc_ci_low": 0.9886173310058908,
+            "pr_auc_ci_high": 0.9914515055163136,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 6000,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 269,
+          "c": 864,
+          "statistic": 311.41747572815535,
+          "p_value": 1.0726039245462725e-69
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": 0.0020089644364092996,
+            "ci_low": 0.0006337037463292034,
+            "ci_high": 0.0035924866485694067,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": 0.11759999999999993,
+            "ci_low": 0.1047446587272383,
+            "ci_high": 0.13083775939017175,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": 0.07487455365439222,
+            "ci_low": 0.0669155007186117,
+            "ci_high": 0.08338941410186271,
+            "n_resamples": 1000
+          }
+        }
+      },
+      "frontiers_llm": {
+        "set": "frontiers_llm",
+        "roberta": {
+          "n": 5986,
+          "bootstrap_precision_ci": {
+            "precision": 0.9995731967562953,
+            "ci_low": 0.9989334470989761,
+            "ci_high": 1.0,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.9394304051343763,
+            "ci_low": 0.9325844297023326,
+            "ci_high": 0.945979628964988,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.9685690653432589,
+            "ci_low": 0.9648156220991366,
+            "ci_high": 0.9721565807048187,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.999367027677497,
+            "roc_auc_ci_low": 0.9983998214596634,
+            "roc_auc_ci_high": 0.9999301063458841,
+            "pr_auc": 0.9998462409663434,
+            "pr_auc_ci_low": 0.999605423703233,
+            "pr_auc_ci_high": 0.9999858872959746,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 5986,
+          "bootstrap_precision_ci": {
+            "precision": 0.9962437395659433,
+            "ci_low": 0.9937185271771509,
+            "ci_high": 0.9987100205902539,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.4787404733253109,
+            "ci_low": 0.46555515489802524,
+            "ci_high": 0.4910374552134513,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.64670820915741,
+            "ci_low": 0.6345555230688265,
+            "ci_high": 0.6579249679699234,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.9542057761732852,
+            "roc_auc_ci_low": 0.9473699324759065,
+            "roc_auc_ci_high": 0.9611096959782067,
+            "pr_auc": 0.988315755538528,
+            "pr_auc_ci_low": 0.9851910574618981,
+            "pr_auc_ci_high": 0.9910924535406547,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 5986,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 11,
+          "c": 2315,
+          "statistic": 2280.227429062769,
+          "p_value": 0.0
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": 0.0033294571903520476,
+            "ci_low": 0.001029784711632814,
+            "ci_high": 0.005851535715431733,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": 0.46068993180906537,
+            "ci_low": 0.44588280691914334,
+            "ci_high": 0.4747146966081995,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": 0.3218608561858489,
+            "ci_low": 0.3101838826740978,
+            "ci_high": 0.33436487831631984,
+            "n_resamples": 1000
+          }
+        }
+      },
+      "phishfuzzer": {
+        "set": "phishfuzzer",
+        "roberta": {
+          "n": 205,
+          "bootstrap_precision_ci": {
+            "precision": 0.5109489051094891,
+            "ci_low": 0.4253448665762099,
+            "ci_high": 0.594241443108233,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.6796116504854369,
+            "ci_low": 0.5882201334141904,
+            "ci_high": 0.7619293078055964,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.5833333333333334,
+            "ci_low": 0.5064990754947087,
+            "ci_high": 0.6511715997181113,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.5711022272986865,
+            "roc_auc_ci_low": 0.4903547046309933,
+            "roc_auc_ci_high": 0.6499805855208287,
+            "pr_auc": 0.6145102685094116,
+            "pr_auc_ci_low": 0.5227939174354541,
+            "pr_auc_ci_high": 0.7094993103463341,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 205,
+          "bootstrap_precision_ci": {
+            "precision": 0.53125,
+            "ci_low": 0.43517512077294684,
+            "ci_high": 0.6344086021505376,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.49514563106796117,
+            "ci_low": 0.39557667103538663,
+            "ci_high": 0.6019417475728155,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.5125628140703518,
+            "ci_low": 0.4242341897233202,
+            "ci_high": 0.5953641061780597,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.5149438416143156,
+            "roc_auc_ci_low": 0.4326663357021027,
+            "roc_auc_ci_high": 0.6000453062309592,
+            "pr_auc": 0.5769726067994712,
+            "pr_auc_ci_low": 0.4853879992897286,
+            "pr_auc_ci_high": 0.6694210632865507,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 205,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 47,
+          "c": 44,
+          "statistic": 0.04395604395604396,
+          "p_value": 0.833935414088552
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": -0.020301094890510907,
+            "ci_low": -0.10844569736855551,
+            "ci_high": 0.056278352559731744,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": 0.18446601941747576,
+            "ci_low": 0.06381061912976807,
+            "ci_high": 0.30775,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": 0.07077051926298161,
+            "ci_low": -0.024479010833445006,
+            "ci_high": 0.16547192541310168,
+            "n_resamples": 1000
+          }
+        }
+      },
+      "phishnchips": {
+        "set": "phishnchips",
+        "roberta": {
+          "n": 2000,
+          "bootstrap_precision_ci": {
+            "precision": 0.9333333333333333,
+            "ci_low": 0.8387096774193549,
+            "ci_high": 1.0,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.028,
+            "ci_low": 0.018537564994599482,
+            "ci_high": 0.03917861837878443,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.05436893203883495,
+            "ci_low": 0.03632511333115867,
+            "ci_high": 0.07511074479517676,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.7787,
+            "roc_auc_ci_low": 0.7584478782553071,
+            "roc_auc_ci_high": 0.7987092234855014,
+            "pr_auc": 0.7946792109638081,
+            "pr_auc_ci_low": 0.7701569292228813,
+            "pr_auc_ci_high": 0.8201173331517448,
+            "n_resamples": 1000
+          }
+        },
+        "bilstm": {
+          "n": 2000,
+          "bootstrap_precision_ci": {
+            "precision": 0.859375,
+            "ci_low": 0.7758203559510568,
+            "ci_high": 0.9375,
+            "n_resamples": 1000
+          },
+          "bootstrap_recall_ci": {
+            "recall": 0.055,
+            "ci_low": 0.041665658276863506,
+            "ci_high": 0.06944512393998696,
+            "n_resamples": 1000
+          },
+          "bootstrap_f1_ci": {
+            "f1": 0.10338345864661654,
+            "ci_low": 0.07945615645601152,
+            "ci_high": 0.12867647058823528,
+            "n_resamples": 1000
+          },
+          "bootstrap_auc_ci": {
+            "roc_auc": 0.6800909999999999,
+            "roc_auc_ci_low": 0.6563381912631565,
+            "roc_auc_ci_high": 0.7036410065808382,
+            "pr_auc": 0.6767571316676289,
+            "pr_auc_ci_low": 0.6456755883525525,
+            "pr_auc_ci_high": 0.7097633314444471,
+            "n_resamples": 1000
+          }
+        },
+        "paired_n": 2000,
+        "mcnemar_roberta_vs_bilstm": {
+          "b": 51,
+          "c": 31,
+          "statistic": 4.402439024390244,
+          "p_value": 0.03588757033175105
+        },
+        "mcnemar_note": "McNemar compares overall errors only; it is NOT a precision test.",
+        "paired_diff_ci_roberta_minus_bilstm": {
+          "precision": {
+            "diff_A_minus_B": 0.07395833333333335,
+            "ci_low": -0.0329407739312162,
+            "ci_high": 0.1802894467213115,
+            "n_resamples": 1000
+          },
+          "recall": {
+            "diff_A_minus_B": -0.027,
+            "ci_low": -0.043396925383739786,
+            "ci_high": -0.010160298921720337,
+            "n_resamples": 1000
+          },
+          "f1": {
+            "diff_A_minus_B": -0.049014526607781585,
+            "ci_low": -0.07962256630865486,
+            "ci_high": -0.017858193056537113,
+            "n_resamples": 1000
+          }
+        }
+      }
+    }
+  },
+  "F_efficiency": {
+    "title": "F: efficiency (latency median, batch 1; params; size)",
+    "rows": {
+      "roberta": {
+        "latency_gpu_ms": {
+          "value": 9.541995000006409,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "latency_cpu_ms": {
+          "value": 129.72720300001583,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "latency_n_gpu": {
+          "value": 200,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "latency_n_cpu": {
+          "value": 100,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "n_params": {
+          "value": 124647170,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "model_size_mb": {
+          "value": 498.672794,
+          "source": "results/phishnchips_roberta_metrics.json"
+        },
+        "latency_texts_source": {
+          "value": "phishnchips",
+          "source": "results/phishnchips_roberta_metrics.json"
+        }
+      },
+      "bilstm": {
+        "latency_gpu_ms": {
+          "value": 6.230310999967514,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "latency_cpu_ms": {
+          "value": 11.090314999989914,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "latency_n_gpu": {
+          "value": 200,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "latency_n_cpu": {
+          "value": 100,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "n_params": {
+          "value": 6236034,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "model_size_mb": {
+          "value": 25.553742,
+          "source": "results/phishnchips_bilstm_metrics.json"
+        },
+        "latency_texts_source": {
+          "value": "phishnchips",
+          "source": "results/phishnchips_bilstm_metrics.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+[{"stream_name":"stdout","time":6.555740758,"data":"repo at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-repo-ah-6b1\n"}
+,{"stream_name":"stdout","time":18.262510968,"data":"roberta checkpoint at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-checkpoint/best_model.pt\n"}
+,{"stream_name":"stdout","time":21.883962388,"data":"bilstm artefact at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-results/results/bilstm/best_bilstm.pt\n"}
+,{"stream_name":"stderr","time":22.256471488,"data":"NOT FOUND under /kaggle/input: OOD dataset (tried ('phishing-xai-ood-modern',), pattern None)\n"}
+,{"stream_name":"stderr","time":24.853540027,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":24.853565705,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":25.187402391,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":25.18744219,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":27.219707152,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":28.291487344,"data":"[NbConvertApp] Writing 294787 bytes to __results__.html\n"}
+]
