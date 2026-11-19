@@ -27,8 +27,8 @@ available (e.g. a tiny ``--max_samples`` run), the placeholder 0.5 is
 used and the report says so explicitly. The placeholder-0.5 metrics
 are also reported alongside the fitted-threshold metrics.
 
-Cheap baselines (Section H hook, ``--models``): ``tfidf_lr`` and
-``bilstm`` are fitted on the REAL-data train split (``results/splits.json``,
+Cheap baselines (Section H hook, ``--models``): ``tfidf_lr``, ``tfidf_svm``
+and ``bilstm`` are fitted on the REAL-data train split (``results/splits.json``,
 identical splits/cleaning as Section H — vocab/TF-IDF fit on train
 only) and evaluated on the SAME extractor output as RoBERTa
 (subject+body+OCR+PDF+QR combined text), via
@@ -77,9 +77,10 @@ if str(REPO_ROOT / "src") not in sys.path:
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from phishing_xai.baselines import RobertaScorer, load_scorer
 from phishing_xai.config import FusionConfig, ModelConfig, TrainConfig
 from phishing_xai.extract import extract_eml
-from phishing_xai.multimodal import build_concatenated_context, fuse_email, part_id
+from phishing_xai.multimodal import build_concatenated_context, fuse_email, part_id, score_texts
 from phishing_xai.utils import get_logger, set_seed
 
 logger = get_logger("phishing_xai.run_multimodal_eval")
@@ -418,56 +419,50 @@ def resolve_default_eval_dir() -> Path:
 
 
 # ---------------------------------------------------------------------------
-# RoBERTa scoring (reuses the predict script's scoring path).
+# Scorer-based scoring (6B.1): any TextScorer drives the (a)-(d) ablations.
 # ---------------------------------------------------------------------------
-def score_email_roberta(
+def score_email(
     extraction: Dict[str, Any],
-    model: Any,
-    tokenizer: Any,
-    device: Any,
+    scorer: Any,
     *,
     threshold: float = DEFAULT_THRESHOLD,
 ) -> Dict[str, Any]:
-    """Score one extracted email under every ablation (a)-(d).
+    """Score one extracted email under every ablation (a)-(d) with any scorer.
 
-    Each non-empty part is scored once (``score_text``); the (a)-(c)
-    scores are RoBERTa P(phishing) on the filtered concatenated
+    Each non-empty part is scored once (``scorer.predict_proba``); the (a)-(c)
+    scores are the scorer's P(phishing) on the filtered concatenated
     contexts; (d) fuses the part scores + full context score + URL/flag
     evidence with ``fuse_email`` for both fusions. Returns the scores,
     the fused verdict dicts and the modality-presence flags.
     """
-    from scripts.run_multimodal_predict import score_text
-
     part_scores: Dict[str, float] = {}
     for part in extraction.get("parts") or []:
         text = (part.get("text") or "").strip()
         if not text:
             continue
-        _, _, p_phish = score_text(model, tokenizer, text, device=device)
-        part_scores[part_id(part)] = p_phish
+        part_scores[part_id(part)] = score_texts(scorer, [text])[0]
 
     ablation_scores: Dict[str, float] = {}
     for key, (_label, kinds) in ABLATION_KINDS.items():
         context = build_concatenated_context(
             filtered_extraction(extraction, kinds),
-            tokenizer=tokenizer, max_length=ModelConfig.max_length,
+            scorer=scorer, max_length=ModelConfig.max_length,
         )
-        _, _, p_phish = score_text(model, tokenizer, context, device=device)
-        ablation_scores[key] = p_phish
+        ablation_scores[key] = score_texts(scorer, [context])[0] if context.strip() else 0.0
 
     full_context = build_concatenated_context(
-        extraction, tokenizer=tokenizer, max_length=ModelConfig.max_length
+        extraction, scorer=scorer, max_length=ModelConfig.max_length
     )
-    _, _, context_prob = score_text(model, tokenizer, full_context, device=device)
+    context_prob = score_texts(scorer, [full_context])[0] if full_context.strip() else 0.0
     fused_weighted = fuse_email(
         extraction, part_scores, fusion="weighted",
         concatenated_score=context_prob, threshold=threshold,
-        tokenizer=tokenizer, max_length=ModelConfig.max_length,
+        scorer=scorer, max_length=ModelConfig.max_length,
     )
     fused_max = fuse_email(
         extraction, part_scores, fusion="max",
         concatenated_score=context_prob, threshold=threshold,
-        tokenizer=tokenizer, max_length=ModelConfig.max_length,
+        scorer=scorer, max_length=ModelConfig.max_length,
     )
     texts = modality_texts(extraction)
     return {
@@ -486,6 +481,25 @@ def score_email_roberta(
         "has_qr": bool(texts["qr_text"].strip()),
         "modality_texts": texts,
     }
+
+
+def score_email_roberta(
+    extraction: Dict[str, Any],
+    model: Any,
+    tokenizer: Any,
+    device: Any,
+    *,
+    threshold: float = DEFAULT_THRESHOLD,
+) -> Dict[str, Any]:
+    """Score one extracted email under every ablation (a)-(d) with RoBERTa.
+
+    Thin wrapper over :func:`score_email` with a ``RobertaScorer`` around
+    the ``(model, tokenizer, device)`` triple, kept so existing callers
+    and tests do not break. Behaviour is identical to the previous
+    implementation (same ``score_text`` calls, same truncation).
+    """
+    scorer = RobertaScorer(model, tokenizer, device, max_length=ModelConfig.max_length)
+    return score_email(extraction, scorer, threshold=threshold)
 
 
 # ---------------------------------------------------------------------------
@@ -509,7 +523,7 @@ def run_cheap_baselines(
     from phishing_xai import baselines as bl
 
     out: Dict[str, Any] = {}
-    wanted = [m for m in models if m in ("tfidf_lr", "bilstm")]
+    wanted = [m for m in models if m in ("tfidf_lr", "tfidf_svm", "bilstm")]
     if not wanted:
         return out
     try:
@@ -534,6 +548,11 @@ def run_cheap_baselines(
             fitted["tfidf_lr"] = bl.build_tfidf_lr(train_texts, train_labels)
         except Exception as exc:  # noqa: BLE001 — report, do not crash the eval
             out["tfidf_lr"] = {"status": "NOT RUN YET", "reason": f"fit failed: {exc}"}
+    if "tfidf_svm" in wanted:
+        try:
+            fitted["tfidf_svm"] = bl.build_tfidf_svm(train_texts, train_labels)
+        except Exception as exc:  # noqa: BLE001 — report, do not crash the eval
+            out["tfidf_svm"] = {"status": "NOT RUN YET", "reason": f"fit failed: {exc}"}
     if "bilstm" in wanted:
         try:
             config = bl.TorchTrainConfig(epochs=int(bilstm_epochs))
@@ -832,15 +851,14 @@ def load_labels(labels_path: Path) -> List[Dict[str, Any]]:
 def evaluate(
     eval_dir: Path,
     labels: List[Dict[str, Any]],
-    model: Any,
-    tokenizer: Any,
-    device: Any,
+    scorer: Any,
     *,
     recall_floor: float = DEFAULT_RECALL_FLOOR,
     max_samples: Optional[int] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """Score every labelled email and fit thresholds on validation only.
 
+    ``scorer`` is a :class:`TextScorer` (RoBERTa, TF-IDF+LR or BiLSTM).
     Returns ``(per-email rows, summary)`` where the summary holds the
     fitted thresholds (one per ablation score), the test-slice metrics at
     the fitted thresholds and at 0.5, per-modality recall and the failure
@@ -854,7 +872,7 @@ def evaluate(
             logger.warning(f"Eval file missing, skipping: {eml_path}")
             continue
         extraction = extract_eml(eml_path)
-        scored = score_email_roberta(extraction, model, tokenizer, device)
+        scored = score_email(extraction, scorer)
         rows.append({
             "filename": entry["filename"],
             "label": int(entry["label"]),
@@ -925,7 +943,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--labels", type=str, default=None,
                         help="labels.csv path (default: <eval_dir>/labels.csv)")
     parser.add_argument("--checkpoint", type=str, default=None,
-                        help="Trained RoBERTa checkpoint (default: Kaggle auto-detect, else results/best_model.pt)")
+                        help="Trained checkpoint (.pt). For --model roberta: the RoBERTa checkpoint. For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt from run_baselines.py) is loaded instead of fitting; a RoBERTa .pt or a missing file means fit on the real train split (default: Kaggle auto-detect, else results/best_model.pt)")
+    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "tfidf_svm", "bilstm", "rule_based"], default="roberta",
+                        help="Scorer model driving the (a)-(d) ablations (default: roberta). tfidf_lr/tfidf_svm/bilstm fit on the real train split unless --checkpoint points at a saved baseline artefact; rule_based needs no model at all (worst static URL-risk score in the text, NOT a model probability); no checkpoint needed for any of the three.")
     parser.add_argument("--output_dir", type=str, default=None,
                         help="Output directory (default: Kaggle /kaggle/working/results/multimodal_eval, else results/multimodal_eval)")
     parser.add_argument("--max_samples", type=int, default=None,
@@ -933,9 +953,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--debug", action="store_true", help="Verbose (DEBUG) logging")
     parser.add_argument("--fusion", choices=["weighted", "max"], default="weighted",
                         help="Primary fusion for the headline verdict (default: weighted; both are always reported)")
-    parser.add_argument("--models", nargs="+", choices=["tfidf_lr", "bilstm", "roberta"],
+    parser.add_argument("--models", nargs="+", choices=["tfidf_lr", "tfidf_svm", "bilstm", "roberta"],
                         default=["roberta"],
-                        help="Models to run (default: roberta only; tfidf_lr/bilstm are the cheap Section H baselines)")
+                        help="Cheap Section H baselines for the side table only (default: roberta, i.e. none); the (a)-(d) ablations are driven by --model, not by this flag")
     parser.add_argument("--allow_pretrained_fallback", action="store_true",
                         help="Allow running with base roberta-base when the checkpoint is missing (loud warning; NOT detection evidence)")
     parser.add_argument("--recall_floor", type=float, default=DEFAULT_RECALL_FLOOR,
@@ -965,10 +985,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         labels = labels[: max(0, args.max_samples)]
 
     untrained_fallback = False
-    model = tokenizer = device = None
     rows: List[Dict[str, Any]] = []
     summary: Dict[str, Any] = {}
-    if "roberta" in args.models:
+    if args.model == "roberta":
         if not ckpt_path.exists() and not args.allow_pretrained_fallback:
             print(
                 f"ERROR: Trained checkpoint is not present locally! Missing file: {ckpt_path.as_posix()}\n"
@@ -984,45 +1003,34 @@ def main(argv: Optional[List[str]] = None) -> int:
         tokenizer, model, device = load_trained_roberta(
             ckpt_path, allow_pretrained_fallback=args.allow_pretrained_fallback
         )
+        scorer = RobertaScorer(model, tokenizer, device, max_length=ModelConfig.max_length)
         rows, summary = evaluate(
-            eval_dir, labels, model, tokenizer, device,
+            eval_dir, labels, scorer,
             recall_floor=args.recall_floor, max_samples=None,
         )
     else:
-        # No RoBERTa requested: still extract + build modality texts so the
-        # cheap baselines can run on the same extractor output.
-        for entry in labels:
-            eml_path = eval_dir / entry["filename"]
-            if not eml_path.exists():
-                continue
-            extraction = extract_eml(eml_path)
-            texts = modality_texts(extraction)
-            rows.append({
-                "filename": entry["filename"], "label": int(entry["label"]),
-                "category": entry["category"], "split": entry.get("split", "test"),
-                "modality_texts": texts,
-                "has_body": bool(texts["body_text"].strip()),
-                "has_ocr": bool(texts["ocr_text"].strip()),
-                "has_pdf": bool(texts["pdf_text"].strip()),
-                "has_qr": bool(texts["qr_text"].strip()),
-            })
-        summary = {"fitted_thresholds": {}, "test_metrics": {},
-                   "test_metrics_at_0_5": {}, "per_modality_recall": {},
-                   "failures": [], "n_scored": len(rows),
-                   "n_validation": sum(1 for r in rows if r["split"] == "validation"),
-                   "n_test": sum(1 for r in rows if r["split"] == "test")}
-        print("RoBERTa not requested (--models without roberta): ablation table is NOT RUN YET.")
+        # Baseline / rule-based scorer: tfidf_lr/bilstm load a saved
+        # baseline artefact when --checkpoint points at one, else fit on
+        # the real train split; rule_based needs no fit at all; the
+        # checkpoint gate does not apply and its absence is not an error
+        # for any of them.
+        scorer = load_scorer(
+            args.model, checkpoint=ckpt_path, bilstm_epochs=args.bilstm_epochs,
+        )
+        rows, summary = evaluate(
+            eval_dir, labels, scorer,
+            recall_floor=args.recall_floor, max_samples=None,
+        )
 
     baselines_out: Dict[str, Any] = {}
-    cheap = [m for m in args.models if m in ("tfidf_lr", "bilstm")]
+    cheap = [m for m in args.models if m in ("tfidf_lr", "tfidf_svm", "bilstm")]
     if cheap and rows:
         logger.info("Running cheap baselines on the same extractor output: %s", cheap)
         baselines_out = run_cheap_baselines(rows, cheap, bilstm_epochs=args.bilstm_epochs)
 
     test_metrics = summary.get("test_metrics", {})
     precision_line = precision_first_summary(test_metrics) if test_metrics else (
-        "RoBERTa ablation NOT RUN YET (roberta was not in --models); "
-        "no precision summary is available."
+        "Ablation NOT RUN YET; no precision summary is available."
     )
 
     results: Dict[str, Any] = {
@@ -1041,7 +1049,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             "n_test": summary.get("n_test"),
             "fusion": args.fusion,
             "checkpoint": str(ckpt_path),
-            "models": list(args.models),
+            "model": args.model,
+            "models": [args.model] + [m for m in cheap if m != args.model],
             "recall_floor": args.recall_floor,
             "threshold_note": (
                 "Threshold 0.5 is a PLACEHOLDER. Reported thresholds were fitted "

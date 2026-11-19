@@ -10,13 +10,14 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from phishing_xai.baselines import explain_word_scores, load_scorer
 from phishing_xai.data import deduplicate_data, load_data
 from phishing_xai.explain import (
     LimeExplainer,
     TransformerExplainer,
     aggregate_subword_attributions_to_words,
 )
-from phishing_xai.lita import build_hybrid_word_attributions
+from phishing_xai.lita import build_hybrid_word_attributions, compute_lita_scores
 from phishing_xai.model import load_tokenizer_and_model
 from phishing_xai.utils import ensure_dir, get_device, get_logger, load_json, save_json, set_seed
 
@@ -25,8 +26,10 @@ logger = get_logger("run_explain")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate XAI explanations: LIME, TI, and LITA")
-    parser.add_argument("--model_name", type=str, default="roberta-base", help="Model backbone")
-    parser.add_argument("--checkpoint_path", type=str, default=None, help="Path to fine-tuned weights (or None for base)")
+    parser.add_argument("--model_name", type=str, default="roberta-base", help="Model backbone (HF identifier; only used for --model roberta)")
+    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "bilstm"], default="roberta",
+                        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split; no checkpoint needed.")
+    parser.add_argument("--checkpoint_path", type=str, default=None, help="Path to trained checkpoint (.pt). For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv", help="Path to raw dataset")
     parser.add_argument("--splits_path", type=str, default="results/splits.json", help="Path to split manifest")
     parser.add_argument("--sample_text", type=str, default=None, help="Custom single text to explain")
@@ -56,22 +59,7 @@ def main() -> None:
 
     out_dir = ensure_dir(args.output_dir)
 
-    # 1. Load tokenizer and model
-    tokenizer, model = load_tokenizer_and_model(args.model_name, num_labels=2, device=device)
-    if args.checkpoint_path and Path(args.checkpoint_path).exists():
-        logger.info(f"Loading checkpoint weights from: {args.checkpoint_path}")
-        chk = torch.load(args.checkpoint_path, map_location=device)
-        state_dict = chk.get("model_state_dict", chk)
-        model.load_state_dict(state_dict)
-
-    model.eval()
-
-    # 2. Initialize explainers
-    max_len = 64 if args.debug else 512
-    lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=max_len)
-    ti_explainer = TransformerExplainer(model, tokenizer, device=device)
-
-    # 3. Determine samples to explain
+    # 1. Determine samples to explain (no model needed for this step)
     texts_to_explain: List[Dict[str, Any]] = []
     if args.sample_text:
         texts_to_explain.append({"id": "custom_0", "text": args.sample_text, "true_label": None})
@@ -99,8 +87,74 @@ def main() -> None:
                 "true_label": int(row["label"]),
             })
 
-
     all_explanations: List[Dict[str, Any]] = []
+
+    if args.model != "roberta":
+        # Baseline scorer path: fitted on the real train split; the HF
+        # model / TransformerExplainer are never loaded here.
+        scorer = load_scorer(args.model, checkpoint=args.checkpoint_path, seed=args.seed)
+        for item in texts_to_explain:
+            text = item["text"]
+            logger.info(f"Generating explanations for sample {item['id']} ({len(text.split())} words)...")
+            probs = scorer.predict_proba([text])[0]
+            pred_class = 1 if float(probs[1]) >= float(probs[0]) else 0
+            words, lime_scores, second_scores, method_name = explain_word_scores(
+                scorer, text, lime_samples=args.lime_samples, seed=args.seed,
+            )
+            alpha_eff = 1.0 if method_name == "lime_only" else args.alpha
+            lita_scores = compute_lita_scores(
+                lime_scores, second_scores, alpha=alpha_eff, variant=args.variant,
+            )
+            hybrid_words = [
+                {
+                    "word_idx": i,
+                    "word": w,
+                    "ti_score": float(s),
+                    "lime_score": float(l),
+                    "lita_score": float(ls),
+                }
+                for i, (w, l, s, ls) in enumerate(
+                    zip(words, lime_scores, second_scores, lita_scores)
+                )
+            ]
+            lime_top = sorted(
+                zip(words, lime_scores), key=lambda t: -abs(t[1]),
+            )[:15]
+            all_explanations.append({
+                "id": item["id"],
+                "true_label": item["true_label"],
+                "pred_label": int(pred_class),
+                "probabilities": probs.tolist(),
+                "lime_top_words": [[w, float(s)] for w, s in lime_top],
+                "word_level_attributions": hybrid_words,
+                "model": args.model,
+                "explanation_method": method_name,
+                "ti_available": method_name != "lime_only",
+                "alpha_effective": float(alpha_eff),
+            })
+        output_file = out_dir / "explanations.json"
+        save_json(
+            {"explanations": all_explanations, "alpha": args.alpha,
+             "variant": args.variant, "model": args.model},
+            output_file,
+        )
+        logger.info(f"Saved {len(all_explanations)} explanations to: {output_file}")
+        return
+
+    # 2. Load tokenizer and model (RoBERTa path, unchanged)
+    tokenizer, model = load_tokenizer_and_model(args.model_name, num_labels=2, device=device)
+    if args.checkpoint_path and Path(args.checkpoint_path).exists():
+        logger.info(f"Loading checkpoint weights from: {args.checkpoint_path}")
+        chk = torch.load(args.checkpoint_path, map_location=device)
+        state_dict = chk.get("model_state_dict", chk)
+        model.load_state_dict(state_dict)
+
+    model.eval()
+
+    # 3. Initialize explainers
+    max_len = 64 if args.debug else 512
+    lime_explainer = LimeExplainer(model, tokenizer, device=device, max_length=max_len)
+    ti_explainer = TransformerExplainer(model, tokenizer, device=device)
 
     for item in texts_to_explain:
         text = item["text"]
@@ -132,11 +186,15 @@ def main() -> None:
             "probabilities": probs.tolist(),
             "lime_top_words": lime_words,
             "word_level_attributions": hybrid_words,
+            "model": "roberta",
+            "explanation_method": "lita",
+            "ti_available": True,
+            "alpha_effective": float(args.alpha),
         }
         all_explanations.append(explanation_record)
 
     output_file = out_dir / "explanations.json"
-    save_json({"explanations": all_explanations, "alpha": args.alpha, "variant": args.variant}, output_file)
+    save_json({"explanations": all_explanations, "alpha": args.alpha, "variant": args.variant, "model": "roberta"}, output_file)
     logger.info(f"Saved {len(all_explanations)} explanations to: {output_file}")
 
 

@@ -1,4 +1,4 @@
-"""Multimodal fusion (Section D): combine per-part RoBERTa scores, a
+"""Multimodal fusion (Section D): combine per-part scorer scores, a
 concatenated-context score, static URL risk and header/structural flags
 into one precision-first verdict.
 
@@ -17,11 +17,11 @@ Public API (what Section E's eval script should import)::
     result = fuse_email(
         extraction, part_scores,
         fusion="weighted",                 # or "max" (recall-heavy baseline)
-        concatenated_score=context_prob,    # RoBERTa P(phish) on the context
+        concatenated_score=context_prob,    # scorer P(phish) on the context
         config=FusionConfig(),            # weights / threshold live here
     )
 
-``part_scores`` maps a part identifier to its RoBERTa P(phishing) in [0, 1].
+``part_scores`` maps a part identifier to its scorer P(phishing) in [0, 1].
 Identifiers are matched in this order per part: the canonical part id
 ``"<kind>[:<filename>][#p<page>]"`` (see :func:`part_id`), then the bare
 ``kind``, then the part index as a string. Callers that score parts should
@@ -109,6 +109,7 @@ __all__ = [
     "PART_KIND_TO_MODALITY",
     "part_id",
     "build_concatenated_context",
+    "score_texts",
     "score_urls_for_email",
     "score_flags",
     "fuse_email",
@@ -187,11 +188,27 @@ def _parts_of(extraction: Dict[str, Any]) -> List[Dict[str, Any]]:
     return list(parts) if isinstance(parts, list) else []
 
 
+def score_texts(scorer: Any, texts: List[str]) -> List[float]:
+    """P(phishing) for each text under any scorer (``TextScorer`` protocol).
+
+    Empty / whitespace-only texts score 0.0 without calling the scorer.
+    """
+    out: List[float] = []
+    for text in texts:
+        if not (text or "").strip():
+            out.append(0.0)
+            continue
+        probs = scorer.predict_proba([text])
+        out.append(float(probs[0, 1]))
+    return out
+
+
 def build_concatenated_context(
     extraction: Dict[str, Any],
     *,
     tokenizer: Any = None,
     max_length: int = 512,
+    scorer: Any = None,
 ) -> str:
     """Build ONE scored string from an extraction dict, with part markers.
 
@@ -206,11 +223,11 @@ def build_concatenated_context(
     QR payloads from ``qr_urls`` are appended to ``[QR_URL]`` even when the
     ``qr`` part text is empty.
 
-    Truncation: with a tokenizer, the existing
-    ``truncate_text_to_model_window`` is used so the string is exactly what
-    the model sees; without one, the text is capped at
-    ``max_length * 4`` characters (roughly 4 chars/token) so the call can
-    never blow up the model window silently.
+    Truncation: with a scorer, ``scorer.truncate`` is used; else with a
+    tokenizer, the existing ``truncate_text_to_model_window`` is used so
+    the string is exactly what the model sees; without either, the text
+    is capped at ``max_length * 4`` characters (roughly 4 chars/token)
+    so the call can never blow up the model window silently.
     """
     sections: Dict[str, List[str]] = {marker: [] for marker, _ in _CONTEXT_SECTIONS}
     kind_to_marker = {
@@ -241,6 +258,8 @@ def build_concatenated_context(
     if not context:
         return ""
 
+    if scorer is not None:
+        return scorer.truncate(context, max_length)
     if tokenizer is not None:
         from phishing_xai.data import truncate_text_to_model_window
 
@@ -413,13 +432,14 @@ def fuse_email(
     url_config: Any = None,
     tokenizer: Any = None,
     max_length: Optional[int] = None,
+    scorer: Any = None,
 ) -> Dict[str, Any]:
     """Fuse per-part scores, context score, URL risk and flags into a verdict.
 
     Args:
         extraction: The dict returned by ``extract_eml`` (``parts``,
             ``body_text``, ``links``, ``flags``, ``headers``).
-        part_scores: ``{part identifier: RoBERTa P(phishing)}``; see the
+        part_scores: ``{part identifier: scorer P(phishing)}``; see the
             module docstring for the identifier matching order.
         fusion: ``"weighted"`` (default, precision-first) or ``"max"``
             (recall-heavy baseline: any part >= threshold flips the verdict;
@@ -427,7 +447,7 @@ def fuse_email(
         config: :class:`FusionConfig` with weights / threshold. Defaults are
             precision-first (see the module docstring); ``threshold`` here is
             a 0.5 PLACEHOLDER until tuned on validation.
-        concatenated_score: RoBERTa P(phishing) of
+        concatenated_score: scorer P(phishing) of
             :func:`build_concatenated_context` for this email. When ``None``
             it falls back to the max part score (recorded as
             ``context_score_source == "fallback_max_part"``) so the weighted
@@ -436,6 +456,9 @@ def fuse_email(
         url_config: Optional :class:`UrlRiskConfig` passed to URL scoring.
         tokenizer / max_length: Passed to :func:`build_concatenated_context`
             (only used to truncate the returned context string).
+        scorer: Optional scorer passed through to
+            :func:`build_concatenated_context` for truncation; takes
+            precedence over ``tokenizer`` there.
 
     Returns a dict with ``fusion``, ``verdict`` (``"Phishing Email"`` /
     ``"Safe Email"``), ``final_class`` (1/0), ``final_score``,
@@ -456,7 +479,9 @@ def fuse_email(
     thr = float(cfg.threshold if threshold is None else threshold)
     ml = int(cfg.max_length if max_length is None else max_length)
 
-    context = build_concatenated_context(extraction, tokenizer=tokenizer, max_length=ml)
+    context = build_concatenated_context(
+        extraction, tokenizer=tokenizer, max_length=ml, scorer=scorer
+    )
     resolved = _match_part_scores(extraction, part_scores or {})
 
     parts = _parts_of(extraction)

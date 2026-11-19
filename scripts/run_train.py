@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from phishing_xai.augment import balance_training_data
 from phishing_xai.config import DataConfig, ModelConfig, TrainConfig
-from phishing_xai.data import create_stratified_splits, deduplicate_data, load_data
+from phishing_xai.data import DatasetSplits, create_stratified_splits, deduplicate_data, load_data
 from phishing_xai.model import create_dataloader, load_tokenizer_and_model
 from phishing_xai.train import train_model
 from phishing_xai.utils import get_device, get_logger, load_json, set_seed
@@ -39,6 +39,64 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--debug", action="store_true", help="Debug mode: ~500 emails, max_len=128, 1 epoch")
     return parser.parse_args()
 
+
+
+def resolve_splits(df, data_path, output_dir, seed: int = 42, debug: bool = False) -> DatasetSplits:
+    """Resolve train/val/test splits, preferring the canonical manifest.
+
+    Full (non-debug) runs reuse the exact splits in
+    ``<output_dir>/splits.json`` when it already exists, via
+    ``phishing_xai.baselines.load_splits`` (lazy import, so importing this
+    module never pulls in the baselines module). That loader rebuilds the
+    splits from the manifest's ``email_id`` lists and raises ``ValueError``
+    when the rebuilt sizes or label distributions disagree with the
+    manifest summary, so a stale or foreign manifest fails loudly instead
+    of silently training on different splits. ``df`` is unused on the
+    manifest path (the loader rebuilds from ``data_path`` itself, exactly
+    as the baselines do).
+
+    Why this exists: ``create_stratified_splits`` regenerates splits with
+    ``StratifiedGroupKFold``, whose output is NOT stable across
+    scikit-learn versions. The canonical manifest (train 11,215 / val
+    2,803 / test 3,495, generated locally with scikit-learn 1.9.1) comes
+    back as train 11,227 / val 2,786 / test 3,500 on Kaggle
+    (scikit-learn 1.6.1, numpy 2.1.3). Regenerating would put RoBERTa on a
+    different test set than the baselines, which already read
+    ``splits.json``.
+
+    When no manifest exists, behaviour is unchanged: splits are generated
+    with ``create_stratified_splits`` and the manifest is saved. Debug
+    mode never reads the manifest (it subsamples ~500 rows first, exactly
+    as before) and still writes its debug manifest.
+    """
+    manifest_path = Path(output_dir) / "splits.json"
+    if not debug and manifest_path.exists():
+        from phishing_xai.baselines import load_splits
+
+        loaded = load_splits(data_path, manifest_path, seed=seed)
+        splits = DatasetSplits(
+            train_df=loaded["train"], val_df=loaded["val"], test_df=loaded["test"]
+        )
+        logger.info(
+            "Loaded canonical splits from manifest %s: train=%d val=%d test=%d",
+            manifest_path, len(splits.train_df), len(splits.val_df), len(splits.test_df),
+        )
+        return splits
+    splits = create_stratified_splits(
+        df,
+        test_size=0.2,
+        val_size=0.2,
+        seed=seed,
+        debug=debug,
+        debug_samples=500,
+        manifest_path=manifest_path,
+    )
+    logger.info(
+        "Generated fresh splits (debug=%s, no manifest at %s): train=%d val=%d test=%d; manifest saved to %s",
+        debug, manifest_path, len(splits.train_df), len(splits.val_df), len(splits.test_df),
+        manifest_path,
+    )
+    return splits
 
 
 def main() -> None:
@@ -103,15 +161,14 @@ def main() -> None:
     df = load_data(args.data_path)
     df = deduplicate_data(df, text_col="clean_text", label_col="label")
 
-    manifest_path = Path(args.output_dir) / "splits.json"
-    splits = create_stratified_splits(
+    # Full runs reuse the canonical splits.json when present (see
+    # resolve_splits); debug mode always regenerates from a ~500-row sample.
+    splits = resolve_splits(
         df,
-        test_size=0.2,
-        val_size=0.2,
+        data_path=args.data_path,
+        output_dir=args.output_dir,
         seed=args.seed,
         debug=args.debug,
-        debug_samples=500,
-        manifest_path=manifest_path,
     )
 
     # 5. Synonym Replacement Augmentation (Balanced on Train Set ONLY!)

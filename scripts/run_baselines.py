@@ -62,6 +62,7 @@ from phishing_xai.baselines import (
     mcnemar_test,
     random_search_tfidf,
     resolve_output_dir,
+    save_baseline_model,
     select_deployment_model,
     subsample_splits,
     TorchTrainConfig,
@@ -385,6 +386,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     # Keep fitted first-seed models for analysis / faithfulness / multimodal.
     fitted: Dict[str, Any] = {}
     fitted_pipelines: Dict[str, Any] = {}
+    # Best fitted model per savable kind, by VALIDATION F1 (ties: lowest
+    # seed). Saved as best_<model>.pt after the loop (6B.2).
+    best_models: Dict[str, Dict[str, Any]] = {}
 
     for name in models:
         per_seed: List[Dict[str, Any]] = []
@@ -472,6 +476,17 @@ def main(argv: Optional[List[str]] = None) -> int:
             if ood_df is not None and current_model is not None and result.get("y_pred") is not None:
                 ood_prob = current_model.predict_proba(ood_df["clean_text"].tolist())[:, 1]
                 result["ood_metrics"] = compute_metrics_full(ood_df["label"].tolist(), ood_prob)
+            # Best-seed tracking for the fitted-artefact save (6B.2): score
+            # the FITTED model of this seed on VALIDATION (never test) and
+            # keep the best; ties go to the lowest seed. Dummy has no
+            # savable artefact and is excluded.
+            if current_model is not None and name in ("tfidf_lr", "tfidf_svm", "bilstm", "cnn"):
+                val_prob = current_model.predict_proba(val_texts)[:, 1]
+                val_f1 = compute_metrics_full(val_labels, val_prob)["f1"]
+                prev = best_models.get(name)
+                if (prev is None or val_f1 > prev["val_f1"] + 1e-12
+                        or (abs(val_f1 - prev["val_f1"]) <= 1e-12 and seed < prev["seed"])):
+                    best_models[name] = {"val_f1": float(val_f1), "seed": seed, "model": current_model}
             per_seed.append(result)
             # Save per-seed test predictions for McNemar / error analysis.
             if result.get("y_pred") is not None:
@@ -479,6 +494,22 @@ def main(argv: Optional[List[str]] = None) -> int:
                 np.save(out_dir / f"{name}_seed{seed}_test_prob.npy", np.asarray(result["y_prob"]))
         agg = aggregate_seed_results([r for r in per_seed if r.get("status") != "NOT RUN YET" and "metrics" in r])
         all_results["models"][name] = {"per_seed": per_seed, "aggregate": agg}
+
+    # --- Save best-seed fitted baselines (6B.2) --------------------------------
+    # One file per model in the output dir (e.g. --output_dir results/bilstm
+    # gives results/bilstm/best_bilstm.pt), loadable later with
+    # load_scorer(..., checkpoint=<path>) in the multimodal scripts. The
+    # metrics / baseline_results.json schemas are unchanged; the saved path
+    # is only logged. A save failure warns instead of failing the run —
+    # the metrics already computed stay the primary output.
+    for name, best in best_models.items():
+        dest = out_dir / f"best_{name}.pt"
+        try:
+            save_baseline_model(best["model"], dest)
+            logger.info(f"Best {name} model (seed {best['seed']}, val F1 "
+                        f"{best['val_f1']:.4f}) saved -> {dest}")
+        except Exception as exc:
+            logger.warning(f"Could not save best {name} model to {dest}: {exc}")
 
     # --- Statistical comparison vs RoBERTa (needs RoBERTa test predictions) ---
     if "roberta_eval" in all_results["models"]:

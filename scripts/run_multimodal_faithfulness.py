@@ -24,6 +24,12 @@ if str(REPO_ROOT / "src") not in sys.path:
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from phishing_xai.baselines import (
+    evaluate_faithfulness_with_proba_fn,
+    evaluate_random_baseline_with_proba_fn,
+    explain_word_scores,
+    load_scorer,
+)
 from phishing_xai.config import ModelConfig, TrainConfig, XAIConfig
 from phishing_xai.data import truncate_text_to_model_window
 from phishing_xai.explain import (
@@ -37,9 +43,92 @@ from phishing_xai.faithfulness import (
     evaluate_random_baseline,
     predict_probability,
 )
-from phishing_xai.lita import build_hybrid_word_attributions
+from phishing_xai.lita import build_hybrid_word_attributions, compute_lita_scores
 from phishing_xai.utils import set_seed
 from scripts.run_multimodal_predict import load_trained_roberta, score_text
+
+
+def _faithfulness_row_for_scorer(
+    eml_path: Path,
+    scorer: Any,
+    model_kind: str,
+    k: int = 5,
+    lime_samples: int = 200,
+) -> Dict[str, Any]:
+    """One faithfulness row for a non-RoBERTa scorer (no transformer needed).
+
+    Picks the winning part by the scorer's P(phishing), explains the
+    truncated text with ``baselines.explain_word_scores`` (LIME + the
+    scorer's second method, or LIME only with ``alpha_effective=1.0``),
+    and evaluates comprehensiveness / sufficiency plus the random
+    baseline through the ``predict_proba`` versions in ``baselines``.
+    """
+    extracted = extract_eml(eml_path)
+    candidate_parts = []
+    for p in extracted["parts"]:
+        txt = (p.get("text") or "").strip()
+        if not txt:
+            continue
+        p_phish = float(scorer.predict_proba([txt])[0, 1])
+        candidate_parts.append((p, 1 if p_phish >= 0.5 else 0, p_phish))
+    if not candidate_parts:
+        print(f"WARNING: No scorable text parts in {eml_path.name}; skipping faithfulness.")
+        return {
+            "sample": eml_path.name,
+            "part_kind": None,
+            "pred_class": None,
+            "p_orig": None,
+            "comprehensiveness_k5": None,
+            "sufficiency_k5": None,
+            "random_comprehensiveness_k5": None,
+            "random_sufficiency_k5": None,
+            "top_5_words": [],
+            "status": "no_text_parts",
+            "untrained_fallback": False,
+            "model": model_kind,
+            "explanation_method": None,
+            "ti_available": False,
+            "alpha_effective": None,
+        }
+    winning_part, _pred_cls, _ = max(
+        candidate_parts,
+        key=lambda item: (item[0]["kind"] != "body_text", item[2]),
+    )
+    truncated = scorer.truncate(winning_part["text"], ModelConfig.max_length)
+    words, lime_scores, second_scores, method_name = explain_word_scores(
+        scorer, truncated, lime_samples=lime_samples,
+    )
+    alpha_eff = 1.0 if method_name == "lime_only" else XAIConfig.alpha
+    lita_scores = compute_lita_scores(
+        lime_scores, second_scores, alpha=alpha_eff, variant="magnitude_preserving",
+    ).tolist()
+    probs = scorer.predict_proba([" ".join(words)])[0]
+    target_class = 1 if float(probs[1]) >= float(probs[0]) else 0
+    p_orig = float(probs[target_class])
+    faith = evaluate_faithfulness_with_proba_fn(
+        scorer.predict_proba, words, lita_scores, target_class, p_orig, ks=(k,),
+    )
+    random_faith = evaluate_random_baseline_with_proba_fn(
+        scorer.predict_proba, words, target_class, p_orig, ks=(k,), num_seeds=5,
+    )
+    order = sorted(range(len(words)), key=lambda i: -lita_scores[i])[:k]
+    return {
+        "sample": eml_path.name,
+        "part_kind": winning_part["kind"],
+        "pred_class": int(target_class),
+        "p_orig": float(p_orig),
+        "comprehensiveness_k5": float(faith["comprehensiveness"][k]),
+        "sufficiency_k5": float(faith["sufficiency"][k]),
+        "random_comprehensiveness_k5": float(random_faith["comprehensiveness"][k]),
+        "random_sufficiency_k5": float(random_faith["sufficiency"][k]),
+        "top_5_words": [words[i] for i in order],
+        "status": "ok",
+        "untrained_fallback": False,
+        "model": model_kind,
+        "explanation_method": method_name,
+        "ti_available": method_name != "lime_only",
+        "alpha_effective": float(alpha_eff),
+    }
 
 
 def evaluate_multimodal_samples_faithfulness(
@@ -48,18 +137,31 @@ def evaluate_multimodal_samples_faithfulness(
     k: int = 5,
     lime_samples: int = 200,
     allow_pretrained_fallback: bool = False,
+    model: str = "roberta",
+    scorer: Any = None,
 ) -> List[Dict[str, Any]]:
     set_seed(TrainConfig.seed)
-    # True when the fine-tuned checkpoint is absent and base roberta-base is used instead.
-    untrained_fallback = not checkpoint_path.exists()
-    tokenizer, model, device = load_trained_roberta(
-        checkpoint_path, allow_pretrained_fallback=allow_pretrained_fallback
-    )
-    lime_exp = LimeExplainer(model=model, tokenizer=tokenizer, device=device, max_length=ModelConfig.max_length)
-    ti_exp = TransformerExplainer(model=model, tokenizer=tokenizer, device=device)
+    is_roberta = (model == "roberta" and scorer is None)
+    if is_roberta:
+        # True when the fine-tuned checkpoint is absent and base roberta-base is used instead.
+        untrained_fallback = not checkpoint_path.exists()
+        tokenizer, hf_model, device = load_trained_roberta(
+            checkpoint_path, allow_pretrained_fallback=allow_pretrained_fallback
+        )
+        lime_exp = LimeExplainer(model=hf_model, tokenizer=tokenizer, device=device, max_length=ModelConfig.max_length)
+        ti_exp = TransformerExplainer(model=hf_model, tokenizer=tokenizer, device=device)
+    else:
+        # Baseline scorer: fitted on the real train split; no checkpoint needed.
+        scorer = scorer or load_scorer(model, checkpoint=checkpoint_path)
+        untrained_fallback = False
 
     rows: List[Dict[str, Any]] = []
     for eml_path in sorted(samples_dir.glob("*.eml")):
+        if not is_roberta:
+            rows.append(_faithfulness_row_for_scorer(
+                eml_path, scorer, model, k=k, lime_samples=lime_samples,
+            ))
+            continue
         extracted = extract_eml(eml_path)
         # Prefer OCR/PDF/QR extracted attachment text when available, or winning part by score
         candidate_parts = []
@@ -67,7 +169,7 @@ def evaluate_multimodal_samples_faithfulness(
             txt = (p.get("text") or "").strip()
             if not txt:
                 continue
-            pred_cls, _, p_phish = score_text(model, tokenizer, txt, device=device)
+            pred_cls, _, p_phish = score_text(hf_model, tokenizer, txt, device=device)
             candidate_parts.append((p, pred_cls, p_phish))
 
         if not candidate_parts:
@@ -87,6 +189,10 @@ def evaluate_multimodal_samples_faithfulness(
                 "top_5_words": [],
                 "status": "no_text_parts",
                 "untrained_fallback": untrained_fallback,
+                "model": "roberta",
+                "explanation_method": None,
+                "ti_available": False,
+                "alpha_effective": None,
             })
             continue
 
@@ -113,7 +219,7 @@ def evaluate_multimodal_samples_faithfulness(
         lita_scores = [item["lita_score"] for item in hybrid]
 
         p_orig = predict_probability(
-            model=model,
+            model=hf_model,
             tokenizer=tokenizer,
             text=" ".join(words),
             target_class=target_class,
@@ -121,7 +227,7 @@ def evaluate_multimodal_samples_faithfulness(
             max_length=ModelConfig.max_length,
         )
         faith = evaluate_faithfulness_single_method(
-            model=model,
+            model=hf_model,
             tokenizer=tokenizer,
             words=words,
             scores=lita_scores,
@@ -138,7 +244,7 @@ def evaluate_multimodal_samples_faithfulness(
         # words, averaged over 5 seeds. LITA is only meaningful if it beats
         # this baseline; without it the numbers have no reference point.
         random_faith = evaluate_random_baseline(
-            model=model,
+            model=hf_model,
             tokenizer=tokenizer,
             words=words,
             target_class=target_class,
@@ -160,6 +266,10 @@ def evaluate_multimodal_samples_faithfulness(
             "top_5_words": top_words,
             "status": "ok",
             "untrained_fallback": untrained_fallback,
+            "model": "roberta",
+            "explanation_method": "lita",
+            "ti_available": True,
+            "alpha_effective": float(XAIConfig.alpha),
         })
     return rows
 
@@ -173,10 +283,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="Directory containing sample .eml files",
     )
     parser.add_argument(
+        "--model",
+        choices=["roberta", "tfidf_lr", "bilstm"],
+        default="roberta",
+        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split; no checkpoint needed.",
+    )
+    parser.add_argument(
         "--checkpoint",
         type=str,
         default=str(REPO_ROOT / "results" / "best_model.pt"),
-        help="Trained RoBERTa checkpoint path",
+        help="Trained checkpoint (.pt). For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split",
     )
     parser.add_argument("--lime_samples", type=int, default=200, help="LIME perturbation samples")
     parser.add_argument("--output_json", type=str, default=None, help="Optional JSON output path")
@@ -188,7 +304,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     ckpt = Path(args.checkpoint)
-    if not ckpt.exists() and not args.allow_pretrained_fallback:
+    if args.model == "roberta" and not ckpt.exists() and not args.allow_pretrained_fallback:
         print(
             f"ERROR: Trained checkpoint is not present locally! Missing file: {ckpt.as_posix()}\n"
             "Per project rules, do NOT retrain locally.",
@@ -202,6 +318,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         k=5,
         lime_samples=args.lime_samples,
         allow_pretrained_fallback=args.allow_pretrained_fallback,
+        model=args.model,
     )
     def _fmt(value: Any) -> str:
         return f"{value:+.4f}" if isinstance(value, (int, float)) else "n/a"
