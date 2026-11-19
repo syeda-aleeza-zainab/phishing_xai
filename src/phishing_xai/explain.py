@@ -141,26 +141,8 @@ class TransformerExplainer:
         except Exception as e:
             logger.warning(f"Could not initialize transformers-interpret ({e}); using Captum fallback.")
 
-    def explain_raw(self, text: str, target_class: Optional[int] = None,
-                    max_length: int = 512) -> List[Tuple[str, float]]:
-        """Compute token-level integrated gradient attributions.
-
-        Texts longer than the model's context window are truncated to
-        ``max_length`` tokens (encode -> decode round-trip) before attribution,
-        mirroring the truncation the model applies at inference. Without this,
-        emails longer than 512 tokens crash both transformers-interpret and
-        the Captum fallback (RoBERTa position embeddings support 514 tokens).
-        """
-        truncated = self.tokenizer.decode(
-            self.tokenizer.encode(text, truncation=True, max_length=max_length),
-            skip_special_tokens=True,
-        )
-        if truncated != text:
-            logger.info(
-                f"Truncated text for attribution ({len(text.split())} words -> "
-                f"{len(truncated.split())} words) to fit {max_length}-token window."
-            )
-        text = truncated
+    def explain_raw(self, text: str, target_class: Optional[int] = None) -> List[Tuple[str, float]]:
+        """Compute token-level integrated gradient attributions."""
         class_name = None
         if target_class is not None:
             if hasattr(self.model.config, "id2label") and target_class in self.model.config.id2label:
@@ -188,10 +170,7 @@ class TransformerExplainer:
     def _explain_with_captum(self, text: str, target_class: Optional[int] = None) -> List[Tuple[str, float]]:
         """Fallback explainer using Captum LayerIntegratedGradients with exact parity to transformers-interpret."""
         clean_text = self._clean_text(text)
-        # Belt-and-braces: truncate to the model window (explain_raw already
-        # truncates the raw text, but cleaning can add tokens around punctuation).
-        input_ids_list = self.tokenizer.encode(clean_text, add_special_tokens=True,
-                                               truncation=True, max_length=512)
+        input_ids_list = self.tokenizer.encode(clean_text, add_special_tokens=True)
         input_ids = torch.tensor([input_ids_list], device=self.device)
         attention_mask = torch.ones_like(input_ids, device=self.device)
 
@@ -299,3 +278,82 @@ def aggregate_subword_attributions_to_words(
         aggregated.append((w_idx, w_str, avg_score))
 
     return aggregated
+
+
+def draw_lita_boxes_on_image(
+    image_input: Any,
+    ocr_boxes: List[Dict[str, Any]],
+    lita_top_words: List[Any],
+    output_path: Optional[Any] = None,
+    top_k: int = 5,
+) -> Any:
+    """Draw red bounding boxes around the LITA top-k words on an image using OCR word boxes.
+
+    Args:
+        image_input: Path to an image, raw image bytes, or a PIL.Image.Image object.
+        ocr_boxes: List of OCR box dicts (``{"text","left","top","width","height","conf"}``)
+            returned by ``phishing_xai.extract.ocr_image``.
+        lita_top_words: Top words from LITA, passed as strings, ``(word, score)`` tuples,
+            or ``{"word": ..., "lita_score": ...}`` dicts.
+        output_path: Destination path for ``<name>_explained.png``. If None and ``image_input``
+            is a path, defaults to ``<stem>_explained.png`` in the same directory.
+        top_k: Maximum number of top LITA words to highlight.
+
+    Returns:
+        Path to the saved ``<name>_explained.png`` file.
+    """
+    import io
+    from pathlib import Path
+    from PIL import Image, ImageDraw
+
+    if isinstance(image_input, (str, Path)):
+        src_path = Path(image_input)
+        img = Image.open(src_path).convert("RGB")
+        if output_path is None:
+            output_path = src_path.with_name(f"{src_path.stem}_explained.png")
+    elif isinstance(image_input, (bytes, bytearray)):
+        img = Image.open(io.BytesIO(image_input)).convert("RGB")
+        if output_path is None:
+            output_path = Path("image_explained.png")
+    else:
+        img = image_input.copy().convert("RGB")
+        if output_path is None:
+            output_path = Path("image_explained.png")
+
+    out_path = Path(output_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _norm(token: str) -> str:
+        return re.sub(r"^[^\w]+|[^\w]+$", "", token.strip().lower())
+
+    target_tokens: List[str] = []
+    for item in list(lita_top_words)[:top_k]:
+        if isinstance(item, dict):
+            w = str(item.get("word", ""))
+        elif isinstance(item, (tuple, list)) and len(item) >= 1:
+            w = str(item[0])
+        else:
+            w = str(item)
+        norm_w = _norm(w)
+        if norm_w and norm_w not in target_tokens:
+            target_tokens.append(norm_w)
+
+    draw = ImageDraw.Draw(img)
+    for box in ocr_boxes:
+        box_text = _norm(str(box.get("text", "")))
+        if not box_text:
+            continue
+        matched = any(
+            box_text == t or (len(t) >= 4 and (t in box_text or box_text in t))
+            for t in target_tokens
+        )
+        if matched:
+            x0 = int(box["left"]) - 2
+            y0 = int(box["top"]) - 2
+            x1 = int(box["left"]) + int(box["width"]) + 2
+            y1 = int(box["top"]) + int(box["height"]) + 2
+            draw.rectangle([x0, y0, x1, y1], outline="red", width=3)
+
+    img.save(out_path, format="PNG")
+    return out_path
+

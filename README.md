@@ -67,6 +67,29 @@ For full-budget model fine-tuning, hyperparameter optimization, and faithfulness
 9. **Alpha Ablation**: Runs `run_ablation.py` across $\alpha \in \{0.0, 0.25, 0.5, 0.75, 1.0\}$.
 10. **Report Generation**: Runs `make_report.py` and synchronizes all artifacts to Google Drive.
 
+### Multimodal extension (image/PDF phishing)
+Extends the trained RoBERTa detector and LITA explainer to handle image-only, QR-code, text-PDF, and scanned-PDF phishing emails without retraining or modifying `model.py` or `faithfulness.py`:
+
+- [`src/phishing_xai/extract.py`](src/phishing_xai/extract.py): Parses `.eml` MIME parts (`stdlib email`), runs `pytesseract` OCR with word-level bounding boxes (`image_to_data`), extracts PDF text/links via `pdfplumber` with a `PyMuPDF` (`fitz`) page-render + OCR fallback for scanned PDFs, and decodes QR payloads via `pyzbar`.
+- [`scripts/make_multimodal_samples.py`](scripts/make_multimodal_samples.py): Deterministically generates 6 synthetic `.eml` samples in `samples/multimodal/` covering image-only phishing, inline button images, QR phishing, text PDF invoices, scanned image-only PDFs, and benign attachments.
+- [`scripts/run_multimodal_predict.py`](scripts/run_multimodal_predict.py): Scores `body_text` and each extracted attachment part with RoBERTa, applies the **max rule** (phishing if any part scores phishing), and with `--explain` computes top-5 LITA words and saves `<name>_explained.png` with red bounding boxes via `draw_lita_boxes_on_image` in [`src/phishing_xai/explain.py`](src/phishing_xai/explain.py).
+- [`scripts/run_multimodal_faithfulness.py`](scripts/run_multimodal_faithfulness.py): Reuses [`src/phishing_xai/faithfulness.py`](src/phishing_xai/faithfulness.py) to compute Comprehensiveness and Sufficiency ($k=5$) of LITA on the extracted text of the 6 samples.
+- [`docs/MULTIMODAL_NOTE.md`](docs/MULTIMODAL_NOTE.md): One-page summary of the multimodal extension, 6-sample results table, and limitations.
+
+```powershell
+# 1. Generate the 6 multimodal .eml samples
+python scripts/make_multimodal_samples.py
+
+# 2. Extract structured JSON from a single .eml file
+python -m phishing_xai.extract samples/multimodal/sample1_image_only_phish.eml --no_boxes
+
+# 3. Score all 6 samples and generate LITA explanations + bounding-box overlays
+python scripts/run_multimodal_predict.py --explain
+
+# 4. Evaluate LITA faithfulness (top-k=5) on the 6 multimodal samples
+python scripts/run_multimodal_faithfulness.py
+```
+
 ---
 
 ## Acknowledgements

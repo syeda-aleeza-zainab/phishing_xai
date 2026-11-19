@@ -205,3 +205,21 @@ A systematic code audit of the upstream Jupyter notebooks revealed critical bugs
   - Configured `colab_run.ipynb` with stage-by-stage Google Drive backup and complete execution workflow.
   - Enforced strict `--params` validation in `run_train.py` outside debug mode.
   - Expanded unit test suite to **41 tests** with 100% pass rate.
+
+---
+
+## 8. Multimodal Extension Decisions (2026-11-12)
+
+| Decision | Reason | Status |
+|---|---|---|
+| Add `pytesseract==0.3.13`, `pdfplumber==0.11.10`, `PyMuPDF==1.28.2`, `pyzbar==0.1.9`, `Pillow==12.3.0`, `qrcode==8.2` to `requirements.txt` and `requirements-colab.txt` | Needed for OCR + bounding boxes, PDF text/links, scanned-PDF rendering, and QR code generation/decoding. | Complete |
+| Install Tesseract `v5.4.0.20240606` in user space (`C:\Users\admin\AppData\Local\Programs\Tesseract-OCR`) and auto-detect in `extract.py` | Avoids UAC prompt hang on Windows while providing full native Tesseract OCR support. | Complete |
+| Create `src/phishing_xai/extract.py` with CLI `python -m phishing_xai.extract <file.eml>` | Walks MIME parts, OCRs images (`image_to_data`), extracts PDF text/links (`pdfplumber`), renders scanned PDF pages (`PyMuPDF`) for OCR fallback, and decodes QR codes (`pyzbar`). | Complete |
+| Create `scripts/make_multimodal_samples.py` and `tests/test_extract.py` | Deterministically generates 6 synthetic `.eml` files in `samples/multimodal/` and verifies extraction, OCR keywords, PDF links, scanned-PDF OCR fallback, QR decoding, and visual bounding boxes. | Complete |
+| No retraining; `model.py` and `faithfulness.py` stay unchanged; existing 41 tests stay green | Hard project constraints; verified with `pytest -v` (49/49 passing). | Complete |
+| `results/best_model.pt` missing locally check + `--allow_pretrained_fallback` | Full training is deferred to Colab (`results/best_model.pt` not present locally). By default, `run_multimodal_predict.py` and `run_multimodal_faithfulness.py` stop and report `results/best_model.pt` is missing; `--allow_pretrained_fallback` runs with base `roberta-base` via `model.py` for end-to-end demonstration. | Complete |
+| Verdict rule = max over parts (phishing if ANY part scores phishing) | Implemented in `scripts/run_multimodal_predict.py`, naming the winning part and explaining it with LITA (`--explain`). | Complete |
+| Append `draw_lita_boxes_on_image` to `src/phishing_xai/explain.py` | Draws red bounding boxes around top-5 LITA words on image parts using OCR boxes and saves `<name>_explained.png` without altering any existing functions. | Complete |
+| Reuse `faithfulness.py` in `scripts/run_multimodal_faithfulness.py` | Evaluates Comprehensiveness and Sufficiency at $k=5$ of LITA on the extracted text of all 6 multimodal samples. | Complete |
+
+
