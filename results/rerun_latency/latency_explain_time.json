@@ -1,0 +1,121 @@
+{
+  "seed": 42,
+  "n_latency": 200,
+  "batch_size": 1,
+  "cuda_available": true,
+  "gpu": "Tesla T4",
+  "protocol": "Latency: baselines.measure_latency (median of n_latency single-email predict_proba calls after warmup), CPU and GPU measured separately on the same model and labelled by device. Explanation time: baselines.explain_word_scores timed once per email (LIME + second method), same 10 test emails Stage C explained, lime_samples=1000.",
+  "latency_ms_per_email": {
+    "roberta_gpu": {
+      "status": "ok",
+      "device": "gpu",
+      "checkpoint": "results/best_model.pt",
+      "latency_ms_per_email_median": 15.495662500001117,
+      "latency_ms_per_email_mean": 18.5839657050019,
+      "n_timed": 200
+    },
+    "roberta_cpu": {
+      "status": "ok",
+      "device": "cpu",
+      "checkpoint": "results/best_model.pt",
+      "latency_ms_per_email_median": 242.49847450002449,
+      "latency_ms_per_email_mean": 282.5319652249985,
+      "n_timed": 200
+    },
+    "bilstm_gpu": {
+      "status": "ok",
+      "device": "gpu",
+      "checkpoint": "results/bilstm/best_bilstm.pt",
+      "latency_ms_per_email_median": 8.373501999926702,
+      "latency_ms_per_email_mean": 7.763199659998463,
+      "n_timed": 200
+    },
+    "bilstm_cpu": {
+      "status": "ok",
+      "device": "cpu",
+      "checkpoint": "results/bilstm/best_bilstm.pt",
+      "latency_ms_per_email_median": 19.897559000014553,
+      "latency_ms_per_email_mean": 16.922785004994125,
+      "n_timed": 200
+    }
+  },
+  "explanation_seconds_per_email": {
+    "roberta_lita": {
+      "median": 30.86714004499993,
+      "mean": 36.64865412539996,
+      "std": 22.846007030033114,
+      "n": 10,
+      "per_email": [
+        16.4312,
+        29.6228,
+        37.6852,
+        22.7233,
+        74.4418,
+        15.4335,
+        75.9196,
+        32.1115,
+        47.5008,
+        14.6168
+      ],
+      "method": "lita",
+      "lime_samples": 1000,
+      "email_ids": [
+        "email_1",
+        "email_17",
+        "email_18",
+        "email_25",
+        "email_27",
+        "email_29",
+        "email_30",
+        "email_37",
+        "email_42",
+        "email_44"
+      ]
+    },
+    "bilstm_lita_ig": {
+      "median": 1.8724162105000346,
+      "mean": 1.7124666100000128,
+      "std": 0.48747229185945884,
+      "n": 10,
+      "per_email": [
+        1.3919,
+        1.8859,
+        1.9176,
+        1.8589,
+        2.1497,
+        1.2193,
+        2.2981,
+        1.817,
+        1.9263,
+        0.6598
+      ],
+      "method": "lime_ig",
+      "lime_samples": 1000,
+      "email_ids": [
+        "email_1",
+        "email_17",
+        "email_18",
+        "email_25",
+        "email_27",
+        "email_29",
+        "email_30",
+        "email_37",
+        "email_42",
+        "email_44"
+      ]
+    }
+  },
+  "n_test": 3495,
+  "explain_email_ids": [
+    "email_1",
+    "email_17",
+    "email_18",
+    "email_25",
+    "email_27",
+    "email_29",
+    "email_30",
+    "email_37",
+    "email_42",
+    "email_44"
+  ]
+}
