@@ -19,13 +19,17 @@ email-body corpus was found (see `reports/dataset_provenance.md`).
   R 0.0280 / F1 0.0544 / ROC-AUC 0.7787; BiLSTM P 0.8594 / R 0.0550 /
   F1 0.1034 / ROC-AUC 0.6801. Both collapse on recall; RoBERTa ranks
   better, BiLSTM has the better F1 at 0.5. H1 rejected here.
+  H1a (ranking) SUPPORTED; H1b (operational detection, recall floor
+  0.85) REJECTED for all four models. TF-IDF OOD COMPLETED (Kernel 4):
+  TF-IDF+LR is the best model on the primary set by precision, recall
+  and F1 (P 0.9788 / R 0.1850 / F1 0.3112).
 * **Synthetic track:** RoBERTa decisively better everywhere — Frontiers
   LLM R 0.9394 vs 0.4787; human R 0.8402 vs 0.7226; BEC R 0.3772 vs
   0.2102 (all McNemar p≈0, paired CIs exclude 0). H1 holds here.
 * **Thresholds fitted on validation (≈0.99) detect ~nothing OOD.**
 * **Final verdict:** MIXED — H1 rejected on the primary set,
   supported on the synthetic track. See
-  `reports/final_comparative_report.md`.
+  `reports/final_comparative_report.md` (Final Decision section).
 
 ## Layout
 
@@ -68,8 +72,51 @@ cd ../ood_synthetic
 kaggle kernels push -p .        # phishing-xai-ood-synthetic-track
 cd ../ood_robustness
 kaggle kernels push -p .        # phishing-xai-ood-robustness
+cd ../ood_tfidf
+kaggle kernels push -p .        # phishing-xai-ood-tf-idf-baselines (Kernel 4, CPU-only)
 kaggle kernels output <slug> -p <dir>   # per kernel, then copy
 # experiments/modern_phishing_ood/{results,predictions} into the repo tree
+```
+
+**Kernel 4 — TF-IDF OOD (2026-11-20, CPU-only, COMPLETED):** TF-IDF+SVC and TF-IDF+LR on all six sets with the SAME
+examples and labels as RoBERTa/BiLSTM. No saved TF-IDF artefact exists
+(results dataset v7 holds only test prediction files), so both models
+are refit on the canonical TRAIN split only, with the seed-42 Stage A
+configs (LR: C=10.0, word ngram (1,2), max_features=None; SVC: C=5.0,
+char ngram (3,6), max_features=None) via the existing
+`build_tfidf_lr` / `build_tfidf_svm` pipeline — never fitted or tuned
+on OOD. Thresholds fitted on validation only. Predictions are NEW
+files (`<set>_tfidf_svm_predictions.csv`, `<set>_tfidf_lr_predictions.csv`);
+the 12 original prediction CSVs are never overwritten. GPU latency is
+NOT MEASURED for TF-IDF (no GPU implementation) — recorded as such,
+never imputed. Direct command (inside the kernel):
+
+```bash
+python experiments/modern_phishing_ood/scripts/run_ood_eval.py \
+  --sets phishnchips phishfuzzer frontiers_llm frontiers_human bec bec_poisoned \
+  --models tfidf_svm tfidf_lr \
+  --ood_dir <ood-dataset-root> \
+  --data_path data/Phishing_Email.csv --splits_path results/splits.json \
+  --output_dir experiments/modern_phishing_ood/results \
+  --predictions_dir experiments/modern_phishing_ood/predictions \
+  --floors 0.85 0.90 0.95 --latency_n_gpu 0 --latency_n_cpu 100 \
+  --robustness --skip_leakage
+```
+
+Repo dataset for Kernel 4 is `syedaaleezazainab/phishing-xai-repo-ah-6b1`
+v14 (uploaded with `--dir-mode zip`; two earlier root-only versions
+were superseded — v14 is the complete one). After Kernel 4 finishes,
+re-run the expanded stats and regenerate the complexity report:
+
+```bash
+python3 experiments/modern_phishing_ood/scripts/compute_ood_stats_expanded.py \
+  --predictions_dir experiments/modern_phishing_ood/predictions \
+  --results_dir experiments/modern_phishing_ood/results \
+  --out_dir experiments/modern_phishing_ood/reports
+python3 scripts/run_system_complexity_report.py \
+  --results_dir ~/workspace/kaggle_downloads/regen_fixed \
+  --output_dir results \
+  --ood_dir experiments/modern_phishing_ood/results
 ```
 
 Each kernel verifies the canonical splits (11,215/2,803/3,495), runs
@@ -105,6 +152,11 @@ python3 experiments/modern_phishing_ood/scripts/compute_ood_stats.py \
   --predictions_dir experiments/modern_phishing_ood/predictions \
   --results_dir experiments/modern_phishing_ood/results \
   --out_dir experiments/modern_phishing_ood/results
+# Expanded paired comparison, all 6 model pairs x 6 sets, Holm correction, H1a/H1b
+python3 experiments/modern_phishing_ood/scripts/compute_ood_stats_expanded.py \
+  --predictions_dir experiments/modern_phishing_ood/predictions \
+  --results_dir experiments/modern_phishing_ood/results \
+  --out_dir experiments/modern_phishing_ood/reports
 # Plots (needs matplotlib)
 python3 experiments/modern_phishing_ood/scripts/make_ood_plots.py \
   --results_dir experiments/modern_phishing_ood/results \
@@ -148,5 +200,6 @@ sane runtimes. Never retrain to fill the gap; never use
   locally); same formulas, unit-tested. A Kaggle-side re-run of
   `compute_ood_stats.py` with the repo helpers would be a clean
   confirmation.
-* No TF-IDF / DistilBERT / CNN OOD comparison was run (natural next
-  experiment — TF-IDF+SVC beat RoBERTa on in-distribution precision).
+* TF-IDF OOD is COMPLETED (Kernel 4, 2026-11-20); the expanded stats
+  script covers all 6 model pairs x 6 sets. DistilBERT and CNN OOD
+  remain NOT RUN YET (no saved checkpoints).

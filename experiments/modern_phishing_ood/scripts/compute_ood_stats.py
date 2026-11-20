@@ -237,13 +237,28 @@ def paired_diff_ci(y_true, prob_a, prob_b, threshold=0.5, n_resamples=1000,
 # Loading predictions
 # ---------------------------------------------------------------------------
 
+# Model names that appear as the last component of a prediction filename.
+# Multi-token names (tfidf_svm / tfidf_lr) MUST be matched before the
+# legacy last-token split, which would misread them as "svm" / "lr"
+# (and misread the set name as e.g. "phishnchips_tfidf"). Longest first.
+KNOWN_MODELS = ("tfidf_svm", "tfidf_lr", "roberta", "bilstm")
+
+
 def load_predictions(pred_dir: Path) -> Dict[str, pd.DataFrame]:
     """All ``<set>_<model>_predictions.csv`` files, keyed ``set__model``."""
     out = {}
     for path in sorted(pred_dir.glob("*_predictions.csv")):
         stem = path.name[: -len("_predictions.csv")]
-        model = stem.rsplit("_", 1)[-1]
-        set_name = stem[: -len(model) - 1]
+        model = None
+        set_name = None
+        for cand in KNOWN_MODELS:
+            if stem.endswith("_" + cand):
+                model = cand
+                set_name = stem[: -len(cand) - 1]
+                break
+        if model is None:  # legacy fallback: last token is the model
+            model = stem.rsplit("_", 1)[-1]
+            set_name = stem[: -len(model) - 1]
         out[f"{set_name}__{model}"] = pd.read_csv(path)
     return out
 

@@ -110,6 +110,26 @@ MinHash ≥ 0.9) are kept and flagged, not silently dropped.
   CPU-only machines local mirrors of the same formulas are used and
   labelled as mirrors. Checkpoints are single, so no multi-seed
   variability is claimed (n_seeds = 1, stated in every table).
+* Expanded statistics (`scripts/compute_ood_stats_expanded.py`, run
+  locally 2026-11-20): all 6 model pairs × 6 sets — paired confusion
+  matrices, prediction-agreement and error tables, McNemar (errors
+  only), paired bootstrap 95% CIs for P/R/F1 and for ROC-AUC/PR-AUC
+  differences (1,000 resamples, seed 42). Multiple-comparison
+  correction: **Holm-Bonferroni within each set** (primary family),
+  with a **global Holm across all sets** reported as a sensitivity
+  check and a Bonferroni reference. Significance = Holm-adjusted
+  p < 0.05 or a paired CI excluding 0; numerical improvement without
+  either is reported as such, never as significant. The primary-set
+  McNemar (p=0.0359) is significant within-set but not under the
+  global Holm (adjusted p=0.0718) — reported both ways.
+* Hypotheses (Task 8, evaluated independently): **H1a (ranking)** —
+  supported iff the paired ROC-AUC AND PR-AUC difference CIs both
+  exclude 0 in RoBERTa's favour (each reported separately; partial
+  support possible). **H1b (operational detection)** — supported iff
+  RoBERTa meets the predefined recall floor 0.85 where BiLSTM does
+  not, at threshold 0.5 and at validation-fitted thresholds (floors
+  0.85/0.90/0.95); rejected if neither meets it. ROC-AUC/PR-AUC are
+  never used as deployment-readiness evidence.
 * Verdict rule (repo, fixed 2026-11-19): a precision gain is
   "significant" only if the gap is positive AND McNemar p < 0.05.
   A negative gap is never a gain; a positive gap with p ≥ 0.05 is never
@@ -146,7 +166,19 @@ MinHash ≥ 0.9) are kept and flagged, not silently dropped.
 * Kernel 1 v3's log file could not be downloaded (Kaggle read timeout
   after 300 s, twice); v1/v2 error logs are saved, and all v3 numbers
   are in the JSONs. Kernel 2 and 3 logs are saved.
-* Reproduction: `README.md` in this directory gives the exact
-  commands; `run_ood_eval.py --help` lists every flag. Local runs
+* Kernel 4 — TF-IDF OOD (CPU-only, 2026-11-20, COMPLETED): `syedaaleezazainab/phishing-xai-ood-tf-idf-baselines`, script
+  in `~/workspace/kaggle_kernels/ood_tfidf/`, repo dataset v14
+  (uploaded with `--dir-mode zip`; two earlier root-only versions were
+  superseded). TF-IDF+SVC and TF-IDF+LR on all six sets with the same
+  examples/labels as the neural models. No saved TF-IDF artefact
+  exists, so both models are refit on the canonical TRAIN split only,
+  seed-42 Stage A configs (LR: C=10.0, word (1,2), max_features=None;
+  SVC: C=5.0, char (3,6), max_features=None) via the existing
+  `build_tfidf_lr` / `build_tfidf_svm` pipeline; thresholds fitted on
+  validation only; never fitted or tuned on OOD. New prediction files
+  (`<set>_tfidf_svm_predictions.csv`, `<set>_tfidf_lr_predictions.csv`);
+  the 12 originals are never overwritten. GPU latency NOT MEASURED for
+  TF-IDF (no GPU implementation). Reproduction: `README.md` in this
+  directory gives the exact commands; `run_ood_eval.py --help` lists every flag. Local runs
   need the checkpoints (Kaggle-only) and torch/sklearn; the leakage
   audit and the unit tests run CPU-only without them.

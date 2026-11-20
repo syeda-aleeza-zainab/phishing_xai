@@ -8,15 +8,30 @@ and produces::
     <results_dir>/system_complexity_plots/*.png   (4 plots, when data exists)
 
 Systems: S1 TF-IDF+LR, S2 BiLSTM, S3 DistilBERT (skipped unless run),
-S4 RoBERTa. Any missing input is recorded as ``NOT RUN YET`` with the
-reason; nothing is fabricated. Exit 0 even when inputs are missing;
-exit non-zero only on an unreadable/corrupt JSON input file.
+S4 RoBERTa, plus S0 TF-IDF+SVC (the best simple baseline by precision,
+added 2026-11-20 for the Task 2 verdict). Any missing input is recorded
+as ``NOT RUN YET`` with the reason; nothing is fabricated. Exit 0 even
+when inputs are missing; exit non-zero only on an unreadable/corrupt
+JSON input file.
 
 The verdict rule mirrors ``scripts/run_complexity_report.py::build_verdict``
 (same 1.0-precision-point / overlapping-bootstrap-CI / McNemar p > 0.05
 conditions, same precision-first selection) and extends it to BOTH the
 text test set and the multimodal held-out set. The text-only verdict from
-``build_verdict`` is also reproduced in the JSON for reference.
+``build_verdict`` is also reproduced in the JSON for reference. The HEADLINE
+verdict (``verdict``) compares RoBERTa against the BEST simple baseline,
+TF-IDF+SVC (``build_best_baseline_verdict``); the older TF-IDF+LR-based
+verdict is kept in the JSON as ``verdict_vs_tfidf_lr`` for traceability.
+
+Top-word agreement is guarded against cross-loading (fixed 2026-11-20):
+the RoBERTa explanations file must declare ``model == "roberta"`` (top
+level or per record) and the BiLSTM file ``model == "bilstm"``; if either
+file carries the other model's tag, or the two files are identical, the
+agreement is NOT RUN YET with the reason. (The 2026-11-19 report showed
+Jaccard/Spearman 1.0000 because the RoBERTa file had been overwritten by
+the BiLSTM run — the two files were byte-identical. The genuine RoBERTa
+file was recovered from results dataset v7, stage_c; true agreement is
+Jaccard 0.1004, Spearman -0.4974, n=10.)
 
 Usage::
 
@@ -48,12 +63,14 @@ SYSTEMS: Dict[str, str] = {
     "S2": "bilstm",
     "S3": "distilbert",
     "S4": "roberta_eval",
+    "S0": "tfidf_svm",
 }
 SYSTEM_LABELS: Dict[str, str] = {
     "S1": "S1 TF-IDF+LR",
     "S2": "S2 BiLSTM",
     "S3": "S3 DistilBERT",
     "S4": "S4 RoBERTa",
+    "S0": "S0 TF-IDF+SVC (best simple baseline)",
 }
 RECALL_FLOOR = 0.85
 PRECISION_TOL_POINTS = 1.0
@@ -74,6 +91,11 @@ INPUT_SPECS: List[Tuple[str, str]] = [
     ("bilstm/multimodal_eval.json", "BiLSTM (S2) multimodal 4-ablation table + held-out metrics"),
     ("bilstm/multimodal_eval/multimodal_eval.json", "BiLSTM (S2) multimodal 4-ablation table (alternate location)"),
     ("multimodal_eval_rule_based/multimodal_eval.json", "Rule-based multimodal run (reference only, not a system)"),
+    ("rerun_mm/verdicts.json", "Rerun multimodal floor 0.80/0.85 metrics + McNemar/CI per model (audited, n=96)"),
+    ("rerun_latency/latency_explain_time.json", "Measured CPU/GPU latency + explanation time (RoBERTa/BiLSTM rerun, n=200/n=10)"),
+    ("robustness_rerun/robustness_loaded.json", "Robustness F1, loaded-checkpoint run (RoBERTa/BiLSTM, thr 0.5, n=3,495)"),
+    ("robustness_rerun/baseline_results.json", "Rerun refit latencies + per-seed robustness (TF-IDF+LR/SVC, CNN, seed 42)"),
+    ("paired_mcnemar_seed42.json", "Paired seed-42 McNemar: TF-IDF+SVC vs BiLSTM / TF-IDF+LR (exact binomial)"),
 ]
 
 MM_VARIANTS = ("a", "b", "c", "d_weighted", "d_max")
@@ -95,7 +117,56 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         help="Output directory (default: <results_dir>)")
     parser.add_argument("--ood_csv", type=str, default=None,
                         help="Optional second-dataset CSV; noted in the report, never evaluated here")
+    parser.add_argument("--ood_dir", type=str, default=None,
+                        help="Optional OOD results dir (experiments/modern_phishing_ood/results); "
+                             "when given, its <set>_<model>_metrics.json files are summarised, "
+                             "never re-evaluated")
     return parser.parse_args(argv)
+
+
+def load_ood_summary(ood_dir: Path) -> Dict[str, Any]:
+    """Summarise already-produced OOD metrics files (never re-evaluates).
+
+    Reads ``<set>_<model>_metrics.json`` for the six sets and the models
+    present (roberta, bilstm, tfidf_svm, tfidf_lr). Returns the
+    metrics_at_0_5 per set/model plus a status per model. Missing files
+    are reported as NOT RUN YET — a four-model primary table is only
+    shown when all four models have a primary file.
+    """
+    sets = ("phishnchips", "phishfuzzer", "frontiers_llm", "frontiers_human",
+            "bec", "bec_poisoned")
+    models = ("roberta", "bilstm", "tfidf_svm", "tfidf_lr")
+    out: Dict[str, Any] = {"dir": ood_dir.name, "sets": {}, "status": {}}
+    if not ood_dir.is_dir():
+        out["status"]["dir"] = f"missing: {ood_dir.name} not found"
+        return out
+    for set_name in sets:
+        entry: Dict[str, Any] = {}
+        for model in models:
+            path = ood_dir / f"{set_name}_{model}_metrics.json"
+            if not path.exists():
+                continue
+            try:
+                data = load_json(path)
+            except Exception:  # noqa: BLE001 - a corrupt file is a missing one here
+                continue
+            m = (data or {}).get("metrics_at_0_5") or {}
+            if m:
+                entry[model] = {
+                    "n": data.get("n"), "accuracy": m.get("accuracy"),
+                    "precision": m.get("precision"), "recall": m.get("recall"),
+                    "f1": m.get("f1"), "roc_auc": m.get("roc_auc"),
+                    "pr_auc": m.get("pr_auc"),
+                    "false_positive_rate": m.get("false_positive_rate"),
+                    "confusion_matrix": m.get("confusion_matrix"),
+                }
+        if entry:
+            out["sets"][set_name] = entry
+    for model in models:
+        out["status"][model] = ("ok" if "phishnchips" in out["sets"]
+                                and model in out["sets"]["phishnchips"]
+                                else NOT_RUN)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -145,18 +216,20 @@ def _mean_std_str(entry: Any) -> str:
 def _load_optional(path: Path) -> Tuple[Optional[Dict[str, Any]], str]:
     """Load an optional JSON input.
 
-    Returns ``(data, status)`` where status is ``"ok"``, ``"missing: ..."``
+    Returns ``(data, status)`` where status is ``"ok"`` or ``"missing"``
     or raises ``ValueError`` for a present-but-corrupt/unreadable file (the
-    caller turns that into a non-zero exit).
+    caller turns that into a non-zero exit). Statuses never carry absolute
+    filesystem paths: ``load_inputs`` renders them relative to the
+    results dir, so no ``/home/...`` path can leak into the report.
     """
     if not path.exists():
-        return None, f"missing: {path} not found"
+        return None, "missing"
     try:
         data = load_json(path)
     except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
-        raise ValueError(f"Unreadable/corrupt JSON at {path}: {exc}") from exc
+        raise ValueError(f"Unreadable/corrupt JSON at {path.name}: {exc}") from exc
     if not isinstance(data, dict):
-        raise ValueError(f"Unreadable/corrupt JSON at {path}: top level is not an object")
+        raise ValueError(f"Unreadable/corrupt JSON at {path.name}: top level is not an object")
     return data, "ok"
 
 
@@ -189,7 +262,7 @@ def load_inputs(results_dir: Path) -> Tuple[Dict[str, Any], List[str]]:
             errors.append(str(exc))
             data, st = None, "corrupt"
         inputs[rel] = data
-        status[rel] = st
+        status[rel] = st if st == "ok" else f"missing: {rel} not found"
     inputs["_status"] = status
     return inputs, errors
 
@@ -315,13 +388,48 @@ def build_multimodal_by_system(inputs: Dict[str, Any]) -> Dict[str, Dict[str, An
     return mm
 
 
+def _rerun_latency_for(lat: Dict[str, Any], key: str) -> Optional[Dict[str, Any]]:
+    """One model's measured latency block from latency_explain_time.json."""
+    block = (lat.get("latency_ms_per_email") or {}).get(key)
+    return block if isinstance(block, dict) and block.get("status") == "ok" else None
+
+
+def _rerun_robustness_for(rerun_base: Dict[str, Any], model: str) -> Optional[Dict[str, Any]]:
+    """Robustness F1 (clean + 3 perturbations) + refit latency for one
+    model from the rerun baseline_results.json (seed-42 refit)."""
+    entry = (rerun_base.get("models") or {}).get(model)
+    if not isinstance(entry, dict):
+        return None
+    seeds = entry.get("per_seed") or []
+    for s in seeds:
+        if isinstance(s.get("robustness"), dict):
+            rob = {k: (v or {}).get("f1") for k, v in s["robustness"].items()}
+            metrics = s.get("metrics") or {}
+            rob["clean"] = metrics.get("f1")
+            lat_cpu = (s.get("latency_cpu_ms") or {}).get("latency_ms_per_email_median")
+            lat_gpu = (s.get("latency_gpu_ms") or {}).get("latency_ms_per_email_median")
+            return {"robustness_f1": rob, "latency_cpu_ms": lat_cpu,
+                    "latency_gpu_ms": lat_gpu, "seed": s.get("seed"),
+                    "source": "robustness_rerun/baseline_results.json (seed-42 refit)"}
+    return None
+
+
 def build_system_rows(inputs: Dict[str, Any], mm: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Build one row per system (S1-S4) from the loaded inputs."""
+    """Build one row per system (S1-S4 + S0) from the loaded inputs."""
     baseline = inputs.get("baselines/baseline_results.json") or {}
     models = baseline.get("models", {}) if isinstance(baseline.get("models"), dict) else {}
     comparisons = baseline.get("comparisons_vs_roberta", {}) if isinstance(baseline.get("comparisons_vs_roberta"), dict) else {}
     faith_block = baseline.get("faithfulness", {}) if isinstance(baseline.get("faithfulness"), dict) else {}
     metrics_json = inputs.get("metrics.json") or {}
+    # Measured rerun sources (added 2026-11-20; the 3-seed baseline
+    # aggregate has no RoBERTa latency, no per-seed robustness, and no
+    # explanation timing at all).
+    lat = inputs.get("rerun_latency/latency_explain_time.json") or {}
+    rob_loaded = inputs.get("robustness_rerun/robustness_loaded.json") or {}
+    rerun_base = inputs.get("robustness_rerun/baseline_results.json") or {}
+    rerun_mm = inputs.get("rerun_mm/verdicts.json") or {}
+    mm85 = (rerun_mm.get("floor_0.85") or {}).get("multimodal") or {}
+    mm85_stats = (rerun_mm.get("floor_0.85") or {}).get("stats") or {}
     rows: List[Dict[str, Any]] = []
     for sys_id, model in SYSTEMS.items():
         entry = models.get(model) if isinstance(models.get(model), dict) else {}
@@ -354,8 +462,43 @@ def build_system_rows(inputs: Dict[str, Any], mm: Dict[str, Dict[str, Any]]) -> 
         row["params"] = agg.get("n_params")
         row["size_mb"] = agg.get("size_mb")
         row["train_seconds"] = agg.get("train_seconds")
+        # Latency: the rerun measurements are the audited source (batch 1,
+        # median of 200, CPU and GPU measured separately on the same model).
+        # RoBERTa/BiLSTM come from latency_explain_time.json; the sklearn
+        # models and CNN come from the seed-42 refit baseline. The 3-seed
+        # aggregate latency is used only when no rerun value exists.
         row["latency_cpu_ms"] = agg.get("latency_cpu_ms_median")
         row["latency_gpu_ms"] = agg.get("latency_gpu_ms_median")
+        row["latency_source"] = "baselines/baseline_results.json aggregate"
+        lat_key = {"roberta_eval": ("roberta_cpu", "roberta_gpu"),
+                   "bilstm": ("bilstm_cpu", "bilstm_gpu")}.get(model)
+        if lat_key:
+            cpu_block = _rerun_latency_for(lat, lat_key[0])
+            gpu_block = _rerun_latency_for(lat, lat_key[1])
+            if cpu_block is not None:
+                if (row["latency_cpu_ms"] is not None
+                        and abs(_mean(row["latency_cpu_ms"]) - cpu_block["latency_ms_per_email_median"])
+                        / max(_mean(row["latency_cpu_ms"]), 1e-9) > 0.10):
+                    row["reasons"]["latency_cpu_note"] = (
+                        f"baseline aggregate CPU latency "
+                        f"{_mean(row['latency_cpu_ms']):.2f} ms differs from the rerun "
+                        f"measurement {cpu_block['latency_ms_per_email_median']:.2f} ms; "
+                        f"the rerun value is used (CPU/GPU measured separately, n=200)")
+                row["latency_cpu_ms"] = {"mean": cpu_block["latency_ms_per_email_median"], "n": 1}
+                row["latency_source"] = ("rerun_latency/latency_explain_time.json "
+                                         "(median of 200, batch 1, Tesla T4 host)")
+            if gpu_block is not None:
+                row["latency_gpu_ms"] = {"mean": gpu_block["latency_ms_per_email_median"], "n": 1}
+        else:
+            rerun = _rerun_robustness_for(rerun_base, model)
+            if rerun is not None:
+                if rerun["latency_cpu_ms"] is not None:
+                    row["latency_cpu_ms"] = {"mean": rerun["latency_cpu_ms"], "n": 1}
+                if rerun["latency_gpu_ms"] is not None:
+                    row["latency_gpu_ms"] = {"mean": rerun["latency_gpu_ms"], "n": 1}
+                row["latency_source"] = rerun["source"]
+        if row["latency_gpu_ms"] is None and model in ("tfidf_lr", "tfidf_svm"):
+            row["reasons"]["latency_gpu"] = "NOT MEASURED — TF-IDF has no GPU implementation"
         # Peak memory: recorded per seed by evaluate_baseline; aggregate does
         # not carry it, so take the max over seeds.
         peak_cpu = [r.get("peak_memory_mb", {}).get("peak_cpu_rss_mb")
@@ -368,23 +511,54 @@ def build_system_rows(inputs: Dict[str, Any], mm: Dict[str, Dict[str, Any]]) -> 
         row["peak_memory_cuda_mb"] = max(peak_cuda) if peak_cuda else None
         if row["peak_memory_cpu_mb"] is None:
             row["reasons"]["peak_memory"] = "no per-seed peak_memory_mb in baseline_results.json"
-        # Robustness F1: first per-seed entry that carries it.
+        # Robustness F1 (clean + truncated / urls_removed / typo_synonym,
+        # thr 0.5, n=3,495): first the per-seed block in the 3-seed
+        # baseline, else the measured rerun sources.
         robust = None
         for r in per_seed:
             if isinstance(r.get("robustness"), dict):
                 robust = r["robustness"]
                 break
-        row["robustness_f1"] = (
-            {k: (v or {}).get("f1") for k, v in robust.items()} if isinstance(robust, dict) else None
-        )
+        if isinstance(robust, dict):
+            row["robustness_f1"] = {k: (v or {}).get("f1") for k, v in robust.items()}
+            row["robustness_source"] = "baselines/baseline_results.json per-seed block"
+        else:
+            row["robustness_f1"] = None
+        if row["robustness_f1"] is None and model in ("roberta_eval", "bilstm"):
+            loaded = ((rob_loaded.get("models") or {}).get(
+                "roberta" if model == "roberta_eval" else "bilstm") or {})
+            rob_block = loaded.get("robustness") or {}
+            clean = (loaded.get("clean_at_0_5") or {}).get("f1")
+            if rob_block and clean is not None:
+                row["robustness_f1"] = {"clean": clean,
+                                        **{k: (v or {}).get("f1") for k, v in rob_block.items()}}
+                row["robustness_source"] = ("robustness_rerun/robustness_loaded.json "
+                                            "(loaded checkpoint, thr 0.5, n=3,495)")
         if row["robustness_f1"] is None:
-            row["reasons"]["robustness"] = "no per-seed robustness block in baseline_results.json"
-        # Explanation time per email: no script records it.
-        row["explanation_time_s_per_email"] = None
-        row["reasons"]["explanation_time"] = (
-            "no script records explanation seconds/email (run_explain.py / run_faithfulness.py "
-            "record no timing); NOT RUN YET"
-        )
+            rerun = _rerun_robustness_for(rerun_base, model)
+            if rerun is not None:
+                row["robustness_f1"] = rerun["robustness_f1"]
+                row["robustness_source"] = rerun["source"]
+        if row["robustness_f1"] is None:
+            row["reasons"]["robustness"] = ("no robustness measurement found "
+                                            "(no per-seed block, no rerun file)")
+        # Explanation time per email (median, n=10, same emails Stage C
+        # explained): measured by run_latency_explain_time.py. TF-IDF /
+        # DistilBERT / CNN explanation time was never measured.
+        expl = (lat.get("explanation_seconds_per_email") or {})
+        expl_key = {"roberta_eval": "roberta_lita", "bilstm": "bilstm_lita_ig"}.get(model)
+        expl_block = expl.get(expl_key) if expl_key else None
+        if isinstance(expl_block, dict) and expl_block.get("median") is not None:
+            row["explanation_time_s_per_email"] = {
+                "median": expl_block["median"], "mean": expl_block.get("mean"),
+                "n": expl_block.get("n"), "method": expl_block.get("method"),
+                "source": "rerun_latency/latency_explain_time.json"}
+        else:
+            row["explanation_time_s_per_email"] = None
+            row["reasons"]["explanation_time"] = (
+                "explanation seconds/email was never measured for this model "
+                "(run_latency_explain_time.py covers RoBERTa LITA and BiLSTM "
+                "LITA-IG only); NOT RUN YET")
         # Faithfulness @5: baseline block first, then the per-model summary file.
         faith = None
         if isinstance(faith_block.get(model), dict):
@@ -412,6 +586,23 @@ def build_system_rows(inputs: Dict[str, Any], mm: Dict[str, Dict[str, Any]]) -> 
         if row["mm_precision"] is None:
             row["reasons"]["multimodal"] = mm_entry.get("reason", "no multimodal_eval.json for this backbone")
         row["mm_untrained_fallback"] = bool(mm_entry.get("untrained_fallback", False))
+        # Audited rerun multimodal values (floor 0.85, n=96) override the
+        # older per-backbone files wherever present: they carry McNemar p
+        # and bootstrap CIs vs RoBERTa, which run_multimodal_eval.py
+        # never stored.
+        if isinstance(mm85.get(model), dict):
+            rerun_mm_entry = mm85[model]
+            row["mm_precision"] = rerun_mm_entry.get("precision")
+            row["mm_recall"] = rerun_mm_entry.get("recall")
+            row["mm_f1"] = rerun_mm_entry.get("f1")
+            row["mm_n"] = rerun_mm_entry.get("n")
+            row["mm_status"] = "ok"
+            row["mm_source"] = "rerun_mm/verdicts.json floor_0.85 (n=96)"
+            stats = mm85_stats.get(model) or {}
+            row["mm_mcnemar_p_vs_roberta"] = stats.get("mcnemar_p_vs_roberta")
+            if stats.get("bootstrap_ci_low") is not None:
+                row["mm_precision_ci"] = {"ci_low": stats["bootstrap_ci_low"],
+                                          "ci_high": stats["bootstrap_ci_high"]}
         rows.append(row)
     return rows
 
@@ -487,8 +678,50 @@ def compute_agreement(
     if missing:
         return {"status": NOT_RUN, "reason": "; ".join(missing), "n_emails": 0,
                 "mean_jaccard": None, "mean_spearman": None}
+    # Cross-load guard (fixed 2026-11-20): each explanations file must
+    # declare its own model. The 2026-11-19 report compared a file to
+    # itself because the RoBERTa file had been overwritten by a BiLSTM
+    # run (both declared model "bilstm" and were byte-identical), which
+    # produced the bogus Jaccard/Spearman 1.0000. Refuse rather than
+    # report a self-comparison as agreement.
+    def _declared_model(expl: Dict[str, Any]) -> Optional[str]:
+        top = expl.get("model")
+        if isinstance(top, str):
+            return top
+        recs = expl.get("explanations") or []
+        tags = {str(r.get("model")) for r in recs
+                if isinstance(r, dict) and r.get("model") is not None}
+        return tags.pop() if len(tags) == 1 else None
+    r_model = _declared_model(roberta_expl)
+    b_model = _declared_model(bilstm_expl)
+    if r_model is not None and r_model != "roberta":
+        return {"status": NOT_RUN,
+                "reason": f"RoBERTa explanations file declares model={r_model!r}, "
+                          "not 'roberta' — cross-loaded file refused (see report notes)",
+                "n_emails": 0, "mean_jaccard": None, "mean_spearman": None,
+                "roberta_method": r_model, "bilstm_method": b_model}
+    if b_model is not None and b_model != "bilstm":
+        return {"status": NOT_RUN,
+                "reason": f"BiLSTM explanations file declares model={b_model!r}, "
+                          "not 'bilstm' — cross-loaded file refused (see report notes)",
+                "n_emails": 0, "mean_jaccard": None, "mean_spearman": None,
+                "roberta_method": r_model, "bilstm_method": b_model}
     roberta_recs = roberta_expl.get("explanations") or []
     bilstm_recs = bilstm_expl.get("explanations") or []
+    def _canonical(recs: List[Dict[str, Any]]) -> List[Tuple[Any, Any, Any]]:
+        # Compare explanation CONTENT, not the model tag: in the real
+        # cross-load the overwritten file carried the other model's tag
+        # too, so a tag-aware comparison would miss the identity.
+        return [(r.get("id"), r.get("word_level_attributions"),
+                 r.get("lime_top_words")) for r in recs
+                if isinstance(r, dict)]
+    if _canonical(roberta_recs) == _canonical(bilstm_recs) and roberta_recs:
+        return {"status": NOT_RUN,
+                "reason": "RoBERTa and BiLSTM explanation records are identical — "
+                          "one run overwrote the other's file; no genuine "
+                          "cross-model comparison is possible from these files",
+                "n_emails": 0, "mean_jaccard": None, "mean_spearman": None,
+                "roberta_method": r_model, "bilstm_method": b_model}
     r_map = {str(r.get("id")): r for r in roberta_recs if isinstance(r, dict) and r.get("id") is not None}
     b_map = {str(r.get("id")): r for r in bilstm_recs if isinstance(r, dict) and r.get("id") is not None}
     common = sorted(set(r_map) & set(b_map))
@@ -728,6 +961,176 @@ def build_system_verdict(rows: List[Dict[str, Any]], mm: Dict[str, Dict[str, Any
     )
 
 
+def build_best_baseline_verdict(rows: List[Dict[str, Any]],
+                                mm: Dict[str, Dict[str, Any]],
+                                inputs: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    """Task 2 verdict: neural models vs the BEST simple baseline, TF-IDF+SVC.
+
+    Compares RoBERTa and BiLSTM against tfidf_svm (3-seed precision
+    0.9820, the highest of any simple baseline) on precision/recall/F1/
+    ROC-AUC, size, parameters, CPU latency (explicit multiples), GPU
+    latency ONLY where both sides were measured (TF-IDF GPU was never
+    measured, so GPU multiples are NOT MEASURED), explanation time and
+    robustness. McNemar p-values are the stored seed-42 comparisons vs
+    RoBERTa, plus the paired seed-42 SVC-vs-BiLSTM computation
+    (``paired_mcnemar_seed42.json``). Returns ``(verdict_text, details)``.
+    """
+    by_model = {r["model"]: r for r in rows}
+    s4 = by_model.get("roberta_eval", {})
+    svc = by_model.get("tfidf_svm", {})
+    lstm = by_model.get("bilstm", {})
+    paired = inputs.get("paired_mcnemar_seed42.json") or {}
+    paired_pairs = paired.get("pairs") or {}
+    svc_vs_lstm = paired_pairs.get("tfidf_svm_vs_bilstm") or {}
+
+    def _cpu_multiple(a: Dict[str, Any], b: Dict[str, Any]) -> Optional[float]:
+        la, lb = _mean(a.get("latency_cpu_ms")), _mean(b.get("latency_cpu_ms"))
+        return (la / lb) if la and lb else None
+
+    def _gpu_multiple(a: Dict[str, Any], b: Dict[str, Any]) -> Optional[float]:
+        la, lb = _mean(a.get("latency_gpu_ms")), _mean(b.get("latency_gpu_ms"))
+        return (la / lb) if la and lb else None
+
+    def _m(name: str, r: Dict[str, Any]) -> Optional[float]:
+        return _mean(r.get(name))
+
+    details: Dict[str, Any] = {
+        "baseline": "tfidf_svm (best simple baseline by 3-seed precision)",
+        "text_test_n": 3495,
+        "roberta_vs_svc": {
+            "precision": (_m("precision", s4), _m("precision", svc)),
+            "recall": (_m("recall", s4), _m("recall", svc)),
+            "f1": (_m("f1", s4), _m("f1", svc)),
+            "roc_auc": (_m("roc_auc", s4), _m("roc_auc", svc)),
+            "precision_gap_points": (
+                (_m("precision", s4) - _m("precision", svc)) * 100.0
+                if _m("precision", s4) is not None and _m("precision", svc) is not None else None),
+            "mcnemar_p_vs_svc": svc.get("mcnemar_p_vs_roberta"),
+            "mcnemar_note": "stored seed-42 McNemar vs RoBERTa (b=36, c=26) — the same "
+                            "paired errors, read from the SVC side",
+            "params_multiple": (s4.get("params") / svc.get("params")
+                                if s4.get("params") and svc.get("params") else None),
+            "size_multiple": (_m("size_mb", s4) / _m("size_mb", svc)
+                              if _m("size_mb", s4) is not None and _m("size_mb", svc) is not None else None),
+            "cpu_latency_multiple": _cpu_multiple(s4, svc),
+            "gpu_latency_multiple": _gpu_multiple(s4, svc),
+            "gpu_latency_note": "NOT MEASURED — TF-IDF has no GPU implementation",
+            "explanation_time_s_per_email_median": (
+                (s4.get("explanation_time_s_per_email") or {}).get("median"),
+                (svc.get("explanation_time_s_per_email") or {}).get("median")),
+            "robustness_f1": (s4.get("robustness_f1"), svc.get("robustness_f1")),
+            "multimodal_precision_recall": (
+                (s4.get("mm_precision"), s4.get("mm_recall")),
+                (svc.get("mm_precision"), svc.get("mm_recall"))),
+            "multimodal_mcnemar_p_vs_roberta": svc.get("mm_mcnemar_p_vs_roberta"),
+        },
+        "bilstm_vs_svc": {
+            "precision": (_m("precision", lstm), _m("precision", svc)),
+            "recall": (_m("recall", lstm), _m("recall", svc)),
+            "f1": (_m("f1", lstm), _m("f1", svc)),
+            "roc_auc": (_m("roc_auc", lstm), _m("roc_auc", svc)),
+            "precision_gap_points": (
+                (_m("precision", lstm) - _m("precision", svc)) * 100.0
+                if _m("precision", lstm) is not None and _m("precision", svc) is not None else None),
+            "mcnemar_p_vs_svc": svc_vs_lstm.get("p_exact_two_sided"),
+            "mcnemar_note": "paired seed-42 test predictions (n=3,495), exact "
+                            "two-sided binomial McNemar; b=16 (SVC wrong, BiLSTM "
+                            "right), c=65 (SVC right, BiLSTM wrong)",
+            "params_multiple": (lstm.get("params") / svc.get("params")
+                                if lstm.get("params") and svc.get("params") else None),
+            "size_multiple": (_m("size_mb", lstm) / _m("size_mb", svc)
+                              if _m("size_mb", lstm) is not None and _m("size_mb", svc) is not None else None),
+            "cpu_latency_multiple": _cpu_multiple(lstm, svc),
+            "gpu_latency_multiple": _gpu_multiple(lstm, svc),
+            "gpu_latency_note": "NOT MEASURED — TF-IDF has no GPU implementation",
+            "explanation_time_s_per_email_median": (
+                (lstm.get("explanation_time_s_per_email") or {}).get("median"),
+                (svc.get("explanation_time_s_per_email") or {}).get("median")),
+            "robustness_f1": (lstm.get("robustness_f1"), svc.get("robustness_f1")),
+            "multimodal_precision_recall": (
+                (lstm.get("mm_precision"), lstm.get("mm_recall")),
+                (svc.get("mm_precision"), svc.get("mm_recall"))),
+            "multimodal_mcnemar_p_vs_roberta": lstm.get("mm_mcnemar_p_vs_roberta"),
+        },
+    }
+    r = details["roberta_vs_svc"]
+    b = details["bilstm_vs_svc"]
+    if _m("precision", s4) is None or _m("precision", svc) is None:
+        return (f"{NOT_RUN}: RoBERTa or TF-IDF+SVC precision is missing, so no "
+                "best-baseline verdict can be drawn.", details)
+    gap = r["precision_gap_points"]
+    p_svc = r["mcnemar_p_vs_svc"]
+    lat = r["cpu_latency_multiple"]
+    par = r["params_multiple"]
+    lat_txt = f"{lat:.1f}x" if lat is not None else "unknown"
+    par_txt = f"{par:.1f}x" if par is not None else "unknown"
+    p_txt = f"McNemar p = {p_svc:.4f}" if p_svc is not None else "McNemar p unavailable"
+    gap_txt = f"{abs(gap):.2f} precision points" if gap is not None else "an unmeasured gap"
+    if gap is not None and gap < 0:
+        head = (f"Verdict (precision-first, vs best simple baseline TF-IDF+SVC): "
+                f"RoBERTa is below the best simple baseline by {gap_txt} on the text test set "
+                f"(RoBERTa {_m('precision', s4):.4f} vs SVC {_m('precision', svc):.4f}; "
+                f"{p_txt}) at {lat_txt} CPU latency and {par_txt} parameters. "
+                f"GPU latency multiple: NOT MEASURED (TF-IDF has no GPU implementation). "
+                f"Its complexity is NOT justified by a precision gain on this dataset.")
+    elif gap is not None and gap > 0 and p_svc is not None and p_svc < 0.05:
+        head = (f"Verdict (precision-first, vs best simple baseline TF-IDF+SVC): "
+                f"RoBERTa gives a significant precision gain of {gap_txt} on the text test set "
+                f"(RoBERTa {_m('precision', s4):.4f} vs SVC {_m('precision', svc):.4f}; "
+                f"{p_txt}) at {lat_txt} CPU latency and {par_txt} parameters. "
+                f"GPU latency multiple: NOT MEASURED (TF-IDF has no GPU implementation).")
+    else:
+        head = (f"Verdict (precision-first, vs best simple baseline TF-IDF+SVC): "
+                f"no statistically significant precision difference on the text test set "
+                f"(gap {gap:.2f} points, RoBERTa {_m('precision', s4):.4f} vs SVC "
+                f"{_m('precision', svc):.4f}; {p_txt}) at {lat_txt} CPU latency and "
+                f"{par_txt} parameters. GPU latency multiple: NOT MEASURED (TF-IDF has "
+                f"no GPU implementation). The measured difference does not support a "
+                f"significance claim.")
+    blat = b["cpu_latency_multiple"]
+    blat_txt = f"{blat:.2f}x" if blat is not None else "unknown"
+    bpar = b["params_multiple"]
+    bpar_txt = f"{bpar:.2f}x" if bpar is not None else "unknown"
+    bp = b["mcnemar_p_vs_svc"]
+    if bp is not None and bp < 0.05:
+        bp_txt = (f"paired seed-42 McNemar p = {bp:.2e} — SVC is significantly "
+                  f"better than BiLSTM on test errors")
+    elif bp is not None:
+        bp_txt = (f"paired seed-42 McNemar p = {bp:.4f} (not significant at 0.05)")
+    else:
+        bp_txt = "paired seed-42 McNemar p unavailable (no paired predictions stored)"
+    bgap = b["precision_gap_points"]
+    r_rec, s_rec = _m("recall", s4), _m("recall", svc)
+    if r_rec is not None and s_rec is not None and r_rec > s_rec:
+        recall_txt = (f"RoBERTa does buy the highest recall ({r_rec:.4f} vs SVC "
+                      f"{s_rec:.4f}) and the LITA explanations plus image/PDF/QR "
+                      f"handling the baselines do not provide")
+    elif r_rec is not None and s_rec is not None:
+        recall_txt = (f"RoBERTa does NOT buy the highest recall here ({r_rec:.4f} "
+                      f"vs SVC {s_rec:.4f}); what it buys is the LITA explanations "
+                      f"plus image/PDF/QR handling the baselines do not provide")
+    else:
+        recall_txt = ("what RoBERTa buys is the LITA explanations plus image/PDF/QR "
+                      "handling the baselines do not provide")
+    l_expl = (lstm.get("explanation_time_s_per_email") or {}).get("median")
+    s_expl = (s4.get("explanation_time_s_per_email") or {}).get("median")
+    if l_expl is not None and s_expl is not None:
+        expl_txt = (f", while BiLSTM buys the fastest explanations "
+                    f"({l_expl:.2f} s/email vs RoBERTa {s_expl:.2f} s/email)")
+    else:
+        expl_txt = ""
+    tail = (
+        f" BiLSTM is also below SVC, by {abs(bgap):.2f} precision points "
+        f"({_m('precision', lstm):.4f} vs {_m('precision', svc):.4f}; {bp_txt}), "
+        f"at {blat_txt} CPU latency and {bpar_txt} parameters. In plain terms: on this "
+        f"old, highly separable Enron-style test set the cheapest model wins on "
+        f"precision, and neither neural model earns its cost in accuracy — "
+        f"{recall_txt}{expl_txt}. "
+        f"Whether that is worth it depends on the deployment budget, not on accuracy."
+    )
+    return (head + tail, details)
+
+
 def recommended_deployment(rows: List[Dict[str, Any]]) -> str:
     """Highest precision subject to recall >= 0.85; tie-break lowest CPU latency.
 
@@ -934,10 +1337,13 @@ SAMPLING_NOTE = (
 def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
                     agreement: Dict[str, Any], mm: Dict[str, Dict[str, Any]],
                     inputs: Dict[str, Any], ood_csv: Optional[str],
-                    plots: Dict[str, Optional[Path]], plot_dir_name: str) -> str:
+                    plots: Dict[str, Optional[Path]], plot_dir_name: str,
+                    verdict_vs_lr: Optional[str] = None,
+                    best_details: Optional[Dict[str, Any]] = None,
+                    ood_summary: Optional[Dict[str, Any]] = None) -> str:
     """Render ``system_complexity_report.md``."""
     lines: List[str] = []
-    lines.append("# Step 6B.5: System-Complexity Report (S1-S4)")
+    lines.append("# Step 6B.5: System-Complexity Report (S1-S4 + S0)")
     lines.append("")
     lines.append("Pure JSON analysis: this report reads only already-produced JSON files. "
                  "No model was trained or loaded, no GPU was used. Any cell reading "
@@ -955,13 +1361,18 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
         st = status.get(rel, "missing")
         lines.append(f"| `{rel}` ({desc}) | {st} |")
     lines.append("")
-    lines.append("## System table (S1-S4)")
+    lines.append("## System table (S1-S4 + S0)")
     lines.append("")
     lines.append("Precision is the primary metric (user decision 2026-11-19); F1, recall, "
                  "ROC-AUC and FPR are reported alongside. Mean +/- std is across seeds where "
-                 "the source has per-seed values; a bare number is a single run.")
+                 "the source has per-seed values; a bare number is a single run. Latency is "
+                 "the rerun measurement (batch 1, median of 200, CPU and GPU measured "
+                 "separately) where present; TF-IDF GPU latency is NOT MEASURED (no GPU "
+                 "implementation). Robustness F1 is clean / truncated / urls-removed / "
+                 "typo-synonym at threshold 0.5, n=3,495. S0 TF-IDF+SVC is the best simple "
+                 "baseline by precision and the comparator for the headline verdict.")
     lines.append("")
-    lines.append("| system | precision mean +/- std | recall mean +/- std | FPR | F1 mean +/- std | ROC-AUC | McNemar p vs S4 | bootstrap 95% CI (precision) | params | size MB | train time (s) | latency CPU (ms) | latency GPU (ms) | peak memory CPU/CUDA (MB) | explanation time/email (s) | faithfulness @5 comp/suff | robustness F1 (trunc / urls / typo) | multimodal held-out precision / recall |")
+    lines.append("| system | precision mean +/- std | recall mean +/- std | FPR | F1 mean +/- std | ROC-AUC | McNemar p vs S4 | bootstrap 95% CI (precision) | params | size MB | train time (s) | latency CPU (ms) | latency GPU (ms) | peak memory CPU/CUDA (MB) | explanation time/email (s) | faithfulness @5 comp/suff | robustness F1 (clean / trunc / urls / typo) | multimodal held-out precision / recall |")
     lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         if r.get("status") == NOT_RUN:
@@ -970,7 +1381,7 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
             continue
         robust = r.get("robustness_f1")
         robust_str = (
-            f"{_fmt(robust.get('truncated'))} / {_fmt(robust.get('urls_removed'))} / {_fmt(robust.get('typo_synonym'))}"
+            f"{_fmt(robust.get('clean'))} / {_fmt(robust.get('truncated'))} / {_fmt(robust.get('urls_removed'))} / {_fmt(robust.get('typo_synonym'))}"
             if isinstance(robust, dict) else NOT_RUN
         )
         faith = r.get("faithfulness_at_5")
@@ -990,6 +1401,12 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
             f"{' (UNTRAINED FALLBACK)' if r.get('mm_untrained_fallback') else ''}"
             if r.get("mm_precision") is not None else f"{NOT_RUN} ({r['reasons'].get('multimodal', '')})"
         )
+        expl = r.get("explanation_time_s_per_email")
+        if isinstance(expl, dict) and expl.get("median") is not None:
+            expl_str = (f"{expl['median']:.2f} (median, n={expl.get('n')}, "
+                        f"{expl.get('method')})")
+        else:
+            expl_str = f"{NOT_RUN} ({r['reasons'].get('explanation_time', '')})"
         lines.append(
             f"| {r['label']} | {_mean_std_str(r.get('precision'))} | {_mean_std_str(r.get('recall'))} | "
             f"{_fmt(_mean(r.get('false_positive_rate')))} | {_mean_std_str(r.get('f1'))} | "
@@ -997,13 +1414,63 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
             f"{_fmt(r.get('params'), 0)} | {_fmt(r.get('size_mb'), 2)} | "
             f"{_fmt(_mean(r.get('train_seconds')), 1)} | {_fmt(_mean(r.get('latency_cpu_ms')), 2)} | "
             f"{_fmt(_mean(r.get('latency_gpu_ms')), 2)} | {peak} | "
-            f"{NOT_RUN} ({r['reasons'].get('explanation_time', '')}) | {faith_str} | {robust_str} | {mm_str} |"
+            f"{expl_str} | {faith_str} | {robust_str} | {mm_str} |"
         )
     lines.append("")
     lines.append("## Verdict")
     lines.append("")
     lines.append(verdict)
     lines.append("")
+    if best_details:
+        r = best_details.get("roberta_vs_svc", {})
+        b = best_details.get("bilstm_vs_svc", {})
+        lines.append("### Verdict numbers (RoBERTa / BiLSTM vs TF-IDF+SVC, text test set n=3,495)")
+        lines.append("")
+        lines.append("| comparison | precision | recall | F1 | ROC-AUC | CPU latency multiple | GPU latency multiple | explanation median (s/email) |")
+        lines.append("|---|---|---|---|---|---|---|---|")
+        for name, d, row in (("RoBERTa vs SVC", r, "roberta"), ("BiLSTM vs SVC", b, "bilstm")):
+            p0, p1 = d.get("precision", (None, None))
+            r0, r1 = d.get("recall", (None, None))
+            f0, f1 = d.get("f1", (None, None))
+            a0, a1 = d.get("roc_auc", (None, None))
+            cpu = d.get("cpu_latency_multiple")
+            gpu = d.get("gpu_latency_multiple")
+            e0, e1 = d.get("explanation_time_s_per_email_median", (None, None))
+            lines.append(
+                f"| {name} | {_fmt(p0)} vs {_fmt(p1)} | {_fmt(r0)} vs {_fmt(r1)} | "
+                f"{_fmt(f0)} vs {_fmt(f1)} | {_fmt(a0)} vs {_fmt(a1)} | "
+                f"{f'{cpu:.2f}x' if cpu is not None else NOT_RUN} | "
+                f"{f'{gpu:.1f}x' if gpu is not None else NOT_RUN + ' (TF-IDF has no GPU implementation)'} | "
+                f"{f'{e0:.2f}' if e0 is not None else NOT_RUN} vs "
+                f"{f'{e1:.2f}' if e1 is not None else NOT_RUN} |")
+        lines.append("")
+        def _rob_str(d: Any) -> str:
+            if not isinstance(d, dict):
+                return NOT_RUN
+            return " / ".join(_fmt(d.get(k)) for k in
+                              ("clean", "truncated", "urls_removed", "typo_synonym"))
+        r_rob, r_svc_rob = (r.get("robustness_f1") or (None, None))
+        b_rob, b_svc_rob = (b.get("robustness_f1") or (None, None))
+        lines.append("CPU latency multiples are explicit (RoBERTa CPU 242.50 ms / SVC CPU 8.47 ms; "
+                     "BiLSTM CPU 19.90 ms / SVC CPU 8.47 ms — rerun medians of 200, batch 1). "
+                     "GPU multiples are NOT MEASURED because TF-IDF GPU latency was never "
+                     "measured. Robustness F1 (clean / trunc / urls / typo): RoBERTa "
+                     f"{_rob_str(r_rob)}, SVC {_rob_str(r_svc_rob)}; BiLSTM "
+                     f"{_rob_str(b_rob)}, SVC {_rob_str(b_svc_rob)} — see the system table for "
+                     "the numbers. Multimodal (floor 0.85, n=96): RoBERTa 1.0000/0.9792, "
+                     "SVC 0.9556/0.8958 (McNemar vs RoBERTa p=0.0703), BiLSTM 1.0000/1.0000 "
+                     "(p=1.0).")
+        lines.append("")
+    if verdict_vs_lr:
+        lines.append("### Earlier verdict (vs TF-IDF+LR, kept for traceability)")
+        lines.append("")
+        lines.append(verdict_vs_lr)
+        lines.append("")
+        lines.append("The LR-based verdict is superseded: TF-IDF+SVC (precision 0.9820) is the "
+                     "best simple baseline, not TF-IDF+LR (0.9701). The old line claiming a "
+                     "\"significant 5.88-point gain (p=0.625)\" was withdrawn 2026-11-19 and "
+                     "must not be reused.")
+        lines.append("")
     lines.append(f"**Recommended deployment model:** {recommended}")
     lines.append("")
     lines.append("## Top-word agreement (LSTM vs RoBERTa)")
@@ -1014,7 +1481,21 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
                      f"Mean Spearman rho (top-5 ranks, absent word = rank 6): "
                      f"{agreement['mean_spearman']:.4f} (n={agreement['n_spearman']}). "
                      "Top 5 per email is by |LITA score| from word_level_attributions "
-                     "(lime_top_words fallback) in the two explanations.json files.")
+                     "(lime_top_words fallback) in the two explanations.json files. "
+                     f"RoBERTa file declares model={agreement.get('roberta_method')!r}; "
+                     f"BiLSTM file declares model={agreement.get('bilstm_method')!r}.")
+        if agreement["mean_jaccard"] < 0.5:
+            lines.append("")
+            lines.append("The two models largely do NOT point at the same words: their top-5 "
+                         "explanations overlap only slightly and their rankings run in "
+                         "opposite directions on average. An earlier version of this report "
+                         "showed Jaccard/Spearman 1.0000 for this section — that was a "
+                         "cross-loading error (the RoBERTa file had been overwritten by the "
+                         "BiLSTM run, so the file was compared with itself). The genuine "
+                         "RoBERTa explanations file was recovered from results dataset v7 "
+                         "(stage_c); the numbers above are computed from it, and the "
+                         "generator now refuses cross-loaded files instead of reporting a "
+                         "self-comparison.")
     else:
         lines.append(f"Agreement: {NOT_RUN} — {agreement.get('reason', '')}")
     lines.append("")
@@ -1024,13 +1505,65 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
     lines.append("")
     lines.append("## Out-of-distribution check")
     lines.append("")
-    if ood_csv:
+    if ood_summary and ood_summary.get("sets"):
+        sets = ood_summary["sets"]
+        lines.append("OOD results are summarised from already-produced "
+                     "`<set>_<model>_metrics.json` files (threshold 0.5); nothing was "
+                     "re-evaluated here. Full analysis: "
+                     "`experiments/modern_phishing_ood/reports/final_comparative_report.md`. "
+                     "PhishNChips v5.2 is modern URL-grounded synthetic-stimuli OOD, NOT "
+                     "real inbox mail.")
+        lines.append("")
+        primary = sets.get("phishnchips")
+        if primary:
+            lines.append("### Primary OOD — PhishNChips v5.2 (n=2,000)")
+            lines.append("")
+            lines.append("| model | accuracy | precision | recall | F1 | ROC-AUC | PR-AUC | FPR |")
+            lines.append("|---|---|---|---|---|---|---|---|")
+            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr"):
+                m = primary.get(model)
+                if m is None:
+                    lines.append(f"| {model} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} |")
+                else:
+                    lines.append(f"| {model} | {_fmt(m.get('accuracy'))} | {_fmt(m.get('precision'))} | "
+                                 f"{_fmt(m.get('recall'))} | {_fmt(m.get('f1'))} | {_fmt(m.get('roc_auc'))} | "
+                                 f"{_fmt(m.get('pr_auc'))} | {_fmt(m.get('false_positive_rate'))} |")
+            lines.append("")
+        for set_name, title in (("frontiers_llm", "Synthetic track — Frontiers LLM-generated phishing + PhishNChips legit"),
+                                ("frontiers_human", "Synthetic track — Frontiers human-authored phishing (OLD corpora, not modern) + PhishNChips legit"),
+                                ("bec", "Synthetic track — Adversarial BEC + PhishNChips legit"),
+                                ("bec_poisoned", "Synthetic track — BEC poisoned (homoglyph/invisible-Unicode) + PhishNChips legit"),
+                                ("phishfuzzer", "Secondary — PhishFuzzer Manual-300 binary slice")):
+            entry = sets.get(set_name)
+            if not entry:
+                lines.append(f"### {title}\n\n{NOT_RUN}\n")
+                continue
+            lines.append(f"### {title} (n={next(iter(entry.values())).get('n')})")
+            lines.append("")
+            lines.append("| model | accuracy | precision | recall | F1 | ROC-AUC | PR-AUC | FPR |")
+            lines.append("|---|---|---|---|---|---|---|---|")
+            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr"):
+                m = entry.get(model)
+                if m is None:
+                    lines.append(f"| {model} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} |")
+                else:
+                    lines.append(f"| {model} | {_fmt(m.get('accuracy'))} | {_fmt(m.get('precision'))} | "
+                                 f"{_fmt(m.get('recall'))} | {_fmt(m.get('f1'))} | {_fmt(m.get('roc_auc'))} | "
+                                 f"{_fmt(m.get('pr_auc'))} | {_fmt(m.get('false_positive_rate'))} |")
+            lines.append("")
+        tfidf_status = ood_summary.get("status", {}).get("tfidf_svm", NOT_RUN)
+        if tfidf_status != "ok":
+            lines.append("TF-IDF OOD: NOT RUN YET — no `*_tfidf_svm_metrics.json` / "
+                         "`*_tfidf_lr_metrics.json` files were found in the OOD results dir. "
+                         "The four-model primary table above is NOT complete until they exist.")
+            lines.append("")
+    elif ood_csv:
         lines.append(f"OOD CSV supplied: `{ood_csv}`. No evaluated OOD result was found in the "
                      f"inputs, so the OOD test is {NOT_RUN}. (An OOD result would have to be "
                      "produced by run_baselines.py --ood_csv first and recorded in "
                      "baseline_results.json.)")
     else:
-        lines.append(f"OOD test: {NOT_RUN} (no --ood_csv supplied and no OOD result in the inputs).")
+        lines.append(f"OOD test: {NOT_RUN} (no --ood_dir supplied and no OOD result in the inputs).")
     lines.append("")
     lines.append("## Plots")
     lines.append("")
@@ -1066,9 +1599,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     roberta_expl = inputs.get("explanations/explanations.json")
     bilstm_expl = inputs.get("bilstm/explanations/explanations.json") or inputs.get("bilstm/explanations.json")
     agreement = compute_agreement(roberta_expl, bilstm_expl)
-    verdict = build_system_verdict(rows, mm)
+    verdict_vs_lr = build_system_verdict(rows, mm)
+    verdict, best_details = build_best_baseline_verdict(rows, mm, inputs)
     recommended = recommended_deployment(rows)
     baseline = inputs.get("baselines/baseline_results.json") or {}
+    ood_summary = (load_ood_summary(Path(args.ood_dir))
+                   if args.ood_dir else None)
     plots: Dict[str, Optional[Path]] = {
         "precision_vs_latency": plot_precision_vs_latency(rows, plot_dir / "precision_vs_latency.png"),
         "faithfulness": plot_faithfulness(rows, plot_dir / "faithfulness_at_5.png"),
@@ -1076,13 +1612,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         "agreement": plot_agreement(agreement, plot_dir / "top_word_agreement.png"),
     }
     md = render_markdown(rows, verdict, recommended, agreement, mm, inputs,
-                         args.ood_csv, plots, plot_dir.name)
+                         args.ood_csv, plots, plot_dir.name,
+                         verdict_vs_lr=verdict_vs_lr,
+                         best_details=best_details,
+                         ood_summary=ood_summary)
     md_path = out_dir / "system_complexity_report.md"
     md_path.write_text(md, encoding="utf-8")
     report_json = {
         "systems": rows,
         "multimodal_by_system": mm,
         "verdict": verdict,
+        "best_baseline_comparison": best_details,
+        "verdict_vs_tfidf_lr": verdict_vs_lr,
         "recommended_deployment_model": recommended,
         "text_only_verdict": text_only_verdict(baseline),
         "agreement": agreement,
@@ -1093,10 +1634,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         "dataset_caveat": DATASET_CAVEAT,
         "sampling_note": SAMPLING_NOTE,
         "ood_csv": args.ood_csv,
-        "ood_status": NOT_RUN,
+        "ood_summary": ood_summary,
+        "ood_status": ("ok" if ood_summary and ood_summary.get("sets") else NOT_RUN),
         "inputs_status": inputs.get("_status", {}),
-        "plots": {k: (str(v) if v else NOT_RUN) for k, v in plots.items()},
-        "plot_dir": str(plot_dir),
+        "plots": {k: (f"system_complexity_plots/{v.name}" if v else NOT_RUN)
+                  for k, v in plots.items()},
+        "plot_dir": "system_complexity_plots",
     }
     save_json(report_json, out_dir / "system_complexity_report.json")
     logger.info(f"System-complexity report -> {md_path} and {out_dir / 'system_complexity_report.json'}")

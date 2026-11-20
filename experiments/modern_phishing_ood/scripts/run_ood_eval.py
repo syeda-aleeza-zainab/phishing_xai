@@ -1,7 +1,13 @@
-"""Out-of-distribution evaluation: fine-tuned RoBERTa vs tuned BiLSTM.
+"""Out-of-distribution evaluation: fine-tuned RoBERTa vs tuned BiLSTM
+vs TF-IDF baselines (TF-IDF+SVC, TF-IDF+LR).
 
-Evaluates BOTH models (loaded from saved checkpoints, NEVER retrained)
-on modern-phishing OOD sets. Thresholds are fitted on the ORIGINAL
+Evaluates the models on modern-phishing OOD sets. Neural models are loaded
+from saved checkpoints, NEVER retrained. TF-IDF models have NO saved
+artefact (results dataset v7 holds only their test-set prediction .npy
+files), so they are REFIT on the canonical TRAIN split only, with the
+seed-42 random-search configs from Stage A (see ``TFIDF_OOD_CONFIG``);
+validation is used only for threshold fitting, never for fitting the
+vectorizer or classifier. Thresholds are fitted on the ORIGINAL
 VALIDATION split only (``baselines.load_splits`` + ``fit_threshold_for_recall``)
 and applied unchanged to OOD — OOD labels are never used for fitting
 (see ``ood_common.fit_thresholds_for_floors`` and ``tests/test_ood_eval.py``).
@@ -19,6 +25,9 @@ Hard rules (project-wide, never bypassed here):
   silent refit (``load_scorer`` would silently refit a fresh BiLSTM if
   the path were missing — this script guards with
   ``_is_baseline_artefact`` and loads via ``load_baseline_model``).
+  The ONLY refit allowed here is the TF-IDF one (``load_tfidf``):
+  no TF-IDF artefact exists at all, so the refit is explicit, on the
+  canonical TRAIN split only, with the documented seed-42 configs.
 * Splits are loaded from ``results/splits.json`` via ``load_splits``,
   never regenerated (sklearn-version split instability).
 
@@ -71,8 +80,21 @@ CAVEAT = ("modern URL-grounded synthetic-stimuli OOD "
 
 SET_LOADERS = ("phishnchips", "phishfuzzer", "frontiers_llm",
                "frontiers_human", "bec", "bec_poisoned")
-MODEL_CHOICES = ("roberta", "bilstm")
+MODEL_CHOICES = ("roberta", "bilstm", "tfidf_svm", "tfidf_lr")
 FLOORS_DEFAULT = (0.85, 0.90, 0.95)
+
+# TF-IDF OOD refit configs: the seed-42 random-search winners from Stage A
+# (baselines/baseline_results.json, per-seed extra.params). Stage A tuned
+# C / ngram_range / max_features per seed on VALIDATION precision, so the
+# three seeds have different configs; seed 42 is the canonical project
+# seed (splits, thresholds, latency all use it), so its configs are the
+# documented refit choice. No saved TF-IDF artefact exists to load
+# (results dataset v7 holds only test-set prediction .npy files), hence
+# refit — on the canonical TRAIN split only, never on OOD data.
+TFIDF_OOD_CONFIG: Dict[str, Dict[str, Any]] = {
+    "tfidf_lr": {"C": 10.0, "ngram_range": (1, 2), "max_features": None},
+    "tfidf_svm": {"C": 5.0, "ngram_range": (3, 6), "max_features": None},
+}
 
 
 # ---------------------------------------------------------------------------
@@ -306,6 +328,54 @@ def load_bilstm(checkpoint: Path):
                    "config": {k: (str(v)) for k, v in cfg.items()}}
 
 
+def load_tfidf(model_name: str, data_path: Path, splits_path: Path):
+    """Refit a TF-IDF baseline on the canonical TRAIN split only.
+
+    No saved TF-IDF artefact exists (results dataset v7 holds only
+    test-set prediction .npy files), so refitting is the only route —
+    and it is done here, explicitly, with the seed-42 Stage A configs
+    (``TFIDF_OOD_CONFIG``). The vectorizer vocabulary and the classifier
+    are fitted on train ``clean_text`` only (the same texts Stage A
+    trained on); validation is touched only later, for threshold fitting.
+    OOD texts/labels are never used for fitting. Returns
+    ``(scorer, info)`` with the same shape as ``load_bilstm``.
+    """
+    if model_name not in TFIDF_OOD_CONFIG:
+        raise ValueError(f"Unknown TF-IDF model: {model_name!r}")
+    from phishing_xai.baselines import (
+        build_tfidf_lr,
+        build_tfidf_svm,
+        load_splits,
+    )
+    splits = load_splits(data_path=str(data_path), splits_path=str(splits_path))
+    train = splits["train"]
+    train_texts = train["clean_text"].astype(str).tolist()
+    train_labels = train["label"].astype(int).tolist()
+    cfg = TFIDF_OOD_CONFIG[model_name]
+    t0 = time.time()
+    if model_name == "tfidf_lr":
+        model = build_tfidf_lr(train_texts, train_labels, **cfg)
+    else:
+        model = build_tfidf_svm(train_texts, train_labels, **cfg)
+    fit_seconds = time.time() - t0
+    # Smoke check: a real prediction on a neutral text, sane shape/sums.
+    probe = np.asarray(model.predict_proba(["hello world, meeting at 3pm"]), dtype=float)
+    assert probe.shape == (1, 2) and abs(probe.sum() - 1.0) < 1e-6, probe
+    print(f"[load] {model_name}: REFIT on canonical train split "
+          f"(n={len(train_texts)}, config={cfg}, fit_seconds={fit_seconds:.1f}, "
+          f"n_params={model.n_params}, size_mb={model.size_mb:.2f}, "
+          f"probe={probe.tolist()}) — no saved artefact exists; "
+          f"vocabulary + classifier fitted on TRAIN ONLY.", flush=True)
+    return model, {"n_params": int(model.n_params),
+                   "size_mb": float(model.size_mb),
+                   "config": {k: str(v) for k, v in cfg.items()},
+                   "fit": "refit on canonical train split only (seed-42 Stage A config); "
+                          "no saved TF-IDF artefact exists",
+                   "fit_seconds": float(fit_seconds),
+                   "train_n": int(len(train_texts)),
+                   "gpu_latency": "NOT MEASURED (TF-IDF has no GPU implementation)"}
+
+
 def measure_both_latencies(scorer, cpu_scorer, texts: Sequence[str],
                            n_gpu: int, n_cpu: int) -> Dict[str, Any]:
     """Median batch-1 latency (ms/email) on GPU and CPU via
@@ -520,6 +590,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 except Exception as exc:  # noqa: BLE001
                     print(f"[warn] CPU RoBERTa scorer unavailable ({exc}); "
                           f"CPU latency NOT RUN YET.", flush=True)
+            elif model_name in ("tfidf_svm", "tfidf_lr"):
+                # CPU-only refit (no GPU implementation exists for TF-IDF):
+                # gpu_scorer stays None so NO GPU latency is ever recorded
+                # for these models — it is NOT MEASURED, never imputed.
+                scorer, info = load_tfidf(model_name, Path(args.data_path),
+                                          Path(args.splits_path))
+                cpu_scorer = scorer
             else:
                 scorer, info = load_bilstm(Path(args.bilstm_checkpoint))
                 try:
@@ -567,15 +644,24 @@ def main(argv: Optional[List[str]] = None) -> int:
                         "val_n": len(val_labels)}, indent=2), encoding="utf-8")
 
         # Latency (primary-set texts, batch 1, median). GPU scorer is the
-        # CUDA copy when one was loaded, else the main scorer.
+        # CUDA copy when one was loaded, else the main scorer — EXCEPT for
+        # TF-IDF models, which have no GPU implementation: their GPU
+        # latency is NOT MEASURED, never measured on a CPU scorer.
         latency_texts = [clean_fn(t) for t in
                          frames[args.sets[0]]["text"].astype(str).tolist()]
         latency: Dict[str, Any] = {"texts_source": args.sets[0]}
         try:
+            latency_gpu_scorer = (
+                None if model_name in ("tfidf_svm", "tfidf_lr")
+                else (gpu_scorer if gpu_scorer is not None else scorer)
+            )
             latency.update(measure_both_latencies(
-                gpu_scorer if gpu_scorer is not None else scorer,
+                latency_gpu_scorer,
                 cpu_scorer, latency_texts,
                 n_gpu=args.latency_n_gpu, n_cpu=args.latency_n_cpu))
+            if model_name in ("tfidf_svm", "tfidf_lr"):
+                latency["gpu"] = {"status": "NOT MEASURED",
+                                  "reason": "TF-IDF has no GPU implementation"}
         except Exception as exc:  # noqa: BLE001
             latency = {"status": "NOT RUN YET", "reason": str(exc),
                        "texts_source": args.sets[0]}

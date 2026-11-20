@@ -337,3 +337,68 @@ def test_pair_with_legit_concatenates_and_keeps_provenance():
     assert paired["label"].tolist() == [1, 0, 0]
     assert paired["source"].tolist() == ["frontiers_2026_llm", "phishnchips_v5.2",
                                          "phishnchips_v5.2"]
+
+
+# ---------------------------------------------------------------------------
+# TF-IDF OOD models (Task 3): config + evaluate_set smoke test
+# ---------------------------------------------------------------------------
+
+def _load_run_ood_eval():
+    """Import run_ood_eval.py as a module (it lives in the OOD scripts dir)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "run_ood_eval",
+        Path(__file__).resolve().parent.parent
+        / "experiments" / "modern_phishing_ood" / "scripts" / "run_ood_eval.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_tfidf_ood_config_is_documented_and_seed42():
+    """The TF-IDF OOD refit configs must exist, be seed-42 Stage A winners,
+    and cover exactly the TF-IDF entries of MODEL_CHOICES."""
+    mod = _load_run_ood_eval()
+    assert set(mod.TFIDF_OOD_CONFIG) == {"tfidf_svm", "tfidf_lr"}
+    assert mod.TFIDF_OOD_CONFIG["tfidf_lr"] == {
+        "C": 10.0, "ngram_range": (1, 2), "max_features": None}
+    assert mod.TFIDF_OOD_CONFIG["tfidf_svm"] == {
+        "C": 5.0, "ngram_range": (3, 6), "max_features": None}
+    assert "tfidf_svm" in mod.MODEL_CHOICES and "tfidf_lr" in mod.MODEL_CHOICES
+
+
+def test_evaluate_set_smoke_with_tfidf_lr(tmp_path):
+    """evaluate_set works with a TF-IDF scorer: same prediction-CSV schema
+    as the neural models, thresholds fitted on validation only (here a
+    fixed 0.5 + one validation-fitted threshold passed in)."""
+    pytest.importorskip("sklearn")
+    from phishing_xai.baselines import build_tfidf_lr, compute_metrics_full
+    mod = _load_run_ood_eval()
+    train_texts = (["free money click here now"] * 6
+                   + ["team meeting notes for tuesday"] * 6)
+    train_labels = [1] * 6 + [0] * 6
+    scorer = build_tfidf_lr(train_texts, train_labels, C=10.0,
+                           ngram_range=(1, 2), max_features=None)
+    frame = pd.DataFrame({
+        "email_id": ["t1", "t2", "t3", "t4"],
+        "text": ["free money click here", "claim your prize now",
+                 "meeting notes tuesday", "project update friday"],
+        "label": [1, 1, 0, 0],
+        "source": ["smoke", "smoke", "smoke", "smoke"],
+        "category": ["a", "a", "b", "b"],
+    })
+    thresholds = {"0.85": {"threshold": 0.5, "floor_met": True}}
+    pred_dir = tmp_path / "pred"
+    pred_dir.mkdir()
+    res = mod.evaluate_set("tfidf_lr", scorer, frame, "smoke",
+                           thresholds, lambda t: t.lower(),
+                           compute_metrics_full, pred_dir)
+    assert res["n"] == 4 and res["model"] == "tfidf_lr"
+    pred_file = pred_dir / "smoke_tfidf_lr_predictions.csv"
+    assert pred_file.exists()
+    preds = pd.read_csv(pred_file)
+    assert list(preds.columns) == ["email_id", "true_label",
+                                   "predicted_label_at_0_5", "prob_phishing",
+                                   "source", "category", "model", "set"]
+    assert preds["model"].tolist() == ["tfidf_lr"] * 4
+    assert res["metrics_at_0_5"]["n"] == 4

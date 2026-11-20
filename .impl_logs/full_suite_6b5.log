@@ -1,0 +1,54 @@
+........................................................................ [ 29%]
+....F................................................................... [ 58%]
+...................................F.................................... [ 87%]
+...............................                                          [100%]
+=================================== FAILURES ===================================
+_______________ test_captum_vs_transformers_interpret_tiny_model _______________
+
+    def test_captum_vs_transformers_interpret_tiny_model():
+        """Verify Captum fallback and transformers_interpret produce matching interfaces, token counts, finite scores,
+        and Spearman rank correlation > 0.9 with matching top-5 tokens."""
+        from scipy.stats import spearmanr
+    
+        tokenizer = AutoTokenizer.from_pretrained(TINY_MODEL)
+        model = AutoModelForSequenceClassification.from_pretrained(
+            TINY_MODEL,
+            id2label={0: "Safe Email", 1: "Phishing Email"},
+            label2id={"Safe Email": 0, "Phishing Email": 1},
+        )
+    
+        explainer = TransformerExplainer(model, tokenizer, device=torch.device("cpu"))
+>       assert explainer.ti_explainer is not None, "Primary transformers-interpret explainer should be initialized."
+E       AssertionError: Primary transformers-interpret explainer should be initialized.
+E       assert None is not None
+E        +  where None = <phishing_xai.explain.TransformerExplainer object at 0x767c7f14d280>.ti_explainer
+
+tests/test_explain_and_resumability.py:60: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2026-11-19 12:55:14 | WARNING | phishing_xai.explain | Could not initialize transformers-interpret (No module named 'transformers_interpret'); using Captum fallback.
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/89 [00:00<?, ?it/s]Loading weights: 100%|██████████| 89/89 [00:00<00:00, 11915.26it/s]
+------------------------------ Captured log call -------------------------------
+WARNING  phishing_xai.explain:explain.py:142 Could not initialize transformers-interpret (No module named 'transformers_interpret'); using Captum fallback.
+___________________________ test_environment_sanity ____________________________
+
+    def test_environment_sanity():
+        import sys
+>       assert sys.version_info[:2] == (3, 10), "Python version must be 3.10"
+E       AssertionError: Python version must be 3.10
+E       assert (3, 12) == (3, 10)
+E         
+E         At index 1 diff: 12 != 10
+E         Use -v to get more diff
+
+tests/test_sanity.py:3: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fitz/__init__.py:17
+  ./.venv/lib/python3.12/site-packages/fitz/__init__.py:17: FutureWarning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_explain_and_resumability.py::test_captum_vs_transformers_interpret_tiny_model
+FAILED tests/test_sanity.py::test_environment_sanity - AssertionError: Python...
+2 failed, 245 passed, 1 warning in 343.87s (0:05:43)

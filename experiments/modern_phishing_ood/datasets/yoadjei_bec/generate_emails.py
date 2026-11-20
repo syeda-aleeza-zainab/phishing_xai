@@ -6,7 +6,7 @@ import os
 from faker import Faker
 
 # CONFIGURATION 
-API_KEY = "X" 
+API_KEY = os.environ.get("GEMINI_API_KEY", "") 
 OUTPUT_FILE = "synthetic_bec.csv"
 TARGET_COUNT = 4000
 BATCH_SIZE = 20 

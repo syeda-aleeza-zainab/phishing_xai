@@ -68,6 +68,22 @@ results/debug/
 # Raw dataset CSV (large; download via scripts/download_data.py or attach as a Kaggle dataset)
 data/*.csv
 
+# Third-party OOD datasets (untracked 2026-11-20; files stay on disk locally
+# and in the Kaggle OOD dataset. Citations/licences stay tracked:
+# phishnchips_README.md, yoadjei_bec/README.md + generate/poison scripts,
+# zenodo_frontiers/LICENSE + README.md. See dataset_provenance.md.)
+experiments/modern_phishing_ood/datasets/ethancratchley/
+experiments/modern_phishing_ood/datasets/human_llm_kaggle/
+experiments/modern_phishing_ood/datasets/phishnchips_core_emails.csv
+experiments/modern_phishing_ood/datasets/phishfuzzer_seeds.json
+experiments/modern_phishing_ood/datasets/rsb-1000.jsonl
+experiments/modern_phishing_ood/datasets/yoadjei_bec/synthetic_emails.csv
+experiments/modern_phishing_ood/datasets/yoadjei_bec/synthetic_emails_poisoned.csv
+experiments/modern_phishing_ood/datasets/zenodo_frontiers/code/
+experiments/modern_phishing_ood/datasets/zenodo_frontiers/data/
+experiments/modern_phishing_ood/datasets/zenodo_frontiers/results/
+experiments/modern_phishing_ood/datasets/zenodo_frontiers/cross-model-phishing.zip
+
 # Trained checkpoint (large; *.pt above already excludes it - listed explicitly so it is never committed)
 results/best_model.pt
 

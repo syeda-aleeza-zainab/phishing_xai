@@ -124,3 +124,78 @@ def test_build_tables_reads_metrics_json(tmp_path):
     f = tables["F_efficiency"]["rows"]["roberta"]
     assert f["latency_gpu_ms"]["value"] == 15.0
     assert f["n_params"]["value"] == 124647170
+
+
+# --- Expanded comparison (Task 7 + Task 8) ---------------------------------
+
+def _load_expanded():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "compute_ood_stats_expanded",
+        Path(__file__).resolve().parent.parent
+        / "experiments" / "modern_phishing_ood" / "scripts"
+        / "compute_ood_stats_expanded.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_holm_adjust_known_values():
+    """Holm: sorted p (0.01, 0.04, 0.05), m=3 -> (0.03, 0.08, 0.08)."""
+    mod = _load_expanded()
+    adj = mod.holm_adjust([0.01, 0.04, 0.05])
+    assert adj == pytest.approx([0.03, 0.08, 0.08])
+    # Monotone non-decreasing in sorted order; capped at 1.0.
+    assert mod.holm_adjust([0.6, 0.7]) == pytest.approx([1.0, 1.0])
+    assert mod.holm_adjust([]) == []
+    assert mod.holm_adjust([0.0359]) == pytest.approx([0.0359])
+
+
+def test_paired_auc_diff_ci_zero_for_identical_models():
+    """Identical probabilities -> diff 0 and a CI containing 0."""
+    mod = _load_expanded()
+    rng = np.random.RandomState(0)
+    y = np.array([1] * 50 + [0] * 50)
+    p = rng.rand(100)
+    out = mod.paired_auc_diff_ci(y, p, p, n_resamples=200, seed=42)
+    assert out["roc_auc"]["diff_A_minus_B"] == pytest.approx(0.0)
+    assert out["roc_auc"]["ci_low"] <= 0.0 <= out["roc_auc"]["ci_high"]
+    assert out["roc_auc"]["significant"] is False
+
+
+def test_compare_pair_mcnemar_is_errors_only():
+    """Two models with identical precision but different errors: McNemar
+    can be significant while the precision difference is 0."""
+    mod = _load_expanded()
+    df = pd.DataFrame({
+        "email_id": [f"e{i}" for i in range(100)],
+        "true_label": [1] * 50 + [0] * 50,
+        # A: TP=40, FN=10, FP=0 -> precision 1.0, recall 0.80.
+        # B: TP=45, FN=5,  FP=0 -> precision 1.0, recall 0.90.
+        # Same precision, different errors: A-only-wrong = 5 rows.
+        "true_label_a": [1] * 50 + [0] * 50,
+        "prob_phishing_a": [0.9] * 40 + [0.1] * 10 + [0.1] * 50,
+        "true_label_b": [1] * 50 + [0] * 50,
+        "prob_phishing_b": [0.9] * 45 + [0.1] * 5 + [0.1] * 50,
+    })
+    comp = mod.compare_pair(df, "a", "b", n_resamples=200, seed=42)
+    assert comp["n_paired"] == 100
+    assert comp["mcnemar"]["b"] + comp["mcnemar"]["c"] > 0
+    assert comp["paired_metric_diff_ci"]["precision"]["diff_A_minus_B"] == pytest.approx(0.0)
+
+
+def test_load_predictions_parses_multitoken_model_names(tmp_path):
+    """Regression: phishnchips_tfidf_lr -> set phishnchips, model tfidf_lr
+    (the old last-token split read model 'lr', set 'phishnchips_tfidf')."""
+    import compute_ood_stats as cs
+    for name in ["phishnchips_roberta_predictions.csv",
+                 "phishnchips_tfidf_svm_predictions.csv",
+                 "frontiers_llm_tfidf_lr_predictions.csv",
+                 "bec_poisoned_bilstm_predictions.csv"]:
+        pd.DataFrame({"email_id": ["e1"], "true_label": [1],
+                      "prob_phishing": [0.9]}).to_csv(tmp_path / name, index=False)
+    preds = cs.load_predictions(tmp_path)
+    assert sorted(preds) == ["bec_poisoned__bilstm",
+                             "frontiers_llm__tfidf_lr",
+                             "phishnchips__roberta",
+                             "phishnchips__tfidf_svm"]
