@@ -1,0 +1,406 @@
+{
+  "set": "frontiers_human",
+  "model": "tfidf_lr",
+  "n": 6000,
+  "n_phish": 5000,
+  "n_legit": 1000,
+  "scoring_seconds_total": 1.6744325160980225,
+  "predictions_file": "experiments/modern_phishing_ood/predictions/frontiers_human_tfidf_lr_predictions.csv",
+  "metrics_at_0_5": {
+    "accuracy": 0.866,
+    "precision": 0.9990485252140818,
+    "recall": 0.84,
+    "f1": 0.9126466753585397,
+    "roc_auc": 0.9822533999999999,
+    "pr_auc": 0.9965275758272896,
+    "precision_at_recall_0.90": 0.9901055408970977,
+    "precision_at_recall_0.90_threshold": 0.35241590276976054,
+    "confusion_matrix": [
+      [
+        996,
+        4
+      ],
+      [
+        800,
+        4200
+      ]
+    ],
+    "false_positive_rate": 0.004,
+    "n": 6000
+  },
+  "metrics_at_fitted_thresholds": {
+    "0.85": {
+      "accuracy": 0.7071666666666667,
+      "precision": 1.0,
+      "recall": 0.6486,
+      "f1": 0.7868494480164988,
+      "roc_auc": 0.9822533999999999,
+      "pr_auc": 0.9965275758272896,
+      "precision_at_recall_0.90": 0.9901055408970977,
+      "precision_at_recall_0.90_threshold": 0.35241590276976054,
+      "confusion_matrix": [
+        [
+          1000,
+          0
+        ],
+        [
+          1757,
+          3243
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 6000,
+      "threshold_used": 0.8182044517154964,
+      "target_recall_floor": 0.85,
+      "val_floor_met": true
+    },
+    "0.90": {
+      "accuracy": 0.795,
+      "precision": 1.0,
+      "recall": 0.754,
+      "f1": 0.8597491448118586,
+      "roc_auc": 0.9822533999999999,
+      "pr_auc": 0.9965275758272896,
+      "precision_at_recall_0.90": 0.9901055408970977,
+      "precision_at_recall_0.90_threshold": 0.35241590276976054,
+      "confusion_matrix": [
+        [
+          1000,
+          0
+        ],
+        [
+          1230,
+          3770
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 6000,
+      "threshold_used": 0.6856861611971153,
+      "target_recall_floor": 0.9,
+      "val_floor_met": true
+    },
+    "0.95": {
+      "accuracy": 0.817,
+      "precision": 0.9997438524590164,
+      "recall": 0.7806,
+      "f1": 0.8766846361185984,
+      "roc_auc": 0.9822533999999999,
+      "pr_auc": 0.9965275758272896,
+      "precision_at_recall_0.90": 0.9901055408970977,
+      "precision_at_recall_0.90_threshold": 0.35241590276976054,
+      "confusion_matrix": [
+        [
+          999,
+          1
+        ],
+        [
+          1097,
+          3903
+        ]
+      ],
+      "false_positive_rate": 0.001,
+      "n": 6000,
+      "threshold_used": 0.6385305141964166,
+      "target_recall_floor": 0.95,
+      "val_floor_met": true
+    }
+  },
+  "per_category_at_0_5": {
+    "category=CEAS_08": {
+      "accuracy": 0.7786666666666666,
+      "precision": 1.0,
+      "recall": 0.7786666666666666,
+      "f1": 0.8755622188905547,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.019138575794986783,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          332,
+          1168
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 1500
+    },
+    "category=Nazario": {
+      "accuracy": 0.834,
+      "precision": 1.0,
+      "recall": 0.834,
+      "f1": 0.9094874591057798,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.03826395885761936,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          166,
+          834
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 1000
+    },
+    "category=Nigerian_Fraud": {
+      "accuracy": 0.984,
+      "precision": 1.0,
+      "recall": 0.984,
+      "f1": 0.9919354838709677,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.08004487793410292,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          12,
+          738
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 750
+    },
+    "category=TREC-07": {
+      "accuracy": 0.8193333333333334,
+      "precision": 1.0,
+      "recall": 0.8193333333333334,
+      "f1": 0.9006962257237083,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.02784553850177533,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          271,
+          1229
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 1500
+    },
+    "category=cross_domain_legitimate": {
+      "accuracy": 0.987987987987988,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.014193223098885602,
+      "confusion_matrix": [
+        [
+          329,
+          4
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.012012012012012012,
+      "n": 333
+    },
+    "category=enron_data_fraud_labeled": {
+      "accuracy": 0.924,
+      "precision": 1.0,
+      "recall": 0.924,
+      "f1": 0.9604989604989606,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.04450456031297225,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          19,
+          231
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 250
+    },
+    "category=legitimate": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.010012927570246622,
+      "confusion_matrix": [
+        [
+          667,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 667
+    },
+    "datasource=adversarial_legit": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.030612747354251738,
+      "confusion_matrix": [
+        [
+          5,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 5
+    },
+    "datasource=cross_domain_expansion_v1": {
+      "accuracy": 0.987987987987988,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.014193223098885602,
+      "confusion_matrix": [
+        [
+          329,
+          4
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.012012012012012012,
+      "n": 333
+    },
+    "datasource=nan": {
+      "accuracy": 0.84,
+      "precision": 1.0,
+      "recall": 0.84,
+      "f1": 0.9130434782608695,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.019138575794986783,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          800,
+          4200
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 5000
+    },
+    "datasource=tranco": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.010012927570246622,
+      "confusion_matrix": [
+        [
+          662,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 662
+    }
+  },
+  "metrics_crosscheck_lite_vs_repo": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "roc_auc": 1.1102230246251565e-16,
+    "pr_auc": 9.958893271710956e-06
+  },
+  "latency_ms_per_email": {
+    "texts_source": "phishnchips",
+    "cpu": {
+      "latency_ms_per_email_median": 1.0154084999953739,
+      "latency_ms_per_email_mean": 1.0512641800016809,
+      "n_timed": 100,
+      "device": "cpu"
+    },
+    "gpu": {
+      "status": "NOT MEASURED",
+      "reason": "TF-IDF has no GPU implementation"
+    }
+  },
+  "model_info": {
+    "n_params": 659027,
+    "size_mb": 10.846089363098145,
+    "config": {
+      "C": "10.0",
+      "ngram_range": "(1, 2)",
+      "max_features": "None"
+    },
+    "fit": "refit on canonical train split only (seed-42 Stage A config); no saved TF-IDF artefact exists",
+    "fit_seconds": 9.483469724655151,
+    "train_n": 11215,
+    "gpu_latency": "NOT MEASURED (TF-IDF has no GPU implementation)"
+  },
+  "thresholds_used": {
+    "0.85": {
+      "threshold": 0.8182044517154964,
+      "val_precision": 0.9943757030371203,
+      "val_recall": 0.8516377649325626,
+      "floor_met": true
+    },
+    "0.90": {
+      "threshold": 0.6856861611971153,
+      "val_precision": 0.9878665318503539,
+      "val_recall": 0.941233140655106,
+      "floor_met": true
+    },
+    "0.95": {
+      "threshold": 0.6385305141964166,
+      "val_precision": 0.9860279441117764,
+      "val_recall": 0.9518304431599229,
+      "floor_met": true
+    }
+  }
+}
