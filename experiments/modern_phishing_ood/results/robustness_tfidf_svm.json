@@ -1,0 +1,22 @@
+{
+  "model": "tfidf_svm",
+  "set": "phishnchips",
+  "n": 2000,
+  "robustness": {
+    "truncated": {
+      "f1": 0.14862385321100918,
+      "accuracy": 0.536,
+      "roc_auc": 0.6603629999999999
+    },
+    "urls_removed": {
+      "f1": 0.18345323741007194,
+      "accuracy": 0.546,
+      "roc_auc": 0.657883
+    },
+    "typo_synonym": {
+      "f1": 0.15956482320942883,
+      "accuracy": 0.5365,
+      "roc_auc": 0.6654410000000001
+    }
+  }
+}

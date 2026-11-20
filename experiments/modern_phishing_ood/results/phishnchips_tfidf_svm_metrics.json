@@ -1,0 +1,560 @@
+{
+  "set": "phishnchips",
+  "model": "tfidf_svm",
+  "n": 2000,
+  "n_phish": 1000,
+  "n_legit": 1000,
+  "scoring_seconds_total": 4.371749401092529,
+  "predictions_file": "experiments/modern_phishing_ood/predictions/phishnchips_tfidf_svm_predictions.csv",
+  "metrics_at_0_5": {
+    "accuracy": 0.536,
+    "precision": 0.9,
+    "recall": 0.081,
+    "f1": 0.14862385321100918,
+    "roc_auc": 0.6603629999999999,
+    "pr_auc": 0.6724125197517408,
+    "precision_at_recall_0.90": 0.5440821256038647,
+    "precision_at_recall_0.90_threshold": 0.0018574900160123952,
+    "confusion_matrix": [
+      [
+        991,
+        9
+      ],
+      [
+        919,
+        81
+      ]
+    ],
+    "false_positive_rate": 0.009,
+    "n": 2000
+  },
+  "metrics_at_fitted_thresholds": {
+    "0.85": {
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.6603629999999999,
+      "pr_auc": 0.6724125197517408,
+      "precision_at_recall_0.90": 0.5440821256038647,
+      "precision_at_recall_0.90_threshold": 0.0018574900160123952,
+      "confusion_matrix": [
+        [
+          1000,
+          0
+        ],
+        [
+          1000,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 2000,
+      "threshold_used": 0.9740476800582453,
+      "target_recall_floor": 0.85,
+      "val_floor_met": true
+    },
+    "0.90": {
+      "accuracy": 0.513,
+      "precision": 0.9642857142857143,
+      "recall": 0.027,
+      "f1": 0.05252918287937743,
+      "roc_auc": 0.6603629999999999,
+      "pr_auc": 0.6724125197517408,
+      "precision_at_recall_0.90": 0.5440821256038647,
+      "precision_at_recall_0.90_threshold": 0.0018574900160123952,
+      "confusion_matrix": [
+        [
+          999,
+          1
+        ],
+        [
+          973,
+          27
+        ]
+      ],
+      "false_positive_rate": 0.001,
+      "n": 2000,
+      "threshold_used": 0.8163802837625163,
+      "target_recall_floor": 0.9,
+      "val_floor_met": true
+    },
+    "0.95": {
+      "accuracy": 0.513,
+      "precision": 0.9642857142857143,
+      "recall": 0.027,
+      "f1": 0.05252918287937743,
+      "roc_auc": 0.6603629999999999,
+      "pr_auc": 0.6724125197517408,
+      "precision_at_recall_0.90": 0.5440821256038647,
+      "precision_at_recall_0.90_threshold": 0.0018574900160123952,
+      "confusion_matrix": [
+        [
+          999,
+          1
+        ],
+        [
+          973,
+          27
+        ]
+      ],
+      "false_positive_rate": 0.001,
+      "n": 2000,
+      "threshold_used": 0.8163802837625163,
+      "target_recall_floor": 0.95,
+      "val_floor_met": true
+    }
+  },
+  "per_category_at_0_5": {
+    "category=cross_domain_legitimate": {
+      "accuracy": 0.972972972972973,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 1.8359846827610213e-05,
+      "confusion_matrix": [
+        [
+          324,
+          9
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.02702702702702703,
+      "n": 333
+    },
+    "category=firebase": {
+      "accuracy": 0.36633663366336633,
+      "precision": 1.0,
+      "recall": 0.36633663366336633,
+      "f1": 0.5362318840579711,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.00260023118587327,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          64,
+          37
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 101
+    },
+    "category=github_pages": {
+      "accuracy": 0.1277533039647577,
+      "precision": 1.0,
+      "recall": 0.1277533039647577,
+      "f1": 0.2265625,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.00026676378366600285,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          198,
+          29
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 227
+    },
+    "category=google_docs": {
+      "accuracy": 0.030612244897959183,
+      "precision": 1.0,
+      "recall": 0.030612244897959183,
+      "f1": 0.0594059405940594,
+      "roc_auc": NaN,
+      "pr_auc": 0.9999999999999999,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.00021071487143292842,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          190,
+          6
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 196
+    },
+    "category=hosting_platform": {
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.0003882294932461531,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          17,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 17
+    },
+    "category=ipfs": {
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.9999999999999998,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.001049652556686567,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          102,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 102
+    },
+    "category=legitimate": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 9.888225677340743e-06,
+      "confusion_matrix": [
+        [
+          667,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 667
+    },
+    "category=other_https": {
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.9999999999999998,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 3.5265055446348856e-05,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          13,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 13
+    },
+    "category=short_clean_https": {
+      "accuracy": 0.010526315789473684,
+      "precision": 1.0,
+      "recall": 0.010526315789473684,
+      "f1": 0.020833333333333332,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 4.6265201989793386e-05,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          188,
+          2
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 190
+    },
+    "category=url_shortener": {
+      "accuracy": 0.045454545454545456,
+      "precision": 1.0,
+      "recall": 0.045454545454545456,
+      "f1": 0.08695652173913043,
+      "roc_auc": NaN,
+      "pr_auc": 0.9999999999999999,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 7.36867816224272e-06,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          147,
+          7
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 154
+    },
+    "datasource=adversarial_legit": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 0.000864106608434739,
+      "confusion_matrix": [
+        [
+          5,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 5
+    },
+    "datasource=cross_domain_expansion_v1": {
+      "accuracy": 0.972972972972973,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 1.8359846827610213e-05,
+      "confusion_matrix": [
+        [
+          324,
+          9
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.02702702702702703,
+      "n": 333
+    },
+    "datasource=github_phishing_db": {
+      "accuracy": 0.1935483870967742,
+      "precision": 1.0,
+      "recall": 0.1935483870967742,
+      "f1": 0.32432432432432434,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.0002712511448567033,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          12
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 62
+    },
+    "datasource=github_phishing_db_live": {
+      "accuracy": 0.09302325581395349,
+      "precision": 1.0,
+      "recall": 0.09302325581395349,
+      "f1": 0.1702127659574468,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.00016723877658853873,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          156,
+          16
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 172
+    },
+    "datasource=openphish": {
+      "accuracy": 0.016129032258064516,
+      "precision": 1.0,
+      "recall": 0.016129032258064516,
+      "f1": 0.031746031746031744,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.00026676378366600285,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          61,
+          1
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 62
+    },
+    "datasource=openphish_live": {
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 1.0,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 0.008232996541997438,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 4
+    },
+    "datasource=phishtank": {
+      "accuracy": 0.07428571428571429,
+      "precision": 1.0,
+      "recall": 0.07428571428571429,
+      "f1": 0.13829787234042554,
+      "roc_auc": NaN,
+      "pr_auc": 0.9999999999999999,
+      "precision_at_recall_0.90": 1.0,
+      "precision_at_recall_0.90_threshold": 7.36867816224272e-06,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          648,
+          52
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 700
+    },
+    "datasource=tranco": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": NaN,
+      "pr_auc": 0.0,
+      "precision_at_recall_0.90": 0.0,
+      "precision_at_recall_0.90_threshold": 9.888225677340743e-06,
+      "confusion_matrix": [
+        [
+          662,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "false_positive_rate": 0.0,
+      "n": 662
+    }
+  },
+  "metrics_crosscheck_lite_vs_repo": {
+    "accuracy": 0.0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "roc_auc": 1.1102230246251565e-16,
+    "pr_auc": 0.0
+  },
+  "latency_ms_per_email": {
+    "texts_source": "phishnchips",
+    "cpu": {
+      "latency_ms_per_email_median": 7.584837999985439,
+      "latency_ms_per_email_mean": 7.532643749999011,
+      "n_timed": 100,
+      "device": "cpu"
+    },
+    "gpu": {
+      "status": "NOT MEASURED",
+      "reason": "TF-IDF has no GPU implementation"
+    }
+  },
+  "model_info": {
+    "n_params": 2531331,
+    "size_mb": 34.7011137008667,
+    "config": {
+      "C": "5.0",
+      "ngram_range": "(3, 6)",
+      "max_features": "None"
+    },
+    "fit": "refit on canonical train split only (seed-42 Stage A config); no saved TF-IDF artefact exists",
+    "fit_seconds": 115.1759762763977,
+    "train_n": 11215,
+    "gpu_latency": "NOT MEASURED (TF-IDF has no GPU implementation)"
+  },
+  "thresholds_used": {
+    "0.85": {
+      "threshold": 0.9740476800582453,
+      "val_precision": 0.9955456570155902,
+      "val_recall": 0.861271676300578,
+      "floor_met": true
+    },
+    "0.90": {
+      "threshold": 0.8163802837625163,
+      "val_precision": 0.9930139720558883,
+      "val_recall": 0.9585741811175337,
+      "floor_met": true
+    },
+    "0.95": {
+      "threshold": 0.8163802837625163,
+      "val_precision": 0.9930139720558883,
+      "val_recall": 0.9585741811175337,
+      "floor_met": true
+    }
+  }
+}

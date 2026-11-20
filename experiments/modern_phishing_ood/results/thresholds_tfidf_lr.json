@@ -1,0 +1,34 @@
+{
+  "model": "tfidf_lr",
+  "thresholds": {
+    "0.85": {
+      "threshold": 0.8182044517154964,
+      "val_precision": 0.9943757030371203,
+      "val_recall": 0.8516377649325626,
+      "floor_met": true
+    },
+    "0.90": {
+      "threshold": 0.6856861611971153,
+      "val_precision": 0.9878665318503539,
+      "val_recall": 0.941233140655106,
+      "floor_met": true
+    },
+    "0.95": {
+      "threshold": 0.6385305141964166,
+      "val_precision": 0.9860279441117764,
+      "val_recall": 0.9518304431599229,
+      "floor_met": true
+    }
+  },
+  "crosscheck_vs_mirror": {
+    "mirror": "ood_common.fit_thresholds_for_floors",
+    "max_abs_threshold_diff": 0.0,
+    "per_floor_diff": {
+      "0.85": 0.0,
+      "0.90": 0.0,
+      "0.95": 0.0
+    }
+  },
+  "fit_on": "original_validation_split_only",
+  "val_n": 2803
+}
