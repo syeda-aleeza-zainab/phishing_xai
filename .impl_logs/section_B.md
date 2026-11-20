@@ -39,7 +39,7 @@ Did NOT touch: `src/phishing_xai/model.py`, `src/phishing_xai/faithfulness.py`, 
 - Status: Done (no dedicated test — exercised implicitly by the OCR/QR sample tests; kept simple/deterministic per spec).
 
 ### B7 — Tesseract discovery without hard-coded user paths — Done
-- Decision: removed `_CANDIDATE_TESSERACT_PATHS` (including `C:\Users\admin\...`). `_configure_tesseract` now uses, in order: `$TESSERACT_CMD` (if the path exists), `shutil.which("tesseract")`, then platform defaults only (`C:\Program Files\Tesseract-OCR\...` on Windows, `/opt/homebrew/bin` + `/usr/local/bin` on macOS, `/usr/bin` + `/usr/local/bin` on Linux). `ocr_image` checks `_tesseract_available()` at call time and, when no binary is found (or pytesseract raises), logs a clear warning and returns `{"text": "", "boxes": []}` — extraction never crashes.
+- Decision: removed `_CANDIDATE_TESSERACT_PATHS` (including `[original author Windows user path]). `_configure_tesseract` now uses, in order: `$TESSERACT_CMD` (if the path exists), `shutil.which("tesseract")`, then platform defaults only (`C:\Program Files\Tesseract-OCR\...` on Windows, `/opt/homebrew/bin` + `/usr/local/bin` on macOS, `/usr/bin` + `/usr/local/bin` on Linux). `ocr_image` checks `_tesseract_available()` at call time and, when no binary is found (or pytesseract raises), logs a clear warning and returns `{"text": "", "boxes": []}` — extraction never crashes.
 - Status: Done. Covered by `test_b7_missing_tesseract_graceful_skip` (monkeypatches `shutil.which`/pytesseract to simulate absence).
 
 ### B8 — Schema + tests — Done

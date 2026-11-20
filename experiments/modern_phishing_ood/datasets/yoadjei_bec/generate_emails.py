@@ -6,7 +6,9 @@ import os
 from faker import Faker
 
 # CONFIGURATION 
-API_KEY = os.environ.get("GEMINI_API_KEY", "") 
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise RuntimeError("GEMINI_API_KEY is not set. Copy .env.example to .env and add your own Gemini API key from https://aistudio.google.com/app/apikey.") 
 OUTPUT_FILE = "synthetic_bec.csv"
 TARGET_COUNT = 4000
 BATCH_SIZE = 20 

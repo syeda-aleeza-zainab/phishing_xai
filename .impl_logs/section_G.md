@@ -118,10 +118,10 @@ content in any output.
   (`test_url_score_contribution_benign_vs_malicious`) did not reproduce here.
 - Absolute/Windows paths: `grep` for `C:\` and `/home/` in README.md,
   docs/MULTIMODAL_NOTE.md, decision.md — README and MULTIMODAL_NOTE have none;
-  decision.md has two `C:\Users\admin...` mentions, both explicitly marked as
+  decision.md has two `[original author Windows user path] mentions, both explicitly marked as
   historical records (B7 row + Step 1 Tesseract row). `docs/PROJECT_LOG.md`
   still contains the historical `file:///c:/Users/admin/...` links in §4 and
-  one `C:\Users\admin` path in §8; both are now annotated as historical records
+  one `[original author Windows user path] path in §8; both are now annotated as historical records
   of the original author's Windows machine rather than presented as current
   paths (rewriting the log's history was not done). The generated
   results/multimodal_eval/multimodal_eval.md contained an absolute home-directory path (fixed to relative)
