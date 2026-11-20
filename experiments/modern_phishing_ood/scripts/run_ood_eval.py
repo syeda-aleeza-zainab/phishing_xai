@@ -80,7 +80,7 @@ CAVEAT = ("modern URL-grounded synthetic-stimuli OOD "
 
 SET_LOADERS = ("phishnchips", "phishfuzzer", "frontiers_llm",
                "frontiers_human", "bec", "bec_poisoned")
-MODEL_CHOICES = ("roberta", "bilstm", "tfidf_svm", "tfidf_lr")
+MODEL_CHOICES = ("roberta", "distilbert", "bilstm", "tfidf_svm", "tfidf_lr")
 FLOORS_DEFAULT = (0.85, 0.90, 0.95)
 
 # TF-IDF OOD refit configs: the seed-42 random-search winners from Stage A
@@ -328,6 +328,35 @@ def load_bilstm(checkpoint: Path):
                    "config": {k: (str(v)) for k, v in cfg.items()}}
 
 
+def load_distilbert(checkpoint: Path):
+    """Load the fine-tuned DistilBERT checkpoint (best-validation seed).
+
+    GUARD: the path must be a DistilBERT artefact (``best_distilbert.pt``
+    from ``phishing_xai.baselines.save_distilbert_model``) — a RoBERTa
+    ``best_model.pt`` or a baseline artefact raises in
+    ``load_distilbert_model`` instead of being misread, and a missing file
+    raises instead of silently refitting (a refit is a full fine-tune).
+    Returns ``(DistilBertScorer, info)`` with the same shape as
+    ``load_bilstm``. A probe prediction checks the scorer end to end.
+    """
+    if not checkpoint.exists():
+        raise FileNotFoundError(f"DistilBERT checkpoint not found: {checkpoint}")
+    from phishing_xai.baselines import DistilBertScorer, load_distilbert_model
+
+    model, tokenizer, payload = load_distilbert_model(str(checkpoint))
+    scorer = DistilBertScorer(model, tokenizer, max_length=256)
+    probe = np.asarray(scorer.predict_proba(["hello world, meeting at 3pm"]), dtype=float)
+    assert probe.shape == (1, 2) and abs(probe.sum() - 1.0) < 1e-6, probe
+    print(f"[load] distilbert: {checkpoint} ({checkpoint.stat().st_size / 1e6:.2f} MB, "
+          f"n_params={payload.get('n_params')}, model_name={payload.get('model_name')}, "
+          f"probe={probe.tolist()})",
+          flush=True)
+    return scorer, {"n_params": int(payload.get("n_params", -1)),
+                    "size_mb": checkpoint.stat().st_size / 1e6,
+                    "model_name": str(payload.get("model_name")),
+                    "max_length": 256}
+
+
 def load_tfidf(model_name: str, data_path: Path, splits_path: Path):
     """Refit a TF-IDF baseline on the canonical TRAIN split only.
 
@@ -482,7 +511,7 @@ def evaluate_set(model_name: str, scorer, frame: pd.DataFrame, set_name: str,
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
-        description="OOD eval: RoBERTa vs BiLSTM on modern-phishing sets (no retraining).")
+        description="OOD eval: RoBERTa vs DistilBERT vs BiLSTM vs TF-IDF on modern-phishing sets (no retraining).")
     parser.add_argument("--sets", nargs="+", choices=list(SET_LOADERS),
                         default=["phishnchips", "phishfuzzer"],
                         help="OOD sets to evaluate")
@@ -492,6 +521,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv")
     parser.add_argument("--splits_path", type=str, default="results/splits.json")
     parser.add_argument("--roberta_checkpoint", type=str, default="results/best_model.pt")
+    parser.add_argument("--distilbert_checkpoint", type=str,
+                        default="results/distilbert/seed_42/best_distilbert.pt",
+                        help="Saved DistilBERT artefact (best_distilbert.pt); "
+                             "the best-validation seed, per results/distilbert/PLAN.md")
     parser.add_argument("--bilstm_checkpoint", type=str,
                         default="results/bilstm/best_bilstm.pt")
     parser.add_argument("--output_dir", type=str, required=True)
@@ -590,6 +623,24 @@ def main(argv: Optional[List[str]] = None) -> int:
                 except Exception as exc:  # noqa: BLE001
                     print(f"[warn] CPU RoBERTa scorer unavailable ({exc}); "
                           f"CPU latency NOT RUN YET.", flush=True)
+            elif model_name == "distilbert":
+                scorer, info = load_distilbert(Path(args.distilbert_checkpoint))
+                gpu_scorer = scorer
+                try:
+                    import torch as _torch
+                    from phishing_xai.baselines import DistilBertScorer, load_distilbert_model
+                    if _torch.cuda.is_available():
+                        _m, _t, _p = load_distilbert_model(
+                            str(args.distilbert_checkpoint), device="cuda")
+                        gpu_scorer = DistilBertScorer(_m, _t, max_length=256)
+                    _m, _t, _p = load_distilbert_model(
+                        str(args.distilbert_checkpoint), device="cpu")
+                    cpu_scorer = DistilBertScorer(_m, _t, max_length=256)
+                except Exception as exc:  # noqa: BLE001
+                    print(f"[warn] DistilBERT device copies unavailable ({exc}).",
+                          flush=True)
+                if cpu_scorer is None:
+                    cpu_scorer = scorer
             elif model_name in ("tfidf_svm", "tfidf_lr"):
                 # CPU-only refit (no GPU implementation exists for TF-IDF):
                 # gpu_scorer stays None so NO GPU latency is ever recorded
@@ -597,7 +648,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 scorer, info = load_tfidf(model_name, Path(args.data_path),
                                           Path(args.splits_path))
                 cpu_scorer = scorer
-            else:
+            elif model_name == "bilstm":
                 scorer, info = load_bilstm(Path(args.bilstm_checkpoint))
                 try:
                     import torch as _torch
@@ -612,6 +663,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                           flush=True)
                 if cpu_scorer is None:
                     cpu_scorer = scorer
+            else:  # argparse choices guard this; never silently load a wrong model
+                raise ValueError(f"Unknown model in MODEL_CHOICES dispatch: {model_name!r}")
         except Exception as exc:  # noqa: BLE001
             combined["status"][model_name] = {
                 "status": "NOT RUN YET", "reason": f"load failed: {exc}"}

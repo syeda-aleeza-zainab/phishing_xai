@@ -1,0 +1,445 @@
+{
+  "model": "distilbert",
+  "model_name": "distilbert-base-uncased",
+  "config": {
+    "batch_size": 16,
+    "lr": 2e-05,
+    "epochs": 3
+  },
+  "seeds": [
+    42,
+    1,
+    7
+  ],
+  "best_validation_seed": 42,
+  "per_seed": [
+    {
+      "model": "distilbert",
+      "model_name": "distilbert-base-uncased",
+      "seed": 42,
+      "status": "ok",
+      "config": {
+        "batch_size": 16,
+        "lr": 2e-05,
+        "epochs": 3,
+        "max_length": 256,
+        "weight_decay": 0.01,
+        "patience": 3
+      },
+      "test_metrics": {
+        "accuracy": 0.9805436337625179,
+        "precision": 0.9868012422360248,
+        "recall": 0.9614220877458396,
+        "f1": 0.9739463601532568,
+        "roc_auc": 0.9986507495023856,
+        "pr_auc": 0.9978414735487615,
+        "precision_at_recall_0.90": 0.9950166112956811,
+        "precision_at_recall_0.90_threshold": 0.9780088663101196,
+        "confusion_matrix": [
+          [
+            2156,
+            17
+          ],
+          [
+            51,
+            1271
+          ]
+        ],
+        "false_positive_rate": 0.007823285780027611,
+        "n": 3495
+      },
+      "metrics_at_val_threshold": {
+        "accuracy": 0.9593705293276109,
+        "precision": 0.9949664429530202,
+        "recall": 0.897125567322239,
+        "f1": 0.94351630867144,
+        "roc_auc": 0.9986507495023856,
+        "pr_auc": 0.9978414735487615,
+        "precision_at_recall_0.90": 0.9950166112956811,
+        "precision_at_recall_0.90_threshold": 0.9780088663101196,
+        "confusion_matrix": [
+          [
+            2167,
+            6
+          ],
+          [
+            136,
+            1186
+          ]
+        ],
+        "false_positive_rate": 0.0027611596870685687,
+        "n": 3495
+      },
+      "threshold_val": {
+        "threshold": 0.9827958941459656,
+        "target_recall": 0.9,
+        "val_precision": 0.9957805907172996,
+        "val_recall": 0.9094412331406551,
+        "val_f1": 0.9506545820745217
+      },
+      "best_epoch": 3,
+      "epochs_run": 3,
+      "best_val_f1": 0.9761789013125911,
+      "best_val_metrics": {
+        "accuracy": 0.9825187299322155,
+        "precision": 0.985279685966634,
+        "recall": 0.9672447013487476,
+        "f1": 0.9761789013125911,
+        "roc_auc": 0.9983521371999977,
+        "pr_auc": 0.9971152758995303,
+        "precision_at_recall_0.90": 0.9957805907172996,
+        "precision_at_recall_0.90_threshold": 0.9827958941459656,
+        "confusion_matrix": [
+          [
+            1750,
+            15
+          ],
+          [
+            34,
+            1004
+          ]
+        ],
+        "false_positive_rate": 0.0084985835694051,
+        "n": 2803,
+        "val_loss": 0.07326706980165909
+      },
+      "floor_met": true,
+      "train_seconds": 388.270802372,
+      "n_params": 66955010,
+      "size_mb": 255.44833278656006,
+      "checkpoint": "/kaggle/working/results/distilbert/seed_42/best_distilbert.pt",
+      "checkpoint_format": "phishing_xai.distilbert.v1",
+      "peak_memory_mb": {
+        "peak_cpu_rss_mb": 3090.125,
+        "peak_cuda_mb": 1719.91015625
+      },
+      "latency_ms_per_email": {
+        "cpu": {
+          "latency_ms_per_email_median": 9.5623905000366,
+          "latency_ms_per_email_mean": 9.741087769999695,
+          "n_timed": 200,
+          "device": "cpu"
+        },
+        "gpu": {
+          "latency_ms_per_email_median": 9.547254999972665,
+          "latency_ms_per_email_mean": 9.38804465999965,
+          "n_timed": 200,
+          "device": "cuda"
+        }
+      },
+      "splits": {
+        "train": 14078,
+        "val": 2803,
+        "test": 3495
+      },
+      "protocol": "Test evaluated exactly once per seed, inside train_distilbert on the frozen best-validation state (precision-first best epoch: validation precision subject to validation recall >= 0.85). Threshold 0.5 for the headline metrics; the validation-fitted threshold (target recall 0.90) is an additional view, fit on VALIDATION only."
+    },
+    {
+      "model": "distilbert",
+      "model_name": "distilbert-base-uncased",
+      "seed": 1,
+      "status": "ok",
+      "config": {
+        "batch_size": 16,
+        "lr": 2e-05,
+        "epochs": 3,
+        "max_length": 256,
+        "weight_decay": 0.01,
+        "patience": 3
+      },
+      "test_metrics": {
+        "accuracy": 0.9742489270386266,
+        "precision": 0.9888888888888889,
+        "recall": 0.9425113464447806,
+        "f1": 0.965143299767622,
+        "roc_auc": 0.9984533746230906,
+        "pr_auc": 0.9971089103063313,
+        "precision_at_recall_0.90": 0.9950083194675541,
+        "precision_at_recall_0.90_threshold": 0.8699771761894226,
+        "confusion_matrix": [
+          [
+            2159,
+            14
+          ],
+          [
+            76,
+            1246
+          ]
+        ],
+        "false_positive_rate": 0.006442705936493327,
+        "n": 3495
+      },
+      "metrics_at_val_threshold": {
+        "accuracy": 0.9719599427753934,
+        "precision": 0.9888178913738019,
+        "recall": 0.9364599092284418,
+        "f1": 0.9619269619269619,
+        "roc_auc": 0.9984533746230906,
+        "pr_auc": 0.9971089103063313,
+        "precision_at_recall_0.90": 0.9950083194675541,
+        "precision_at_recall_0.90_threshold": 0.8699771761894226,
+        "confusion_matrix": [
+          [
+            2159,
+            14
+          ],
+          [
+            84,
+            1238
+          ]
+        ],
+        "false_positive_rate": 0.006442705936493327,
+        "n": 3495
+      },
+      "threshold_val": {
+        "threshold": 0.6043925285339355,
+        "target_recall": 0.9,
+        "val_precision": 0.9877175025588536,
+        "val_recall": 0.9296724470134875,
+        "val_f1": 0.9578163771712159
+      },
+      "best_epoch": 1,
+      "epochs_run": 3,
+      "best_val_f1": 0.9609876543209876,
+      "best_val_metrics": {
+        "accuracy": 0.9718159115233678,
+        "precision": 0.9858156028368794,
+        "recall": 0.9373795761078998,
+        "f1": 0.9609876543209876,
+        "roc_auc": 0.9979940722788977,
+        "pr_auc": 0.9963907750477958,
+        "precision_at_recall_0.90": 0.9877175025588536,
+        "precision_at_recall_0.90_threshold": 0.6043925285339355,
+        "confusion_matrix": [
+          [
+            1751,
+            14
+          ],
+          [
+            65,
+            973
+          ]
+        ],
+        "false_positive_rate": 0.00793201133144476,
+        "n": 2803,
+        "val_loss": 0.07810864249371331
+      },
+      "floor_met": true,
+      "train_seconds": 388.63270449699996,
+      "n_params": 66955010,
+      "size_mb": 255.44833278656006,
+      "checkpoint": "/kaggle/working/results/distilbert/seed_1/best_distilbert.pt",
+      "checkpoint_format": "phishing_xai.distilbert.v1",
+      "peak_memory_mb": {
+        "peak_cpu_rss_mb": 5524.73828125,
+        "peak_cuda_mb": 1725.16015625
+      },
+      "latency_ms_per_email": {
+        "cpu": {
+          "latency_ms_per_email_median": 9.588600000029146,
+          "latency_ms_per_email_mean": 9.6376942699942,
+          "n_timed": 200,
+          "device": "cpu"
+        },
+        "gpu": {
+          "latency_ms_per_email_median": 9.536811500083786,
+          "latency_ms_per_email_mean": 9.473413764998213,
+          "n_timed": 200,
+          "device": "cuda"
+        }
+      },
+      "splits": {
+        "train": 14078,
+        "val": 2803,
+        "test": 3495
+      },
+      "protocol": "Test evaluated exactly once per seed, inside train_distilbert on the frozen best-validation state (precision-first best epoch: validation precision subject to validation recall >= 0.85). Threshold 0.5 for the headline metrics; the validation-fitted threshold (target recall 0.90) is an additional view, fit on VALIDATION only."
+    },
+    {
+      "model": "distilbert",
+      "model_name": "distilbert-base-uncased",
+      "seed": 7,
+      "status": "ok",
+      "config": {
+        "batch_size": 16,
+        "lr": 2e-05,
+        "epochs": 3,
+        "max_length": 256,
+        "weight_decay": 0.01,
+        "patience": 3
+      },
+      "test_metrics": {
+        "accuracy": 0.9736766809728183,
+        "precision": 0.9912140575079872,
+        "recall": 0.9387291981845688,
+        "f1": 0.9642579642579643,
+        "roc_auc": 0.9977463757168329,
+        "pr_auc": 0.9956398216102705,
+        "precision_at_recall_0.90": 0.9926530612244898,
+        "precision_at_recall_0.90_threshold": 0.8362621068954468,
+        "confusion_matrix": [
+          [
+            2162,
+            11
+          ],
+          [
+            81,
+            1241
+          ]
+        ],
+        "false_positive_rate": 0.0050621260929590425,
+        "n": 3495
+      },
+      "metrics_at_val_threshold": {
+        "accuracy": 0.967381974248927,
+        "precision": 0.99185667752443,
+        "recall": 0.9213313161875946,
+        "f1": 0.9552941176470588,
+        "roc_auc": 0.9977463757168329,
+        "pr_auc": 0.9956398216102705,
+        "precision_at_recall_0.90": 0.9926530612244898,
+        "precision_at_recall_0.90_threshold": 0.8362621068954468,
+        "confusion_matrix": [
+          [
+            2163,
+            10
+          ],
+          [
+            104,
+            1218
+          ]
+        ],
+        "false_positive_rate": 0.004601932811780948,
+        "n": 3495
+      },
+      "threshold_val": {
+        "threshold": 0.8184109926223755,
+        "target_recall": 0.9,
+        "val_precision": 0.9927310488058152,
+        "val_recall": 0.9210019267822736,
+        "val_f1": 0.9555222388805598
+      },
+      "best_epoch": 3,
+      "epochs_run": 3,
+      "best_val_f1": 0.9613478691774033,
+      "best_val_metrics": {
+        "accuracy": 0.9721726721369961,
+        "precision": 0.9897959183673469,
+        "recall": 0.9344894026974951,
+        "f1": 0.9613478691774033,
+        "roc_auc": 0.9979444016877083,
+        "pr_auc": 0.9966165374921775,
+        "precision_at_recall_0.90": 0.9927310488058152,
+        "precision_at_recall_0.90_threshold": 0.8184109926223755,
+        "confusion_matrix": [
+          [
+            1755,
+            10
+          ],
+          [
+            68,
+            970
+          ]
+        ],
+        "false_positive_rate": 0.0056657223796034,
+        "n": 2803,
+        "val_loss": 0.1320605119048692
+      },
+      "floor_met": true,
+      "train_seconds": 389.11120235399994,
+      "n_params": 66955010,
+      "size_mb": 255.44833278656006,
+      "checkpoint": "/kaggle/working/results/distilbert/seed_7/best_distilbert.pt",
+      "checkpoint_format": "phishing_xai.distilbert.v1",
+      "peak_memory_mb": {
+        "peak_cpu_rss_mb": 5586.140625,
+        "peak_cuda_mb": 1725.16015625
+      },
+      "latency_ms_per_email": {
+        "cpu": {
+          "latency_ms_per_email_median": 9.489644499922179,
+          "latency_ms_per_email_mean": 9.4882518099962,
+          "n_timed": 200,
+          "device": "cpu"
+        },
+        "gpu": {
+          "latency_ms_per_email_median": 9.618540500014205,
+          "latency_ms_per_email_mean": 9.682174654999471,
+          "n_timed": 200,
+          "device": "cuda"
+        }
+      },
+      "splits": {
+        "train": 14078,
+        "val": 2803,
+        "test": 3495
+      },
+      "protocol": "Test evaluated exactly once per seed, inside train_distilbert on the frozen best-validation state (precision-first best epoch: validation precision subject to validation recall >= 0.85). Threshold 0.5 for the headline metrics; the validation-fitted threshold (target recall 0.90) is an additional view, fit on VALIDATION only."
+    }
+  ],
+  "aggregate": {
+    "n_seeds": 3,
+    "seeds": [
+      42,
+      1,
+      7
+    ],
+    "accuracy": {
+      "mean": 0.9761564139246542,
+      "std": 0.0038102020706605607,
+      "n": 3
+    },
+    "precision": {
+      "mean": 0.9889680628776336,
+      "std": 0.002207472773668197,
+      "n": 3
+    },
+    "recall": {
+      "mean": 0.9475542107917296,
+      "std": 0.012157905649259894,
+      "n": 3
+    },
+    "f1": {
+      "mean": 0.9677825413929476,
+      "std": 0.00535634679829627,
+      "n": 3
+    },
+    "roc_auc": {
+      "mean": 0.9982834999474365,
+      "std": 0.00047551660335914676,
+      "n": 3
+    },
+    "pr_auc": {
+      "mean": 0.9968634018217878,
+      "std": 0.001121170650058417,
+      "n": 3
+    },
+    "precision_at_recall_0.90": {
+      "mean": 0.9942259973292417,
+      "std": 0.0013622089343516095,
+      "n": 3
+    },
+    "false_positive_rate": {
+      "mean": 0.006442705936493327,
+      "std": 0.0013805798435342844,
+      "n": 3
+    },
+    "latency_cpu_ms_median": {
+      "mean": 9.546878333329309,
+      "std": 0.05126907681362238,
+      "n": 3
+    },
+    "latency_gpu_ms_median": {
+      "mean": 9.567535666690219,
+      "std": 0.044479056187018966,
+      "n": 3
+    },
+    "train_seconds": {
+      "mean": 388.671569741,
+      "std": 0.4215458608855796,
+      "n": 3
+    },
+    "n_params": 66955010,
+    "size_mb": 255.44833278656006
+  }
+}

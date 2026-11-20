@@ -8,6 +8,10 @@ loaded without training:
   (``RobertaScorer`` wraps the existing ``score_text`` path, so this is
   the ``predict_proba`` wrapper ``run_baselines.py --robustness`` lacks
   for ``roberta_eval``).
+* ``distilbert`` — the saved DistilBERT artefact (``best_distilbert.pt``
+  from ``phishing_xai.baselines.save_distilbert_model``), via
+  ``baselines.load_scorer`` (which loads the artefact and raises on a
+  missing/wrong-kind checkpoint — DistilBERT is never refit here).
 * ``bilstm`` — a saved tuned-BiLSTM artefact (``best_bilstm.pt`` from
   ``run_baselines.py``), via ``baselines.load_baseline_model``.
 * ``tfidf_lr`` / ``tfidf_svm`` — fitted on the REAL train split via
@@ -21,11 +25,12 @@ fixed 0.5 used by ``baselines.evaluate_robustness``). The clean
 reads as a drop from a known baseline.
 
 NOT covered here (recorded as NOT RUN YET in the output when relevant):
-DistilBERT, CNN and the bigger BiLSTM variant — no saved checkpoint
-for any of them exists in the results dataset, so each would need a
-full refit, which this script never does. ``run_baselines.py
---models tfidf_lr tfidf_svm cnn --robustness`` is the refit route for
-the cheap models; DistilBERT would need a fresh fine-tune.
+CNN and the bigger BiLSTM variant — no saved checkpoint for either
+exists in the results dataset, so each would need a full refit, which
+this script never does. ``run_baselines.py --models tfidf_lr tfidf_svm
+cnn --robustness`` is the refit route for the cheap models.
+(DistilBERT was in this list until the standalone ``best_distilbert.pt``
+artefact existed; it is now a loadable scorer like RoBERTa/BiLSTM.)
 
 Writes ``robustness_loaded.json`` into the output directory and
 returns 0 even when a model is NOT RUN YET (the reason is in the
@@ -57,14 +62,11 @@ from phishing_xai.utils import ensure_dir, get_logger, set_seed  # noqa: E402
 
 logger = get_logger("phishing_xai.run_robustness_loaded")
 
-MODEL_CHOICES = ("roberta", "bilstm", "tfidf_lr", "tfidf_svm")
+MODEL_CHOICES = ("roberta", "distilbert", "bilstm", "tfidf_lr", "tfidf_svm")
 
 #: Models this script deliberately does NOT attempt, and why (no saved
 #: checkpoint exists in the results dataset; each would need a refit).
 NOT_ATTEMPTED: Dict[str, str] = {
-    "distilbert": "No saved DistilBERT checkpoint exists in the results "
-                  "dataset (Stage D ran 1 seed but saved no artefact); "
-                  "robustness would need a full fine-tune refit.",
     "cnn": "No saved CNN artefact exists in the results dataset (Stage D "
            "ran 1 seed but saved no artefact); use run_baselines.py "
            "--models cnn --robustness for the refit route.",
@@ -116,6 +118,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                         help="RoBERTa checkpoint (.pt)")
     parser.add_argument("--bilstm_checkpoint", type=str, default="results/bilstm/best_bilstm.pt",
                         help="Saved tuned-BiLSTM artefact (best_bilstm.pt)")
+    parser.add_argument("--distilbert_checkpoint", type=str,
+                        default="results/distilbert/seed_42/best_distilbert.pt",
+                        help="Saved DistilBERT artefact (best_distilbert.pt, best-validation seed)")
     parser.add_argument("--tfidf_checkpoint", type=str, default=None,
                         help="Optional saved TF-IDF artefact (best_tfidf_*.pt); without it, TF-IDF models are fitted on the real train split")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv")
@@ -152,6 +157,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         if name == "roberta":
             ckpt = args.roberta_checkpoint
             source = f"loaded checkpoint {ckpt} (no retraining)"
+        elif name == "distilbert":
+            ckpt = args.distilbert_checkpoint
+            source = f"loaded saved artefact {ckpt} (no retraining)"
         elif name == "bilstm":
             ckpt = args.bilstm_checkpoint
             source = f"loaded saved artefact {ckpt} (no retraining)"

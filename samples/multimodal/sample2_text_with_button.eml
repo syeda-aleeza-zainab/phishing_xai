@@ -2,9 +2,9 @@ Subject: Security Check Required
 From: support@portal-example.com
 To: user@example.org
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2258728696626565719=="
+Content-Type: multipart/mixed; boundary="===============6839596180442651345=="
 
---===============2258728696626565719==
+--===============6839596180442651345==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -13,7 +13,7 @@ Hello,
 We noticed unusual sign-in activity on your profile. Please use the button be=
 low to confirm your identity immediately.
 
---===============2258728696626565719==
+--===============6839596180442651345==
 Content-Type: image/png
 Content-Transfer-Encoding: base64
 Content-Disposition: inline; filename="verify_button.png"
@@ -104,4 +104,4 @@ DiHcAQA4hHAHAOAQwh0AgEMIdwAADiHcAQA4hHAHAOAQwh0AgEMIdwAADiHcAQA4hHAHAOAQwh0A
 gEMIdwAADiHcAQA4hHAHAOAQwh0AgEMIdwAADiHcAQA4hHAHAODQ/wDZlebCt3FgwgAAAABJRU5E
 rkJggg==
 
---===============2258728696626565719==--
+--===============6839596180442651345==--

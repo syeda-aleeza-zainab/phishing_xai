@@ -40,9 +40,9 @@ logger = get_logger("run_faithfulness")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate XAI Faithfulness")
-    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained checkpoint (.pt). For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split")
-    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "bilstm"], default="roberta",
-                        help="Scorer model (default: roberta). tfidf_lr/bilstm fit on the real train split; no checkpoint needed.")
+    parser.add_argument("--model_path", type=str, default="results/best_model.pt", help="Path to trained checkpoint (.pt). For --model distilbert: a saved DistilBERT artefact (best_distilbert.pt, best-validation seed) — a missing/wrong-kind checkpoint raises, never refits. For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt) is loaded instead of fitting; a RoBERTa .pt means fit on the real train split")
+    parser.add_argument("--model", choices=["roberta", "distilbert", "tfidf_lr", "bilstm"], default="roberta",
+                        help="Scorer model (default: roberta). distilbert loads a saved best_distilbert.pt and runs LITA (LIME + Transformers-Interpret/Captum, alpha=0.5) via explain_word_scores; tfidf_lr/bilstm fit on the real train split; no checkpoint needed.")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv", help="Path to raw dataset")
     parser.add_argument("--splits_path", type=str, default="results/splits.json", help="Path to split manifest")
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save faithfulness artifacts")
@@ -118,8 +118,13 @@ def run_faithfulness(args: argparse.Namespace) -> Dict[str, Any]:
         ti_explainer = TransformerExplainer(model, tokenizer, device=device)
         scorer = None
     else:
-        # Baseline scorer: fitted on the real train split; the HF model /
-        # TransformerExplainer are never loaded here.
+        # Scorer path: tfidf_lr/bilstm are fitted on the real train split;
+        # distilbert loads a saved best_distilbert.pt artefact (raises on a
+        # missing/wrong-kind checkpoint, never refits). explain_word_scores
+        # takes the LITA branch (LIME + TransformerExplainer/Captum) for
+        # the DistilBertScorer, so the HF model / TransformerExplainer ARE
+        # used on this path for distilbert — just through the scorer, not
+        # through the RoBERTa branch above.
         scorer = load_scorer(args.model, checkpoint=args.model_path, seed=args.seed)
         model = tokenizer = None
         lime_explainer = ti_explainer = None

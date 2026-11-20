@@ -1,0 +1,246 @@
+{
+  "Safe Email": [
+    {
+      "word": "the",
+      "mean_score": 0.2666,
+      "total_score": 39.4602,
+      "count": 148
+    },
+    {
+      "word": "to",
+      "mean_score": 0.2077,
+      "total_score": 18.0684,
+      "count": 87
+    },
+    {
+      "word": "that",
+      "mean_score": 0.3059,
+      "total_score": 12.8498,
+      "count": 42
+    },
+    {
+      "word": "for",
+      "mean_score": 0.1972,
+      "total_score": 9.6621,
+      "count": 49
+    },
+    {
+      "word": "of",
+      "mean_score": 0.1139,
+      "total_score": 8.2012,
+      "count": 72
+    },
+    {
+      "word": "and",
+      "mean_score": 0.1125,
+      "total_score": 7.2013,
+      "count": 64
+    },
+    {
+      "word": "in",
+      "mean_score": 0.1213,
+      "total_score": 7.0332,
+      "count": 58
+    },
+    {
+      "word": "is",
+      "mean_score": 0.144,
+      "total_score": 6.4816,
+      "count": 45
+    },
+    {
+      "word": "url",
+      "mean_score": 0.7798,
+      "total_score": 6.2386,
+      "count": 8
+    },
+    {
+      "word": "on",
+      "mean_score": 0.1389,
+      "total_score": 5.695,
+      "count": 41
+    },
+    {
+      "word": "2002",
+      "mean_score": 0.4274,
+      "total_score": 5.5564,
+      "count": 13
+    },
+    {
+      "word": "about",
+      "mean_score": 0.311,
+      "total_score": 4.6656,
+      "count": 15
+    },
+    {
+      "word": "enron",
+      "mean_score": 0.4468,
+      "total_score": 4.4677,
+      "count": 10
+    },
+    {
+      "word": "2001",
+      "mean_score": 0.6057,
+      "total_score": 4.2398,
+      "count": 7
+    },
+    {
+      "word": "if",
+      "mean_score": 0.1984,
+      "total_score": 3.7701,
+      "count": 19
+    },
+    {
+      "word": "or",
+      "mean_score": 0.2611,
+      "total_score": 3.6557,
+      "count": 14
+    },
+    {
+      "word": "at",
+      "mean_score": 0.2131,
+      "total_score": 3.622,
+      "count": 17
+    },
+    {
+      "word": "de",
+      "mean_score": 0.4228,
+      "total_score": 3.3826,
+      "count": 8
+    },
+    {
+      "word": "as",
+      "mean_score": 0.1585,
+      "total_score": 3.1703,
+      "count": 20
+    },
+    {
+      "word": "linguistics",
+      "mean_score": 0.6018,
+      "total_score": 3.0089,
+      "count": 5
+    }
+  ],
+  "Phishing Email": [
+    {
+      "word": "you",
+      "mean_score": 0.4932,
+      "total_score": 28.1116,
+      "count": 57
+    },
+    {
+      "word": "your",
+      "mean_score": 0.4707,
+      "total_score": 11.7678,
+      "count": 25
+    },
+    {
+      "word": "get",
+      "mean_score": 0.3578,
+      "total_score": 4.6519,
+      "count": 13
+    },
+    {
+      "word": "money",
+      "mean_score": 0.4929,
+      "total_score": 3.4502,
+      "count": 7
+    },
+    {
+      "word": "company",
+      "mean_score": 0.4282,
+      "total_score": 3.4253,
+      "count": 8
+    },
+    {
+      "word": "000",
+      "mean_score": 0.4156,
+      "total_score": 2.9091,
+      "count": 7
+    },
+    {
+      "word": "message",
+      "mean_score": 0.4119,
+      "total_score": 2.8834,
+      "count": 7
+    },
+    {
+      "word": "life",
+      "mean_score": 0.3176,
+      "total_score": 2.5412,
+      "count": 8
+    },
+    {
+      "word": "click",
+      "mean_score": 0.3069,
+      "total_score": 2.4552,
+      "count": 8
+    },
+    {
+      "word": "high",
+      "mean_score": 0.3301,
+      "total_score": 2.3109,
+      "count": 7
+    },
+    {
+      "word": "free",
+      "mean_score": 0.2958,
+      "total_score": 2.0704,
+      "count": 7
+    },
+    {
+      "word": "it",
+      "mean_score": 0.149,
+      "total_score": 1.9366,
+      "count": 13
+    },
+    {
+      "word": "com",
+      "mean_score": 0.1277,
+      "total_score": 1.9153,
+      "count": 15
+    },
+    {
+      "word": "no",
+      "mean_score": 0.1253,
+      "total_score": 1.8792,
+      "count": 15
+    },
+    {
+      "word": "mail",
+      "mean_score": 0.2974,
+      "total_score": 1.7842,
+      "count": 6
+    },
+    {
+      "word": "my",
+      "mean_score": 0.1537,
+      "total_score": 1.6904,
+      "count": 11
+    },
+    {
+      "word": "email",
+      "mean_score": 0.2314,
+      "total_score": 1.6199,
+      "count": 7
+    },
+    {
+      "word": "save",
+      "mean_score": 0.1975,
+      "total_score": 1.5803,
+      "count": 8
+    },
+    {
+      "word": "here",
+      "mean_score": 0.0897,
+      "total_score": 1.5247,
+      "count": 17
+    },
+    {
+      "word": "insurance",
+      "mean_score": 0.284,
+      "total_score": 1.4201,
+      "count": 5
+    }
+  ]
+}

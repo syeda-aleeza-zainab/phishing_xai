@@ -1,0 +1,169 @@
+{
+  "seed": 42,
+  "n_latency": 200,
+  "batch_size": 1,
+  "cuda_available": true,
+  "gpu": "Tesla T4",
+  "protocol": "Latency: baselines.measure_latency (median of n_latency single-email predict_proba calls after warmup), CPU and GPU measured separately on the same model and labelled by device. Explanation time: baselines.explain_word_scores timed once per email (LIME + second method), same 10 test emails Stage C explained, lime_samples=1000.",
+  "latency_ms_per_email": {
+    "roberta_gpu": {
+      "status": "ok",
+      "device": "gpu",
+      "checkpoint": "results/best_model.pt",
+      "latency_ms_per_email_median": 17.83351350002249,
+      "latency_ms_per_email_mean": 20.813023444997043,
+      "n_timed": 200
+    },
+    "roberta_cpu": {
+      "status": "ok",
+      "device": "cpu",
+      "checkpoint": "results/best_model.pt",
+      "latency_ms_per_email_median": 234.5846454999787,
+      "latency_ms_per_email_mean": 272.741993919999,
+      "n_timed": 200
+    },
+    "bilstm_gpu": {
+      "status": "ok",
+      "device": "gpu",
+      "checkpoint": "results/bilstm/best_bilstm.pt",
+      "latency_ms_per_email_median": 8.218511000052331,
+      "latency_ms_per_email_mean": 7.818493254997065,
+      "n_timed": 200
+    },
+    "bilstm_cpu": {
+      "status": "ok",
+      "device": "cpu",
+      "checkpoint": "results/bilstm/best_bilstm.pt",
+      "latency_ms_per_email_median": 18.183085499970275,
+      "latency_ms_per_email_mean": 15.248923470004456,
+      "n_timed": 200
+    },
+    "distilbert_gpu": {
+      "status": "ok",
+      "device": "gpu",
+      "checkpoint": "results/distilbert/seed_42/best_distilbert.pt",
+      "latency_ms_per_email_median": 9.073759999978392,
+      "latency_ms_per_email_mean": 9.050550689997863,
+      "n_timed": 200
+    },
+    "distilbert_cpu": {
+      "status": "ok",
+      "device": "cpu",
+      "checkpoint": "results/distilbert/seed_42/best_distilbert.pt",
+      "latency_ms_per_email_median": 118.61517900001672,
+      "latency_ms_per_email_mean": 101.47308543999713,
+      "n_timed": 200
+    }
+  },
+  "explanation_seconds_per_email": {
+    "roberta_lita": {
+      "median": 34.035980316999996,
+      "mean": 38.530660244,
+      "std": 23.807439629524087,
+      "n": 10,
+      "per_email": [
+        18.7439,
+        35.215,
+        39.3707,
+        23.1839,
+        78.0889,
+        15.3769,
+        78.9282,
+        32.857,
+        49.177,
+        14.3652
+      ],
+      "method": "lita",
+      "lime_samples": 1000,
+      "email_ids": [
+        "email_1",
+        "email_17",
+        "email_18",
+        "email_25",
+        "email_27",
+        "email_29",
+        "email_30",
+        "email_37",
+        "email_42",
+        "email_44"
+      ]
+    },
+    "bilstm_lita_ig": {
+      "median": 1.6607230970000728,
+      "mean": 1.542624478499988,
+      "std": 0.4562695566007253,
+      "n": 10,
+      "per_email": [
+        1.226,
+        1.639,
+        1.6824,
+        1.6165,
+        1.9989,
+        1.0805,
+        2.1709,
+        1.684,
+        1.719,
+        0.6091
+      ],
+      "method": "lime_ig",
+      "lime_samples": 1000,
+      "email_ids": [
+        "email_1",
+        "email_17",
+        "email_18",
+        "email_25",
+        "email_27",
+        "email_29",
+        "email_30",
+        "email_37",
+        "email_42",
+        "email_44"
+      ]
+    },
+    "distilbert_lita": {
+      "median": 15.692972198499888,
+      "mean": 14.320645545299977,
+      "std": 5.195199144434695,
+      "n": 10,
+      "per_email": [
+        8.9331,
+        14.4487,
+        17.2981,
+        10.3748,
+        20.3879,
+        8.1334,
+        21.369,
+        16.9373,
+        17.7764,
+        7.5478
+      ],
+      "method": "lita",
+      "lime_samples": 1000,
+      "email_ids": [
+        "email_1",
+        "email_17",
+        "email_18",
+        "email_25",
+        "email_27",
+        "email_29",
+        "email_30",
+        "email_37",
+        "email_42",
+        "email_44"
+      ]
+    }
+  },
+  "n_test": 3495,
+  "explain_email_ids": [
+    "email_1",
+    "email_17",
+    "email_18",
+    "email_25",
+    "email_27",
+    "email_29",
+    "email_30",
+    "email_37",
+    "email_42",
+    "email_44"
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "n_test": 3495,
+  "seed": 42,
+  "method": "McNemar (repo baselines.mcnemar_test) + bootstrap 95% CIs, 1000 resamples, seed 42. DistilBERT predictions are the SAVED Kernel-2 seed-42 arrays; RoBERTa predictions are inference-only from the loaded checkpoint; TF-IDF predictions are the saved seed-42 arrays from results v7.",
+  "metrics": {
+    "distilbert_seed42": {
+      "accuracy": 0.9805436337625179,
+      "precision": 0.9868012422360248,
+      "recall": 0.9614220877458396,
+      "f1": 0.9739463601532568,
+      "n": 3495,
+      "errors": 68
+    },
+    "roberta": {
+      "accuracy": 0.9854077253218884,
+      "precision": 0.9690036900369003,
+      "recall": 0.9931921331316188,
+      "f1": 0.980948823309675,
+      "n": 3495,
+      "errors": 51
+    },
+    "tfidf_lr": {
+      "accuracy": 0.9808297567954221,
+      "precision": 0.9707426856714179,
+      "recall": 0.9788199697428139,
+      "f1": 0.9747645951035782,
+      "n": 3495,
+      "errors": 67
+    },
+    "tfidf_svm": {
+      "accuracy": 0.9882689556509299,
+      "precision": 0.981941309255079,
+      "recall": 0.9871406959152799,
+      "f1": 0.984534138061109,
+      "n": 3495,
+      "errors": 41
+    }
+  },
+  "bootstrap_ci": {
+    "distilbert_seed42": {
+      "f1": {
+        "f1": 0.9739463601532568,
+        "ci_low": 0.9675975873041787,
+        "ci_high": 0.9799778995088779,
+        "n_resamples": 1000
+      },
+      "precision": {
+        "precision": 0.9868012422360248,
+        "ci_low": 0.9799208344557181,
+        "ci_high": 0.9930236604974909,
+        "n_resamples": 1000
+      }
+    },
+    "roberta": {
+      "f1": {
+        "f1": 0.980948823309675,
+        "ci_low": 0.9751010990997097,
+        "ci_high": 0.9861636107900065,
+        "n_resamples": 1000
+      },
+      "precision": {
+        "precision": 0.9690036900369003,
+        "ci_low": 0.9590857362167935,
+        "ci_high": 0.978582374486965,
+        "n_resamples": 1000
+      }
+    },
+    "tfidf_lr": {
+      "f1": {
+        "f1": 0.9747645951035782,
+        "ci_low": 0.9684438523474498,
+        "ci_high": 0.9806697908742519,
+        "n_resamples": 1000
+      },
+      "precision": {
+        "precision": 0.9707426856714179,
+        "ci_low": 0.9612198536902513,
+        "ci_high": 0.9799080968052344,
+        "n_resamples": 1000
+      }
+    },
+    "tfidf_svm": {
+      "f1": {
+        "f1": 0.984534138061109,
+        "ci_low": 0.9794370468392468,
+        "ci_high": 0.9889386215643539,
+        "n_resamples": 1000
+      },
+      "precision": {
+        "precision": 0.981941309255079,
+        "ci_low": 0.9745841274631694,
+        "ci_high": 0.9888562826001649,
+        "n_resamples": 1000
+      }
+    }
+  },
+  "mcnemar_vs_distilbert": {
+    "roberta": {
+      "b": 49,
+      "c": 32,
+      "statistic": 3.1604938271604937,
+      "p_value": 0.07544035962680037,
+      "distilbert_errors": 68,
+      "comparator_errors": 51,
+      "error_gain_distilbert_minus_comparator": 17,
+      "distilbert_fewer_errors_by": -17,
+      "significant_gain_distilbert": false
+    },
+    "tfidf_lr": {
+      "b": 50,
+      "c": 49,
+      "statistic": 0.0,
+      "p_value": 1.0,
+      "distilbert_errors": 68,
+      "comparator_errors": 67,
+      "error_gain_distilbert_minus_comparator": 1,
+      "distilbert_fewer_errors_by": -1,
+      "significant_gain_distilbert": false
+    },
+    "tfidf_svm": {
+      "b": 53,
+      "c": 26,
+      "statistic": 8.556962025316455,
+      "p_value": 0.003442033333573635,
+      "distilbert_errors": 68,
+      "comparator_errors": 41,
+      "error_gain_distilbert_minus_comparator": 27,
+      "distilbert_fewer_errors_by": -27,
+      "significant_gain_distilbert": false
+    }
+  },
+  "paired_f1_diff_ci": {
+    "roberta": {
+      "f1_diff": -0.0070024631564182815,
+      "ci_low": -0.01396192949251969,
+      "ci_high": -0.00017003488176564886,
+      "n_resamples": 1000
+    },
+    "tfidf_lr": {
+      "f1_diff": -0.0008182349503214059,
+      "ci_low": -0.008185730647615486,
+      "ci_high": 0.00685389299848934,
+      "n_resamples": 1000
+    },
+    "tfidf_svm": {
+      "f1_diff": -0.010587777907852258,
+      "ci_low": -0.017373315601307372,
+      "ci_high": -0.004117116243367198,
+      "n_resamples": 1000
+    }
+  }
+}

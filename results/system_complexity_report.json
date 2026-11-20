@@ -183,70 +183,93 @@
       "model": "distilbert",
       "label": "S3 DistilBERT",
       "status": "ok",
-      "reasons": {
-        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json",
-        "robustness": "no robustness measurement found (no per-seed block, no rerun file)",
-        "explanation_time": "explanation seconds/email was never measured for this model (run_latency_explain_time.py covers RoBERTa LITA and BiLSTM LITA-IG only); NOT RUN YET",
-        "faithfulness": "no faithfulness @5 found (baseline_results.json faithfulness block or faithfulness.json)",
-        "multimodal": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
-      },
+      "reasons": {},
       "accuracy": {
-        "mean": 0.9839771101573677,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9761564139246542,
+        "std": 0.0038102020706605607,
+        "n": 3
       },
       "precision": {
-        "mean": 0.9730941704035875,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9889680628776336,
+        "std": 0.002207472773668197,
+        "n": 3
       },
       "recall": {
-        "mean": 0.9848714069591528,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9475542107917296,
+        "std": 0.012157905649259894,
+        "n": 3
       },
       "f1": {
-        "mean": 0.9789473684210527,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9677825413929476,
+        "std": 0.00535634679829627,
+        "n": 3
       },
       "roc_auc": {
-        "mean": 0.9982932468550559,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9982834999474365,
+        "std": 0.00047551660335914676,
+        "n": 3
       },
       "false_positive_rate": {
-        "mean": 0.016566958122411414,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.006442705936493327,
+        "std": 0.0013805798435342844,
+        "n": 3
       },
       "precision_ci": {
-        "ci_low": 0.9635400497626004,
-        "ci_high": 0.9819532947285957
+        "ci_low": 0.9799208344557181,
+        "ci_high": 0.9930236604974909
       },
-      "mcnemar_p_vs_roberta": 0.602537006105314,
+      "mcnemar_p_vs_roberta": 0.07544035962680037,
       "params": 66955010,
-      "size_mb": 255.45360660552979,
+      "size_mb": 255.44833278656006,
       "train_seconds": {
-        "mean": 518.4906888980004,
-        "std": 0.0,
-        "n": 1
+        "mean": 388.671569741,
+        "std": 0.4215458608855796,
+        "n": 3
       },
-      "latency_cpu_ms": null,
-      "latency_gpu_ms": null,
+      "latency_cpu_ms": {
+        "mean": 118.61517900001672,
+        "std": 0.0,
+        "n": 1,
+        "source": "results/distilbert/latency/latency_explain_time.json (seed-42 DistilBERT checkpoint, device switched to CPU, median of 200, batch 1, Tesla T4 host)"
+      },
+      "latency_gpu_ms": {
+        "mean": 9.567535666690219,
+        "std": 0.044479056187018966,
+        "n": 3,
+        "source": "run_distilbert_final.py 3-seed aggregate (GPU timing, CUDA)"
+      },
       "latency_source": "baselines/baseline_results.json aggregate",
-      "peak_memory_cpu_mb": null,
-      "peak_memory_cuda_mb": null,
-      "robustness_f1": null,
-      "explanation_time_s_per_email": null,
-      "faithfulness_at_5": null,
-      "mm_precision": null,
-      "mm_recall": null,
-      "mm_f1": null,
+      "peak_memory_cpu_mb": 5586.140625,
+      "peak_memory_cuda_mb": 1725.16015625,
+      "robustness_f1": {
+        "clean": 0.9739463601532568,
+        "truncated": 0.9688101655756642,
+        "urls_removed": 0.9739463601532568,
+        "typo_synonym": 0.9744956223829463
+      },
+      "robustness_source": "baselines/baseline_results.json per-seed block",
+      "explanation_time_s_per_email": {
+        "median": 15.692972198499888,
+        "mean": 14.320645545299977,
+        "n": 10,
+        "method": "lita",
+        "source": "distilbert/latency/latency_explain_time.json"
+      },
+      "faithfulness_at_5": {
+        "comprehensiveness": 0.04975501477679948,
+        "sufficiency": 0.036349427723085755,
+        "method": "lita_magnitude"
+      },
+      "mm_precision": 1.0,
+      "mm_recall": 0.9375,
+      "mm_f1": 0.967741935483871,
       "mm_n": null,
-      "mm_status": "NOT RUN YET",
+      "mm_status": "ok",
       "mm_mcnemar_p_vs_roberta": null,
-      "mm_precision_ci": null,
+      "mm_precision_ci": {
+        "ci_low": 1.0,
+        "ci_high": 1.0
+      },
       "mm_untrained_fallback": false
     },
     {
@@ -508,8 +531,14 @@
       "bootstrap_ci_high": 1.0
     },
     "S3": {
-      "status": "NOT RUN YET",
-      "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
+      "status": "ok",
+      "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)",
+      "precision": 1.0,
+      "recall": 0.9375,
+      "f1": 0.967741935483871,
+      "mcnemar_p_vs_roberta": null,
+      "bootstrap_ci_low": 1.0,
+      "bootstrap_ci_high": 1.0
     }
   },
   "verdict": "Verdict (precision-first, vs best simple baseline TF-IDF+SVC): RoBERTa is below the best simple baseline by 1.30 precision points on the text test set (RoBERTa 0.9690 vs SVC 0.9820; McNemar p = 0.2530) at 28.6x CPU latency and 31.4x parameters. GPU latency multiple: NOT MEASURED (TF-IDF has no GPU implementation). Its complexity is NOT justified by a precision gain on this dataset. BiLSTM is also below SVC, by 1.00 precision points (0.9719 vs 0.9820; paired seed-42 McNemar p = 3.64e-08 \u2014 SVC is significantly better than BiLSTM on test errors), at 2.35x CPU latency and 1.57x parameters. In plain terms: on this old, highly separable Enron-style test set the cheapest model wins on precision, and neither neural model earns its cost in accuracy \u2014 RoBERTa does buy the highest recall (0.9932 vs SVC 0.9889) and the LITA explanations plus image/PDF/QR handling the baselines do not provide, while BiLSTM buys the fastest explanations (1.87 s/email vs RoBERTa 30.87 s/email). Whether that is worth it depends on the deployment budget, not on accuracy.",
@@ -628,8 +657,8 @@
     }
   },
   "verdict_vs_tfidf_lr": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 222.6x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
-  "recommended_deployment_model": "tfidf_svm (S0, precision 0.9820, recall 0.9889; recall floor 0.85 met)",
-  "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 1.30 precision points (RoBERTa 0.9690 vs tfidf_svm 0.9820; McNemar p = 0.2530) at unknown latency and 31.4x parameters. (F1 gap: -0.45 points, RoBERTa 0.9809 vs tfidf_svm 0.9854) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
+  "recommended_deployment_model": "distilbert (S3, precision 0.9890, recall 0.9476; recall floor 0.85 met)",
+  "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 2.00 precision points (RoBERTa 0.9690 vs distilbert 0.9890; McNemar p = 0.0754) at unknown latency and 1.9x parameters. (F1 gap: 1.32 points, RoBERTa 0.9809 vs distilbert 0.9678) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
   "agreement": {
     "status": "ok",
     "n_emails": 10,
@@ -921,6 +950,26 @@
               185
             ]
           ]
+        },
+        "distilbert": {
+          "n": 2000,
+          "accuracy": 0.507,
+          "precision": 1.0,
+          "recall": 0.014,
+          "f1": 0.027613412228796843,
+          "roc_auc": 0.82222,
+          "pr_auc": 0.8249558074737283,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              986,
+              14
+            ]
+          ]
         }
       },
       "phishfuzzer": {
@@ -1001,6 +1050,26 @@
             [
               26,
               77
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 205,
+          "accuracy": 0.5317073170731708,
+          "precision": 0.5299145299145299,
+          "recall": 0.6019417475728155,
+          "f1": 0.5636363636363636,
+          "roc_auc": 0.5477822196839901,
+          "pr_auc": 0.5897493858447459,
+          "false_positive_rate": 0.5392156862745098,
+          "confusion_matrix": [
+            [
+              47,
+              55
+            ],
+            [
+              41,
+              62
             ]
           ]
         }
@@ -1085,6 +1154,26 @@
               4082
             ]
           ]
+        },
+        "distilbert": {
+          "n": 5986,
+          "accuracy": 0.805880387570999,
+          "precision": 1.0,
+          "recall": 0.7669474528680305,
+          "f1": 0.8681044267877412,
+          "roc_auc": 0.9988076614520658,
+          "pr_auc": 0.999755048929815,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              1162,
+              3824
+            ]
+          ]
         }
       },
       "frontiers_human": {
@@ -1165,6 +1254,26 @@
             [
               800,
               4200
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 6000,
+          "accuracy": 0.881,
+          "precision": 1.0,
+          "recall": 0.8572,
+          "f1": 0.9231100581520568,
+          "roc_auc": 0.9970968,
+          "pr_auc": 0.999428810555111,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              714,
+              4286
             ]
           ]
         }
@@ -1249,6 +1358,26 @@
               1323
             ]
           ]
+        },
+        "distilbert": {
+          "n": 5181,
+          "accuracy": 0.31422505307855625,
+          "precision": 1.0,
+          "recall": 0.15020330064577853,
+          "f1": 0.2611769598669162,
+          "roc_auc": 0.9559806266443435,
+          "pr_auc": 0.9891019539461815,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              3553,
+              628
+            ]
+          ]
         }
       },
       "bec_poisoned": {
@@ -1331,6 +1460,26 @@
               1256
             ]
           ]
+        },
+        "distilbert": {
+          "n": 5181,
+          "accuracy": 0.3821656050955414,
+          "precision": 1.0,
+          "recall": 0.23439368572111935,
+          "f1": 0.3797713621391203,
+          "roc_auc": 0.9613642669217892,
+          "pr_auc": 0.99063420889423,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              3201,
+              980
+            ]
+          ]
         }
       }
     },
@@ -1338,7 +1487,8 @@
       "roberta": "ok",
       "bilstm": "ok",
       "tfidf_svm": "ok",
-      "tfidf_lr": "ok"
+      "tfidf_lr": "ok",
+      "distilbert": "ok"
     }
   },
   "ood_status": "ok",
@@ -1359,6 +1509,7 @@
     "multimodal_eval_rule_based/multimodal_eval.json": "ok",
     "rerun_mm/verdicts.json": "ok",
     "rerun_latency/latency_explain_time.json": "ok",
+    "distilbert/latency/latency_explain_time.json": "ok",
     "robustness_rerun/robustness_loaded.json": "ok",
     "robustness_rerun/baseline_results.json": "ok",
     "paired_mcnemar_seed42.json": "ok"

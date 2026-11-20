@@ -101,6 +101,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--with_cnn", action="store_true", help="Also run the 1D-CNN baseline")
     parser.add_argument("--with_distilbert", action="store_true",
                         help="Also run the DistilBERT baseline (downloads weights if not cached)")
+    parser.add_argument("--distilbert_lr", type=float, default=2e-5,
+                        help="DistilBERT learning rate (default 2e-5; was hardcoded before 2026-11-20)")
     parser.add_argument("--random_search_trials", type=int, default=RANDOM_SEARCH_TRIALS,
                         help="Random-search trials on validation for TF-IDF models (0 to disable)")
     parser.add_argument("--analysis", action="store_true", help="Write error analysis CSV")
@@ -269,51 +271,81 @@ def _fit_distilbert(
     out_dir: Path,
     device: torch.device,
 ) -> Dict[str, Any]:
-    """Fine-tune DistilBERT with the repo training loop (behind a flag only).
+    """Fine-tune DistilBERT via :func:`phishing_xai.baselines.train_distilbert`.
 
     Downloads ``distilbert-base-uncased`` from the HF hub only when it is not
-    already cached; any download failure is recorded as NOT RUN YET.
+    already cached; any download failure is recorded as NOT RUN YET by the
+    caller. The test set is evaluated EXACTLY ONCE, inside
+    ``train_distilbert`` on the frozen best state (precision-first best
+    epoch: validation precision subject to validation recall >= 0.85).
+    The best state is saved as a STANDALONE artefact —
+    ``<out_dir>/distilbert/seed_<seed>/best_distilbert.pt`` plus
+    ``tokenizer/`` and ``config.json`` — so the checkpoint loads without
+    the Hub (see :func:`phishing_xai.baselines.load_distilbert_model`).
+    The returned dict carries the fitted pair as ``"_model_wrapper"``
+    (a :class:`BaselineModel`); the main loop pops it before the results
+    are serialised, and uses it for the per-seed robustness / OOD /
+    validation-threshold / latency views that the other baselines get.
     """
-    from phishing_xai.model import create_dataloader, load_tokenizer_and_model
-    from phishing_xai.train import evaluate_dataloader, train_model
+    from phishing_xai.baselines import (
+        build_distilbert_wrapper,
+        measure_latency,
+        train_distilbert,
+    )
 
     model_name = "distilbert-base-uncased"
-    tokenizer, model = load_tokenizer_and_model(model_name=model_name, num_labels=2, device=device)
-    train_loader = create_dataloader(train_texts, train_labels, tokenizer,
-                                     batch_size=args.batch_size, shuffle=True,
-                                     max_length=args.max_len)
-    val_loader = create_dataloader(val_texts, val_labels, tokenizer,
-                                   batch_size=args.batch_size * 2, shuffle=False,
-                                   max_length=args.max_len)
-    test_loader = create_dataloader(test_texts, test_labels, tokenizer,
-                                    batch_size=args.batch_size * 2, shuffle=False,
-                                    max_length=args.max_len)
     run_dir = out_dir / "distilbert" / f"seed_{seed}"
     ensure_dir(run_dir)
-    start = time.perf_counter()
-    summary = train_model(
-        model=model, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader,
-        epochs=args.epochs, learning_rate=2e-5, weight_decay=0.01,
-        use_amp=(device.type == "cuda"), early_stopping_patience=args.patience,
-        device=device, output_dir=run_dir, seed=seed, is_debug=args.debug,
+    trained = train_distilbert(
+        train_texts, train_labels, val_texts, val_labels,
+        test_texts=test_texts, test_labels=test_labels,
+        model_name=model_name,
+        batch_size=args.batch_size, lr=args.distilbert_lr,
+        epochs=args.epochs, max_length=args.max_len,
+        patience=args.patience, seed=seed, device=device,
+        output_dir=run_dir,
     )
-    train_seconds = time.perf_counter() - start
-    # train_model leaves the best checkpoint loaded; re-evaluate the test
-    # loader once here only to capture predictions + the full H3 metric set
-    # (train_model's own final_test_metrics lacks pr_auc / confusion matrix).
-    _, y_true, y_pred, y_prob = evaluate_dataloader(model, test_loader, device)
-    full_metrics = compute_metrics_full(y_true, y_prob)
-    return {
+    train_seconds = float(trained["train_seconds"])
+    model = trained.pop("_model")
+    tokenizer = trained.pop("_tokenizer")
+    wrapper = build_distilbert_wrapper(
+        model, tokenizer, device=device, max_length=args.max_len,
+        extra={"model_name": model_name, "best_epoch": trained.get("best_epoch"),
+               "best_val_f1": trained.get("best_val_f1")},
+    )
+    result: Dict[str, Any] = {
         "model": "distilbert", "status": "ok",
-        "metrics": full_metrics,
-        "n_params": int(sum(p.numel() for p in model.parameters() if p.requires_grad)),
-        "size_mb": float((run_dir / "best_model.pt").stat().st_size / (1024.0 * 1024.0))
-        if (run_dir / "best_model.pt").exists() else None,
+        "metrics": trained["test_metrics"],
+        "n_params": trained["n_params"],
+        "size_mb": trained["size_mb"],
         "train_seconds": train_seconds,
-        "y_pred": y_pred.tolist(), "y_prob": [float(v) for v in y_prob],
-        "extra": {"model_name": model_name, "best_epoch": summary.get("best_epoch"),
-                  "best_val_f1": summary.get("best_val_f1")},
+        "y_pred": trained["y_pred"], "y_prob": trained["y_prob"],
+        "extra": {"model_name": model_name, "best_epoch": trained.get("best_epoch"),
+                  "best_val_f1": trained.get("best_val_f1"),
+                  "best_val_metrics": trained.get("best_val_metrics"),
+                  "floor_met": trained.get("floor_met"),
+                  "checkpoint": trained.get("checkpoint"),
+                  "checkpoint_format": trained.get("checkpoint_format")},
+        "peak_memory_mb": trained.get("peak_memory_mb"),
+        "_model_wrapper": wrapper,
     }
+    # CPU latency on the fitted wrapper (median of 200, batch 1), plus GPU
+    # latency when CUDA is available — the same views evaluate_baseline
+    # records for the other baselines.
+    try:
+        result["latency_cpu_ms"] = measure_latency(wrapper.predict_proba, test_texts, n=200)
+    except Exception as exc:
+        logger.warning(f"DistilBERT CPU latency measurement failed: {exc}")
+        result["latency_cpu_ms"] = {"latency_ms_per_email_median": None, "n_timed": 0}
+    if torch.cuda.is_available():
+        try:
+            wrapper.set_device(torch.device("cuda"))
+            result["latency_gpu_ms"] = measure_latency(wrapper.predict_proba, test_texts, n=200)
+        except Exception as exc:
+            logger.warning(f"DistilBERT GPU latency measurement failed: {exc}")
+        finally:
+            wrapper.set_device(torch.device("cpu"))
+    return result
 
 
 def _load_ood(path: str) -> pd.DataFrame:
@@ -408,15 +440,27 @@ def main(argv: Optional[List[str]] = None) -> int:
                     result["train_seconds"] = None
                     per_seed.append(result)
                     continue
-                if name == "distilbert":
+                elif name == "distilbert":
                     result = _fit_distilbert(
                         b_train_texts, b_train_labels, val_texts, val_labels,
                         test_texts, test_labels, args, seed, out_dir, device,
                     )
                     result["seed"] = seed
-                    per_seed.append(result)
-                    continue
-                if name in ("dummy", "tfidf_lr", "tfidf_svm"):
+                    # Pop the fitted wrapper before serialisation; it drives
+                    # the same per-seed robustness / OOD / val-threshold
+                    # views the other baselines get (fall through to the
+                    # shared block below). The standalone checkpoint was
+                    # already saved per seed inside _fit_distilbert, so
+                    # distilbert is deliberately NOT in the best_models /
+                    # save_baseline_model tracking below.
+                    wrapper = result.pop("_model_wrapper", None)
+                    if wrapper is not None:
+                        current_model = wrapper
+                        _add_val_threshold(result, wrapper, val_texts, val_labels,
+                                           test_texts, test_labels)
+                        if seed == args.seeds[0]:
+                            fitted[name] = wrapper
+                elif name in ("dummy", "tfidf_lr", "tfidf_svm"):
                     model, pipeline, train_seconds, params = _fit_sklearn(
                         name, b_train_texts, b_train_labels, val_texts, val_labels, args, seed
                     )

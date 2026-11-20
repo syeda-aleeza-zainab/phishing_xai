@@ -2,15 +2,15 @@ Subject: Two-Factor Authentication Re-enrollment
 From: it-helpdesk@corp-auth-example.com
 To: user@example.org
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1287010195568088798=="
+Content-Type: multipart/mixed; boundary="===============2258728696626565719=="
 
---===============1287010195568088798==
+--===============2258728696626565719==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 Scan the attached QR code with your phone to keep your account active.
 
---===============1287010195568088798==
+--===============2258728696626565719==
 Content-Type: image/png
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="auth_qr.png"
@@ -50,4 +50,4 @@ tALEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYrQExWgJisADFZAWKyAsRkBYjJ
 ChCTFSAmK0BMVoCYrAAxWQFisgLEZAWIyQoQkxUgJitATFaAmKwAMVkBYrICxGQFiMkKEJMVICYr
 QExWgJisALH/AHfSEAiJjQ0IAAAAAElFTkSuQmCC
 
---===============1287010195568088798==--
+--===============2258728696626565719==--

@@ -1,0 +1,121 @@
+{
+  "model": "distilbert",
+  "model_name": "distilbert-base-uncased",
+  "seed": 7,
+  "status": "ok",
+  "config": {
+    "batch_size": 16,
+    "lr": 2e-05,
+    "epochs": 3,
+    "max_length": 256,
+    "weight_decay": 0.01,
+    "patience": 3
+  },
+  "test_metrics": {
+    "accuracy": 0.9736766809728183,
+    "precision": 0.9912140575079872,
+    "recall": 0.9387291981845688,
+    "f1": 0.9642579642579643,
+    "roc_auc": 0.9977463757168329,
+    "pr_auc": 0.9956398216102705,
+    "precision_at_recall_0.90": 0.9926530612244898,
+    "precision_at_recall_0.90_threshold": 0.8362621068954468,
+    "confusion_matrix": [
+      [
+        2162,
+        11
+      ],
+      [
+        81,
+        1241
+      ]
+    ],
+    "false_positive_rate": 0.0050621260929590425,
+    "n": 3495
+  },
+  "metrics_at_val_threshold": {
+    "accuracy": 0.967381974248927,
+    "precision": 0.99185667752443,
+    "recall": 0.9213313161875946,
+    "f1": 0.9552941176470588,
+    "roc_auc": 0.9977463757168329,
+    "pr_auc": 0.9956398216102705,
+    "precision_at_recall_0.90": 0.9926530612244898,
+    "precision_at_recall_0.90_threshold": 0.8362621068954468,
+    "confusion_matrix": [
+      [
+        2163,
+        10
+      ],
+      [
+        104,
+        1218
+      ]
+    ],
+    "false_positive_rate": 0.004601932811780948,
+    "n": 3495
+  },
+  "threshold_val": {
+    "threshold": 0.8184109926223755,
+    "target_recall": 0.9,
+    "val_precision": 0.9927310488058152,
+    "val_recall": 0.9210019267822736,
+    "val_f1": 0.9555222388805598
+  },
+  "best_epoch": 3,
+  "epochs_run": 3,
+  "best_val_f1": 0.9613478691774033,
+  "best_val_metrics": {
+    "accuracy": 0.9721726721369961,
+    "precision": 0.9897959183673469,
+    "recall": 0.9344894026974951,
+    "f1": 0.9613478691774033,
+    "roc_auc": 0.9979444016877083,
+    "pr_auc": 0.9966165374921775,
+    "precision_at_recall_0.90": 0.9927310488058152,
+    "precision_at_recall_0.90_threshold": 0.8184109926223755,
+    "confusion_matrix": [
+      [
+        1755,
+        10
+      ],
+      [
+        68,
+        970
+      ]
+    ],
+    "false_positive_rate": 0.0056657223796034,
+    "n": 2803,
+    "val_loss": 0.1320605119048692
+  },
+  "floor_met": true,
+  "train_seconds": 389.11120235399994,
+  "n_params": 66955010,
+  "size_mb": 255.44833278656006,
+  "checkpoint": "/kaggle/working/results/distilbert/seed_7/best_distilbert.pt",
+  "checkpoint_format": "phishing_xai.distilbert.v1",
+  "peak_memory_mb": {
+    "peak_cpu_rss_mb": 5586.140625,
+    "peak_cuda_mb": 1725.16015625
+  },
+  "latency_ms_per_email": {
+    "cpu": {
+      "latency_ms_per_email_median": 9.489644499922179,
+      "latency_ms_per_email_mean": 9.4882518099962,
+      "n_timed": 200,
+      "device": "cpu"
+    },
+    "gpu": {
+      "latency_ms_per_email_median": 9.618540500014205,
+      "latency_ms_per_email_mean": 9.682174654999471,
+      "n_timed": 200,
+      "device": "cuda"
+    }
+  },
+  "splits": {
+    "train": 14078,
+    "val": 2803,
+    "test": 3495
+  },
+  "protocol": "Test evaluated exactly once per seed, inside train_distilbert on the frozen best-validation state (precision-first best epoch: validation precision subject to validation recall >= 0.85). Threshold 0.5 for the headline metrics; the validation-fitted threshold (target recall 0.90) is an additional view, fit on VALIDATION only."
+}

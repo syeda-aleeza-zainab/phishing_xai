@@ -93,6 +93,7 @@ INPUT_SPECS: List[Tuple[str, str]] = [
     ("multimodal_eval_rule_based/multimodal_eval.json", "Rule-based multimodal run (reference only, not a system)"),
     ("rerun_mm/verdicts.json", "Rerun multimodal floor 0.80/0.85 metrics + McNemar/CI per model (audited, n=96)"),
     ("rerun_latency/latency_explain_time.json", "Measured CPU/GPU latency + explanation time (RoBERTa/BiLSTM rerun, n=200/n=10)"),
+    ("distilbert/latency/latency_explain_time.json", "DistilBERT CPU/GPU latency + LITA explanation time (seed-42 checkpoint, n=200/n=10)"),
     ("robustness_rerun/robustness_loaded.json", "Robustness F1, loaded-checkpoint run (RoBERTa/BiLSTM, thr 0.5, n=3,495)"),
     ("robustness_rerun/baseline_results.json", "Rerun refit latencies + per-seed robustness (TF-IDF+LR/SVC, CNN, seed 42)"),
     ("paired_mcnemar_seed42.json", "Paired seed-42 McNemar: TF-IDF+SVC vs BiLSTM / TF-IDF+LR (exact binomial)"),
@@ -128,14 +129,14 @@ def load_ood_summary(ood_dir: Path) -> Dict[str, Any]:
     """Summarise already-produced OOD metrics files (never re-evaluates).
 
     Reads ``<set>_<model>_metrics.json`` for the six sets and the models
-    present (roberta, bilstm, tfidf_svm, tfidf_lr). Returns the
+    present (roberta, bilstm, tfidf_svm, tfidf_lr, distilbert). Returns the
     metrics_at_0_5 per set/model plus a status per model. Missing files
-    are reported as NOT RUN YET — a four-model primary table is only
-    shown when all four models have a primary file.
+    are reported as NOT RUN YET — a five-model primary table is only
+    shown when all five models have a primary file.
     """
     sets = ("phishnchips", "phishfuzzer", "frontiers_llm", "frontiers_human",
             "bec", "bec_poisoned")
-    models = ("roberta", "bilstm", "tfidf_svm", "tfidf_lr")
+    models = ("roberta", "bilstm", "tfidf_svm", "tfidf_lr", "distilbert")
     out: Dict[str, Any] = {"dir": ood_dir.name, "sets": {}, "status": {}}
     if not ood_dir.is_dir():
         out["status"]["dir"] = f"missing: {ood_dir.name} not found"
@@ -543,16 +544,22 @@ def build_system_rows(inputs: Dict[str, Any], mm: Dict[str, Dict[str, Any]]) -> 
             row["reasons"]["robustness"] = ("no robustness measurement found "
                                             "(no per-seed block, no rerun file)")
         # Explanation time per email (median, n=10, same emails Stage C
-        # explained): measured by run_latency_explain_time.py. TF-IDF /
-        # DistilBERT / CNN explanation time was never measured.
+        # explained): measured by run_latency_explain_time.py. TF-IDF / CNN
+        # explanation time was never measured; DistilBERT LITA was measured
+        # in the DistilBERT latency file (distilbert_lita, same 10 emails).
         expl = (lat.get("explanation_seconds_per_email") or {})
         expl_key = {"roberta_eval": "roberta_lita", "bilstm": "bilstm_lita_ig"}.get(model)
         expl_block = expl.get(expl_key) if expl_key else None
+        expl_source = "rerun_latency/latency_explain_time.json"
+        if expl_block is None and model == "distilbert":
+            lat_d = inputs.get("distilbert/latency/latency_explain_time.json") or {}
+            expl_block = (lat_d.get("explanation_seconds_per_email") or {}).get("distilbert_lita")
+            expl_source = "distilbert/latency/latency_explain_time.json"
         if isinstance(expl_block, dict) and expl_block.get("median") is not None:
             row["explanation_time_s_per_email"] = {
                 "median": expl_block["median"], "mean": expl_block.get("mean"),
                 "n": expl_block.get("n"), "method": expl_block.get("method"),
-                "source": "rerun_latency/latency_explain_time.json"}
+                "source": expl_source}
         else:
             row["explanation_time_s_per_email"] = None
             row["reasons"]["explanation_time"] = (
@@ -1520,7 +1527,7 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
             lines.append("")
             lines.append("| model | accuracy | precision | recall | F1 | ROC-AUC | PR-AUC | FPR |")
             lines.append("|---|---|---|---|---|---|---|---|")
-            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr"):
+            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr", "distilbert"):
                 m = primary.get(model)
                 if m is None:
                     lines.append(f"| {model} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} |")
@@ -1542,7 +1549,7 @@ def render_markdown(rows: List[Dict[str, Any]], verdict: str, recommended: str,
             lines.append("")
             lines.append("| model | accuracy | precision | recall | F1 | ROC-AUC | PR-AUC | FPR |")
             lines.append("|---|---|---|---|---|---|---|---|")
-            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr"):
+            for model in ("roberta", "bilstm", "tfidf_svm", "tfidf_lr", "distilbert"):
                 m = entry.get(model)
                 if m is None:
                     lines.append(f"| {model} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} | {NOT_RUN} |")
