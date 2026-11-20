@@ -51,7 +51,8 @@ def _per_seed(seed=42, f1=0.95):
 
 def _baseline_results(s1_prec=0.970, s4_prec=0.975, s1_p=0.40, s1_ci=(0.960, 0.985),
                       s2_prec=0.965, s2_p=0.30, s2_ci=(0.955, 0.980),
-                      mm_s1_prec=0.940, mm_s1_p=0.30, mm_s1_ci=(0.930, 0.960)):
+                      mm_s1_prec=0.940, mm_s1_p=0.30, mm_s1_ci=(0.930, 0.960),
+                      s0_prec=0.982, s0_p=0.253, s0_ci=(0.9746, 0.9889)):
     return {
         "models": {
             "tfidf_lr": {"aggregate": _agg(s1_prec, 0.93, params=500_000, size_mb=8.0,
@@ -67,6 +68,9 @@ def _baseline_results(s1_prec=0.970, s4_prec=0.975, s1_p=0.40, s1_ci=(0.960, 0.9
                                                size_mb=500.0, train_s=3600.0,
                                                lat_cpu=50.0, lat_gpu=8.0),
                              "per_seed": _per_seed()},
+            "tfidf_svm": {"aggregate": _agg(s0_prec, 0.99, params=500_000, size_mb=8.0,
+                                            train_s=30.0, lat_cpu=2.0),
+                          "per_seed": _per_seed()},
         },
         "comparisons_vs_roberta": {
             "tfidf_lr": {"mcnemar_vs_roberta": {"p_value": s1_p},
@@ -75,6 +79,8 @@ def _baseline_results(s1_prec=0.970, s4_prec=0.975, s1_p=0.40, s1_ci=(0.960, 0.9
                        "bootstrap_precision_ci": {"ci_low": s2_ci[0], "ci_high": s2_ci[1]}},
             "distilbert": {"mcnemar_vs_roberta": {"p_value": 0.60},
                            "bootstrap_precision_ci": {"ci_low": 0.960, "ci_high": 0.985}},
+            "tfidf_svm": {"mcnemar_vs_roberta": {"p_value": s0_p},
+                          "bootstrap_precision_ci": {"ci_low": s0_ci[0], "ci_high": s0_ci[1]}},
         },
         "faithfulness": {
             "tfidf_lr": {"comprehensiveness": {"5": 0.30}, "sufficiency": {"5": 0.10}},
@@ -166,19 +172,25 @@ def _write_all_inputs(results: Path, **overrides) -> None:
 
 
 def test_all_inputs_present(tmp_path):
-    """(a) All inputs present: S1-S4 table, no-gain verdict, recommended line, 4 plots."""
+    """(a) All inputs present: S1-S4 + S0 table, best-baseline verdict, recommended line, 4 plots."""
     results = tmp_path / "results"
     _write_all_inputs(results)
     rc = main(["--results_dir", str(results)])
     assert rc == 0
     md = (results / "system_complexity_report.md").read_text(encoding="utf-8")
     report = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))
-    for label in ("S1 TF-IDF+LR", "S2 BiLSTM", "S3 DistilBERT", "S4 RoBERTa"):
+    for label in ("S1 TF-IDF+LR", "S2 BiLSTM", "S3 DistilBERT", "S4 RoBERTa",
+                  "S0 TF-IDF+SVC"):
         assert label in md
-    assert "not statistically justified" in md
+    # Headline verdict is vs the best simple baseline (SVC 0.982 > RoBERTa 0.975).
+    assert "below the best simple baseline" in md
+    assert "TF-IDF+SVC" in report["verdict"]
+    assert "GPU latency multiple: NOT MEASURED" in report["verdict"]
+    # The older LR-based verdict is kept for traceability.
+    assert "not statistically justified" in report["verdict_vs_tfidf_lr"]
+    assert "tfidf_lr" in report["verdict_vs_tfidf_lr"]
     assert "Recommended deployment model:" in md
-    assert "roberta_eval" in report["recommended_deployment_model"]  # highest precision, recall >= 0.85
-    assert "tfidf_lr" in report["verdict"]  # ...while the verdict names the lightweight deployment
+    assert "tfidf_svm" in report["recommended_deployment_model"]  # highest precision, recall >= 0.85
     plot_dir = results / "system_complexity_plots"
     for name in ("precision_vs_latency.png", "faithfulness_at_5.png",
                  "multimodal_ablation.png", "top_word_agreement.png"):
@@ -188,16 +200,19 @@ def test_all_inputs_present(tmp_path):
     assert report["agreement"]["n_emails"] == 3
     assert report["agreement"]["mean_jaccard"] == pytest.approx(4 / 6)
     assert 0.0 < report["agreement"]["mean_spearman"] <= 1.0
+    assert report["agreement"]["roberta_method"] == "roberta"
+    assert report["agreement"]["bilstm_method"] == "bilstm"
 
 
 def test_no_significant_gain_names_s1(tmp_path):
-    """(b) S1 within 1.0pt + overlapping CI + p>0.05 on both sets -> names S1."""
+    """(b) S1 within 1.0pt + overlapping CI + p>0.05 on both sets -> names S1 (LR verdict)."""
     results = tmp_path / "results"
     _write_all_inputs(results)
     rc = main(["--results_dir", str(results)])
     assert rc == 0
     md = (results / "system_complexity_report.md").read_text(encoding="utf-8")
-    verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict"]
+    report = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))
+    verdict = report["verdict_vs_tfidf_lr"]
     assert "The Transformer is not statistically justified by accuracy on this data" in verdict
     assert "tfidf_lr" in verdict
     assert "recommended lightweight deployment" in verdict
@@ -205,19 +220,21 @@ def test_no_significant_gain_names_s1(tmp_path):
 
 
 def test_significant_gain_reports_size_and_cost(tmp_path):
-    """(c) S4 significantly better -> gain size + latency/params multiples."""
+    """(c) S4 significantly better -> gain size + latency/params multiples (vs SVC)."""
     results = tmp_path / "results"
     _write_all_inputs(results, baseline_results=_baseline_results(
         s1_prec=0.90, s4_prec=0.99, s1_p=0.001, s1_ci=(0.88, 0.92),
         s2_prec=0.89, s2_p=0.001, s2_ci=(0.87, 0.91),
-        mm_s1_prec=0.80, mm_s1_p=0.001, mm_s1_ci=(0.78, 0.82)))
+        mm_s1_prec=0.80, mm_s1_p=0.001, mm_s1_ci=(0.78, 0.82),
+        s0_prec=0.90, s0_p=0.001, s0_ci=(0.88, 0.92)))
     rc = main(["--results_dir", str(results)])
     assert rc == 0
     verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict"]
     assert "significant precision gain" in verdict
-    assert "9.00 points" in verdict  # (0.99 - 0.90) * 100
-    assert "25.0x latency" in verdict  # 50 ms / 2 ms
+    assert "9.00 precision points" in verdict  # (0.99 - 0.90) * 100
+    assert "25.0x CPU latency" in verdict  # 50 ms / 2 ms
     assert "250.0x parameters" in verdict  # 125M / 500k
+    assert "GPU latency multiple: NOT MEASURED" in verdict
 
 
 def test_missing_inputs_not_run_yet_exit_0(tmp_path):
@@ -268,7 +285,9 @@ def test_mm_only_significant_gain_no_text_s4(tmp_path):
     _write(results / "multimodal_eval" / "multimodal_eval.json", _mm_eval(1.0, "roberta"))
     rc = main(["--results_dir", str(results)])
     assert rc == 0
-    verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict"]
+    # Headline verdict needs text precision (absent here); the LR-based
+    # verdict carries the multimodal-only logic.
+    verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict_vs_tfidf_lr"]
     assert "significant precision gain" not in verdict
     assert "no statistically significant difference" in verdict
     assert "multimodal held-out set" in verdict
@@ -284,7 +303,7 @@ def test_untrained_fallback_mm_never_drives_verdict(tmp_path):
     _write(results / "multimodal_eval" / "multimodal_eval.json", mm_data)
     rc = main(["--results_dir", str(results)])
     assert rc == 0
-    verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict"]
+    verdict = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))["verdict_vs_tfidf_lr"]
     assert "significant precision gain" not in verdict
     assert "UNTRAINED FALLBACK" in verdict
 
@@ -371,3 +390,89 @@ def test_system_verdict_p_exactly_boundary_not_significant():
     verdict = run_system_complexity_report.build_system_verdict(rows, mm)
     assert "significant precision gain" not in verdict
     assert "no statistically significant difference" in verdict
+
+
+# --- Cross-load guard + best-baseline verdict (fixed 2026-11-20) -----------
+
+def test_agreement_refuses_cross_loaded_roberta_file(tmp_path):
+    """A RoBERTa explanations file declaring model 'bilstm' is refused,
+    never reported as agreement (regression: the 2026-11-19 report showed
+    Jaccard/Spearman 1.0000 from exactly this mix-up)."""
+    results = tmp_path / "results"
+    _write_all_inputs(results, expl_roberta=_explanations("bilstm", _BILSTM_TOPS))
+    rc = main(["--results_dir", str(results)])
+    assert rc == 0
+    report = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))
+    assert report["agreement"]["status"] == NOT_RUN
+    assert "cross-loaded" in report["agreement"]["reason"]
+    assert report["agreement"]["mean_jaccard"] is None
+
+
+def test_agreement_refuses_identical_files(tmp_path):
+    """Byte-identical RoBERTa/BiLSTM explanation records are refused: one
+    run overwrote the other's file, so no cross-model comparison exists."""
+    results = tmp_path / "results"
+    _write_all_inputs(results, expl_roberta=_explanations("roberta", _BILSTM_TOPS))
+    rc = main(["--results_dir", str(results)])
+    assert rc == 0
+    report = json.loads((results / "system_complexity_report.json").read_text(encoding="utf-8"))
+    assert report["agreement"]["status"] == NOT_RUN
+    assert "identical" in report["agreement"]["reason"]
+
+
+def _best_verdict_rows():
+    """Rows in the shape build_best_baseline_verdict reads (real numbers)."""
+    def _row(model, prec, rec, f1, roc, lat_cpu, lat_gpu, params, size,
+             p_vs_roberta=None, expl=None, rob=None, mm_p=None, mm_r=None,
+             mm_p_value=None):
+        return {"model": model, "precision": {"mean": prec},
+                "recall": {"mean": rec}, "f1": {"mean": f1},
+                "roc_auc": {"mean": roc},
+                "latency_cpu_ms": {"mean": lat_cpu} if lat_cpu is not None else None,
+                "latency_gpu_ms": {"mean": lat_gpu} if lat_gpu is not None else None,
+                "params": params, "size_mb": size,
+                "mcnemar_p_vs_roberta": p_vs_roberta,
+                "explanation_time_s_per_email": ({"median": expl} if expl is not None else None),
+                "robustness_f1": rob,
+                "mm_precision": mm_p, "mm_recall": mm_r,
+                "mm_mcnemar_p_vs_roberta": mm_p_value}
+    return [
+        _row("tfidf_svm", 0.9820, 0.9892, 0.9856, 0.9989, 8.47, None, 3_972_261, 54.81,
+             p_vs_roberta=0.2530, expl=None,
+             rob={"clean": 0.9845, "truncated": 0.9726, "urls_removed": 0.9849,
+                  "typo_synonym": 0.9835},
+             mm_p=0.9556, mm_r=0.8958, mm_p_value=0.0703),
+        _row("bilstm", 0.9719, 0.9428, 0.9571, 0.9942, 19.90, 8.37, 6_236_034, 23.79,
+             p_vs_roberta=0.0002, expl=1.87,
+             rob={"clean": 0.9658, "truncated": 0.9658, "urls_removed": 0.9654,
+                  "typo_synonym": 0.9637},
+             mm_p=1.0, mm_r=1.0, mm_p_value=1.0),
+        _row("roberta_eval", 0.9690, 0.9932, 0.9809, 0.9986, 242.50, 15.50,
+             124_647_170, 475.57, expl=30.87,
+             rob={"clean": 0.9809, "truncated": 0.9773, "urls_removed": 0.9755,
+                  "typo_synonym": 0.9638},
+             mm_p=1.0, mm_r=0.9792),
+    ]
+
+
+def test_best_baseline_verdict_below_svc_with_explicit_multiples():
+    """RoBERTa 1.30 points below SVC (p=0.253): CPU multiple explicit,
+    GPU multiple NOT MEASURED, never fabricated."""
+    rows = _best_verdict_rows()
+    inputs = {"paired_mcnemar_seed42.json": {
+        "pairs": {"tfidf_svm_vs_bilstm": {"b": 16, "c": 65,
+                                          "p_exact_two_sided": 3.64e-08}}}}
+    verdict, details = run_system_complexity_report.build_best_baseline_verdict(
+        rows, {}, inputs)
+    assert "below the best simple baseline" in verdict
+    assert "1.30 precision points" in verdict
+    assert "McNemar p = 0.2530" in verdict
+    assert "28.6x CPU latency" in verdict  # 242.50 / 8.47
+    assert "31.4x parameters" in verdict  # 124647170 / 3972261
+    assert "GPU latency multiple: NOT MEASURED" in verdict
+    assert "significant precision gain" not in verdict
+    assert details["roberta_vs_svc"]["gpu_latency_multiple"] is None
+    assert details["roberta_vs_svc"]["cpu_latency_multiple"] == pytest.approx(242.50 / 8.47, rel=1e-3)
+    assert details["bilstm_vs_svc"]["cpu_latency_multiple"] == pytest.approx(19.90 / 8.47, rel=1e-3)
+    assert details["bilstm_vs_svc"]["mcnemar_p_vs_svc"] == pytest.approx(3.64e-08, rel=1e-2)
+    assert "SVC is significantly better than BiLSTM" in verdict

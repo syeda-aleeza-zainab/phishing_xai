@@ -1,0 +1,680 @@
+[{"stream_name":"stdout","time":4.711055686,"data":"repo at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-repo-ah-6b1\n"}
+,{"stream_name":"stdout","time":15.170439949,"data":"ood dataset at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-ood-modern\n"}
+,{"stream_name":"stdout","time":15.170477155,"data":"\n"}
+,{"stream_name":"stdout","time":15.170483526,"data":"$ pip install -q -r requirements-kaggle.txt\n"}
+,{"stream_name":"stdout","time":27.892634887,"data":"\n"}
+,{"stream_name":"stdout","time":27.892681743,"data":"$ pip install -q -e . --no-deps\n"}
+,{"stream_name":"stdout","time":33.390771962,"data":"\n"}
+,{"stream_name":"stdout","time":33.390809457,"data":"$ python scripts/download_data.py\n"}
+,{"stream_name":"stdout","time":41.729856816,"data":"Downloading dataset from: https://huggingface.co/datasets/zefang-liu/phishing-email-dataset/resolve/main/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":41.729926742,"data":"Target destination: data/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":41.729935236,"data":"Download completed successfully.\n"}
+,{"stream_name":"stdout","time":41.729941381,"data":"Verifying downloaded dataset...\n"}
+,{"stream_name":"stdout","time":41.729947216,"data":"VERIFICATION PASSED:\n"}
+,{"stream_name":"stdout","time":41.729952217,"data":"  Shape:       (18650, 3)\n"}
+,{"stream_name":"stdout","time":41.729957156,"data":"  Columns:     ['Unnamed: 0', 'Email Text', 'Email Type']\n"}
+,{"stream_name":"stdout","time":41.72996225,"data":"  Row count:   18650 (matches ~18,650 target)\n"}
+,{"stream_name":"stdout","time":41.729967154,"data":"  Label counts:\n"}
+,{"stream_name":"stdout","time":41.729974007,"data":"Email Type\n"}
+,{"stream_name":"stdout","time":41.729983373,"data":"Safe Email        11322\n"}
+,{"stream_name":"stdout","time":41.729986799,"data":"Phishing Email     7328\n"}
+,{"stream_name":"stdout","time":41.886955605,"data":"Canonical splits verified: {'train_size': 11215, 'train_label_dist': {'0': 7039, '1': 4176}, 'val_size': 2803, 'val_label_dist': {'0': 1765, '1': 1038}, 'test_size': 3495, 'test_label_dist': {'0': 2173, '1': 1322}}\n"}
+,{"stream_name":"stdout","time":41.886998643,"data":"\n"}
+,{"stream_name":"stdout","time":41.88700341,"data":"$ python -m pytest tests/test_ood_eval.py -q\n"}
+,{"stream_name":"stdout","time":74.803874336,"data":".........................                                                [100%]\n"}
+,{"stream_name":"stdout","time":74.803918246,"data":"=============================== warnings summary ===============================\n"}
+,{"stream_name":"stdout","time":74.803923254,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.803927137,"data":"  /usr/local/lib/python3.13/dist-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'\n"}
+,{"stream_name":"stdout","time":74.803931037,"data":"    prop = Group((name + Suppress(\"=\") + comma_separated(value)) | oneOf(_CONSTANTS))\n"}
+,{"stream_name":"stdout","time":74.803934754,"data":"\n"}
+,{"stream_name":"stdout","time":74.803939497,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.803959181,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.803965077,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.803970621,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.803976424,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804000468,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804014083,"data":"  /usr/local/lib/python3.13/dist-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'\n"}
+,{"stream_name":"stdout","time":74.80401745099999,"data":"    parse = parser.parseString(pattern)\n"}
+,{"stream_name":"stdout","time":74.804020133,"data":"\n"}
+,{"stream_name":"stdout","time":74.804022617,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804025273,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804027853,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804056257,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.80406088,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.80406554,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.80407031,"data":"  /usr/local/lib/python3.13/dist-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'\n"}
+,{"stream_name":"stdout","time":74.804087656,"data":"    parser.resetCache()\n"}
+,{"stream_name":"stdout","time":74.804124412,"data":"\n"}
+,{"stream_name":"stdout","time":74.804129041,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.80413304,"data":"  /usr/local/lib/python3.13/dist-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'\n"}
+,{"stream_name":"stdout","time":74.804137314,"data":"    ParserElement.enablePackrat()\n"}
+,{"stream_name":"stdout","time":74.804141056,"data":"\n"}
+,{"stream_name":"stdout","time":74.804144721,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804148576,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804152631,"data":"  /usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stdout","time":74.804158647,"data":"    warnings.warn(\n"}
+,{"stream_name":"stdout","time":74.804162505,"data":"\n"}
+,{"stream_name":"stdout","time":74.804166118,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804170154,"data":"tests/test_ood_eval.py::test_evaluate_set_smoke_with_tfidf_lr\n"}
+,{"stream_name":"stdout","time":74.804178218,"data":"  /usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stdout","time":74.804181188,"data":"    warnings.warn(\n"}
+,{"stream_name":"stdout","time":74.804183771,"data":"\n"}
+,{"stream_name":"stdout","time":74.804186879,"data":"-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n"}
+,{"stream_name":"stdout","time":74.804203591,"data":"25 passed, 18 warnings in 29.24s\n"}
+,{"stream_name":"stdout","time":76.442545421,"data":"\n"}
+,{"stream_name":"stdout","time":76.442584087,"data":"$ python experiments/modern_phishing_ood/scripts/run_ood_eval.py --sets phishnchips phishfuzzer frontiers_llm frontiers_human bec bec_poisoned --models tfidf_svm tfidf_lr --ood_dir /kaggle/input/datasets/syedaaleezazainab/phishing-xai-ood-modern --data_path data/Phishing_Email.csv --splits_path results/splits.json --output_dir experiments/modern_phishing_ood/results --predictions_dir experiments/modern_phishing_ood/predictions --floors 0.85 0.90 0.95 --latency_n_gpu 0 --latency_n_cpu 100 --robustness --skip_leakage\n"}
+,{"stream_name":"stdout","time":85.818136105,"data":"[setup] clean=phishing_xai.data.clean_text | metrics=phishing_xai.baselines.compute_metrics_full | thresholds=phishing_xai.baselines.fit_threshold_for_recall\n"}
+,{"stream_name":"stdout","time":86.102844542,"data":"[data] phishnchips: n=2000 phish=1000 legit=1000 other=0\n"}
+,{"stream_name":"stdout","time":86.453478495,"data":"[data] phishfuzzer: n=300 phish=103 legit=102 other=95\n"}
+,{"stream_name":"stdout","time":87.131668661,"data":"[data] frontiers_llm: n=4986 phish=4986 legit=0 other=0\n"}
+,{"stream_name":"stdout","time":87.69034265,"data":"[data] frontiers_human: n=5000 phish=5000 legit=0 other=0\n"}
+,{"stream_name":"stdout","time":88.026659605,"data":"[data] bec: n=4181 phish=4181 legit=0 other=0\n"}
+,{"stream_name":"stdout","time":88.347669232,"data":"[data] bec_poisoned: n=4181 phish=4181 legit=0 other=0\n"}
+,{"stream_name":"stdout","time":88.352457707,"data":"[data] frontiers_llm paired with PhishNChips legit n=5986\n"}
+,{"stream_name":"stdout","time":88.354567891,"data":"[data] frontiers_human paired with PhishNChips legit n=6000\n"}
+,{"stream_name":"stdout","time":88.356396334,"data":"[data] bec paired with PhishNChips legit n=5181\n"}
+,{"stream_name":"stdout","time":88.357931925,"data":"[data] bec_poisoned paired with PhishNChips legit n=5181\n"}
+,{"stream_name":"stdout","time":88.358322089,"data":"2026-11-20 03:14:40 | INFO    | phishing_xai.data | Loading dataset from: data/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":89.03126895,"data":"2026-11-20 03:14:40 | INFO    | phishing_xai.data | Dropping 16 rows with null values (from 18650 total).\n"}
+,{"stream_name":"stdout","time":94.520021841,"data":"2026-11-20 03:14:46 | INFO    | phishing_xai.data | Dropping 3 rows that became empty after text cleaning.\n"}
+,{"stream_name":"stdout","time":94.53214024,"data":"2026-11-20 03:14:46 | INFO    | phishing_xai.data | Loaded and cleaned 18631 emails (Safe: 11322, Phishing: 7309).\n"}
+,{"stream_name":"stdout","time":94.745857296,"data":"2026-11-20 03:14:46 | WARNING | phishing_xai.data | Conflicting duplicates: identified 1 unique text(s) across 533 total rows with conflicting labels! Dropping ALL copies of these conflicting rows.\n"}
+,{"stream_name":"stdout","time":94.751460068,"data":"2026-11-20 03:14:46 | INFO    | phishing_xai.data | Deduplication: removed 585 duplicate emails from remaining pool.\n"}
+,{"stream_name":"stdout","time":94.755634287,"data":"2026-11-20 03:14:46 | INFO    | phishing_xai.data | Deduplication summary: removed 1118 rows total (18631 -\u003e 17513). Retained unique emails: Safe=10977, Phishing=6536.\n"}
+,{"stream_name":"stdout","time":94.773124203,"data":"2026-11-20 03:14:46 | INFO    | phishing_xai.baselines | Loaded identical splits: train=11215 val=2803 test=3495\n"}
+,{"stream_name":"stdout","time":94.778548856,"data":"[thresholds] validation n=2803 (phish=1038)\n"}
+,{"stream_name":"stdout","time":95.362882258,"data":"2026-11-20 03:14:47 | INFO    | phishing_xai.data | Loading dataset from: data/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":95.999004151,"data":"2026-11-20 03:14:47 | INFO    | phishing_xai.data | Dropping 16 rows with null values (from 18650 total).\n"}
+,{"stream_name":"stdout","time":101.456004535,"data":"2026-11-20 03:14:53 | INFO    | phishing_xai.data | Dropping 3 rows that became empty after text cleaning.\n"}
+,{"stream_name":"stdout","time":101.467606722,"data":"2026-11-20 03:14:53 | INFO    | phishing_xai.data | Loaded and cleaned 18631 emails (Safe: 11322, Phishing: 7309).\n"}
+,{"stream_name":"stdout","time":101.680708843,"data":"2026-11-20 03:14:53 | WARNING | phishing_xai.data | Conflicting duplicates: identified 1 unique text(s) across 533 total rows with conflicting labels! Dropping ALL copies of these conflicting rows.\n"}
+,{"stream_name":"stdout","time":101.686519833,"data":"2026-11-20 03:14:53 | INFO    | phishing_xai.data | Deduplication: removed 585 duplicate emails from remaining pool.\n"}
+,{"stream_name":"stdout","time":101.689751856,"data":"2026-11-20 03:14:53 | INFO    | phishing_xai.data | Deduplication summary: removed 1118 rows total (18631 -\u003e 17513). Retained unique emails: Safe=10977, Phishing=6536.\n"}
+,{"stream_name":"stdout","time":101.705507283,"data":"2026-11-20 03:14:53 | INFO    | phishing_xai.baselines | Loaded identical splits: train=11215 val=2803 test=3495\n"}
+,{"stream_name":"stdout","time":216.888815665,"data":"[load] tfidf_svm: REFIT on canonical train split (n=11215, config={'C': 5.0, 'ngram_range': (3, 6), 'max_features': None}, fit_seconds=115.2, n_params=2531331, size_mb=34.70, probe=[[0.5027425761032135, 0.4972574238967866]]) — no saved artefact exists; vocabulary + classifier fitted on TRAIN ONLY.\n"}
+,{"stream_name":"stdout","time":243.476862394,"data":"[thresholds] tfidf_svm: {'0.85': {'threshold': 0.9740476800582453, 'val_precision': 0.9955456570155902, 'val_recall': 0.861271676300578, 'floor_met': True}, '0.90': {'threshold': 0.8163802837625163, 'val_precision': 0.9930139720558883, 'val_recall': 0.9585741811175337, 'floor_met': True}, '0.95': {'threshold': 0.8163802837625163, 'val_precision': 0.9930139720558883, 'val_recall': 0.9585741811175337, 'floor_met': True}} | cross-check {'mirror': 'ood_common.fit_thresholds_for_floors', 'max_abs_threshold_diff': 0.0, 'per_floor_diff': {'0.85': 0.0, '0.90': 0.0, '0.95': 0.0}}\n"}
+,{"stream_name":"stdout","time":244.465165687,"data":"[latency] tfidf_svm: {'texts_source': 'phishnchips', 'cpu': {'latency_ms_per_email_median': 7.584837999985439, 'latency_ms_per_email_mean': 7.532643749999011, 'n_timed': 100, 'device': 'cpu'}, 'gpu': {'status': 'NOT MEASURED', 'reason': 'TF-IDF has no GPU implementation'}}\n"}
+,{"stream_name":"stderr","time":249.075511881,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.075562027,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.076345209,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.076365039,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.077355213,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.077382413,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.085156908,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.085187313,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.094871542,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.094908909,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.103611852,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.103671833,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.112400654,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.112440109,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.121241055,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.121274319,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.130350703,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.130386248,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.131312317,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.13136589,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.132361565,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.13238673,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.140553857,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.140579339,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.149362511,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.149396306,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.158137929,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.158165747,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.167221397,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.167253038,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.167992503,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.168003426,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.168822096,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.168836966,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.176401983,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.176456714,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.177378203,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.177407168,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.178241314,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.17826248,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.186217258,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.186251041,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.19569697,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.195736293,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.204631014,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.204666654,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.213868996,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.213908598,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.222924304,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.222964068,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.232608362,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":249.232644312,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.233566114,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.233583545,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":249.234674724,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":249.234691544,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":249.267503359,"data":"[eval] phishnchips / tfidf_svm: n=2000 acc=0.5360 P=0.9000 R=0.0810 F1=0.1486 ROC-AUC=0.6604 FPR=0.0090\n"}
+,{"stream_name":"stderr","time":250.340799633,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":250.340840988,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":250.349576722,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":250.349637956,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":250.350452511,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":250.350476006,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":250.351277429,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":250.351296831,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":251.076022138,"data":"[eval] phishfuzzer / tfidf_svm: n=205 acc=0.5317 P=0.5263 R=0.6796 F1=0.5932 ROC-AUC=0.5819 FPR=0.6176\n"}
+,{"stream_name":"stderr","time":283.564792267,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.564840038,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.565757035,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.565792564,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.566727216,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.56674684,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.575592584,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.575625557,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.585965419,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.586003722,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.598285451,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.598329519,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.608717741,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.608755537,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.619193646,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.619230548,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.629399398,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.629440688,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.63963569,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.63971082,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.649703992,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.649740423,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.659895189,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.659949335,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.670244968,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.670284686,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.680410424,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.680466189,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.681442693,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.681468429,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.682543031,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.682561748,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.691632844,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.691690592,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.701440559,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.701477645,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.711766164,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.711827427,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.722185841,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.722229409,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.732645138,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.732677197,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.744512437,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.74460057,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.745416543,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.74543099,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.746257034,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.746269551,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.755026144,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.755086179,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.755831826,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.755847234,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.756812092,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.756831555,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.767424787,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.76746363,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.781362427,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":283.781401855,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.782328398,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.782348578,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":283.783358983,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":283.783373405,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":283.900652949,"data":"[eval] frontiers_llm / tfidf_svm: n=5986 acc=0.6816 P=0.9971 R=0.6195 F1=0.7642 ROC-AUC=0.9379 FPR=0.0090\n"}
+,{"stream_name":"stderr","time":316.578751657,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.578800411,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.589176341,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.589215799,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.599042377,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.599133018,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.609878543,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.609897731,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.619898448,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.619920715,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.620695175,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.62071061,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.621561102,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.621574333,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.629311344,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.629327517,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.63877487,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.638797132,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.639571424,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.639586402,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.640472696,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.640487009,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.650895417,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.650916252,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.651652951,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.651665684,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.652420734,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.652432914,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.659937522,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.659966146,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.660689996,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.660724593,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.66155176,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.661563939,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.670977836,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.671045154,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.68389217,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":316.683926571,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.684669801,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.684684964,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":316.685600276,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":316.685613634,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":316.784870819,"data":"[eval] frontiers_human / tfidf_svm: n=6000 acc=0.8497 P=0.9978 R=0.8214 F1=0.9011 ROC-AUC=0.9699 FPR=0.0090\n"}
+,{"stream_name":"stderr","time":327.815172342,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.815218764,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.826975996,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.827035216,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.827743762,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.827757035,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.828625637,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.8286458,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.836665174,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.836685405,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.83748822,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.837501003,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.838446825,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.838482833,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.847947691,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.847966755,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.848684535,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.84869812,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.849449665,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.849462445,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.857158067,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.857179626,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.857911303,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.85792124,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.858788206,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.858805434,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.868196738,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.868241126,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.881385909,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":327.881415097,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.882274477,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.882288471,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":327.883243275,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":327.883266123,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":327.966226006,"data":"[eval] bec / tfidf_svm: n=5181 acc=0.5045 P=0.9945 R=0.3882 F1=0.5584 ROC-AUC=0.9001 FPR=0.0090\n"}
+,{"stream_name":"stderr","time":339.165365877,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.165417985,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.177238523,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.177299576,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.178124667,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.178135739,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.178982927,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.178993375,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.187003485,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.187037198,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.188043992,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.188061854,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.188958592,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.188975106,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.198467182,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.198497486,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.199293603,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.199310985,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.200124849,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.200144847,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.20819485,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.20821895,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.209167576,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.209186103,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.20999375,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.210008312,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.220080435,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.220122656,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.232613091,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":339.232646483,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.233631172,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.233653753,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":339.234768595,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":339.23478861,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":339.31850898,"data":"[eval] bec_poisoned / tfidf_svm: n=5181 acc=0.4868 P=0.9942 R=0.3662 F1=0.5352 ROC-AUC=0.8939 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":357.120649366,"data":"[robustness] tfidf_svm: {'truncated': {'f1': 0.14862385321100918, 'accuracy': 0.536, 'roc_auc': 0.6603629999999999}, 'urls_removed': {'f1': 0.18345323741007194, 'accuracy': 0.546, 'roc_auc': 0.657883}, 'typo_synonym': {'f1': 0.15956482320942883, 'accuracy': 0.5365, 'roc_auc': 0.6654410000000001}}\n"}
+,{"stream_name":"stdout","time":357.120822485,"data":"2026-11-20 03:19:08 | INFO    | phishing_xai.data | Loading dataset from: data/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":357.76285688,"data":"2026-11-20 03:19:09 | INFO    | phishing_xai.data | Dropping 16 rows with null values (from 18650 total).\n"}
+,{"stream_name":"stdout","time":363.151492308,"data":"2026-11-20 03:19:14 | INFO    | phishing_xai.data | Dropping 3 rows that became empty after text cleaning.\n"}
+,{"stream_name":"stdout","time":363.165187965,"data":"2026-11-20 03:19:14 | INFO    | phishing_xai.data | Loaded and cleaned 18631 emails (Safe: 11322, Phishing: 7309).\n"}
+,{"stream_name":"stdout","time":363.366290758,"data":"2026-11-20 03:19:15 | WARNING | phishing_xai.data | Conflicting duplicates: identified 1 unique text(s) across 533 total rows with conflicting labels! Dropping ALL copies of these conflicting rows.\n"}
+,{"stream_name":"stdout","time":363.371901289,"data":"2026-11-20 03:19:15 | INFO    | phishing_xai.data | Deduplication: removed 585 duplicate emails from remaining pool.\n"}
+,{"stream_name":"stdout","time":363.3750544,"data":"2026-11-20 03:19:15 | INFO    | phishing_xai.data | Deduplication summary: removed 1118 rows total (18631 -\u003e 17513). Retained unique emails: Safe=10977, Phishing=6536.\n"}
+,{"stream_name":"stdout","time":363.391037014,"data":"2026-11-20 03:19:15 | INFO    | phishing_xai.baselines | Loaded identical splits: train=11215 val=2803 test=3495\n"}
+,{"stream_name":"stdout","time":372.878043583,"data":"[load] tfidf_lr: REFIT on canonical train split (n=11215, config={'C': 10.0, 'ngram_range': (1, 2), 'max_features': None}, fit_seconds=9.5, n_params=659027, size_mb=10.85, probe=[[0.3440273900635845, 0.6559726099364155]]) — no saved artefact exists; vocabulary + classifier fitted on TRAIN ONLY.\n"}
+,{"stream_name":"stdout","time":374.651308754,"data":"[thresholds] tfidf_lr: {'0.85': {'threshold': 0.8182044517154964, 'val_precision': 0.9943757030371203, 'val_recall': 0.8516377649325626, 'floor_met': True}, '0.90': {'threshold': 0.6856861611971153, 'val_precision': 0.9878665318503539, 'val_recall': 0.941233140655106, 'floor_met': True}, '0.95': {'threshold': 0.6385305141964166, 'val_precision': 0.9860279441117764, 'val_recall': 0.9518304431599229, 'floor_met': True}} | cross-check {'mirror': 'ood_common.fit_thresholds_for_floors', 'max_abs_threshold_diff': 0.0, 'per_floor_diff': {'0.85': 0.0, '0.90': 0.0, '0.95': 0.0}}\n"}
+,{"stream_name":"stdout","time":374.938629761,"data":"[latency] tfidf_lr: {'texts_source': 'phishnchips', 'cpu': {'latency_ms_per_email_median': 1.0154084999953739, 'latency_ms_per_email_mean': 1.0512641800016809, 'n_timed': 100, 'device': 'cpu'}, 'gpu': {'status': 'NOT MEASURED', 'reason': 'TF-IDF has no GPU implementation'}}\n"}
+,{"stream_name":"stderr","time":375.398826866,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.398866114,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.400236541,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.400262264,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.400909599,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.400927783,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.40873935,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.408772021,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.417442979,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.417475611,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.426550625,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.426581655,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.435397402,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.435426314,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.444007725,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.44403629,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.453035355,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.453068895,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.453937405,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.453967673,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.454908596,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.454928422,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.463024158,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.463071209,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.471675277,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.471710271,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.480500663,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.480535398,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.489457835,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.489491835,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.490251123,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.490270477,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.491070424,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.491083491,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.498547073,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.49857646,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.49937314,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.499393525,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.500266856,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.500282468,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.508380288,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.508408176,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.517565622,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.517594429,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.526237695,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.526264535,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.535407678,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.535455534,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.544231318,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.544263248,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.553762452,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.553795445,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.554678536,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.554699729,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.555642261,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.555659878,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":375.58843696,"data":"[eval] phishnchips / tfidf_lr: n=2000 acc=0.5905 P=0.9788 R=0.1850 F1=0.3112 ROC-AUC=0.7528 FPR=0.0040\n"}
+,{"stream_name":"stderr","time":375.719459302,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.719498246,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.727935453,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":375.727967518,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.728933875,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.728953153,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":375.729786864,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":375.729800782,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":375.789883614,"data":"[eval] phishfuzzer / tfidf_lr: n=205 acc=0.5317 P=0.5238 R=0.7476 F1=0.6160 ROC-AUC=0.5603 FPR=0.6863\n"}
+,{"stream_name":"stderr","time":378.315509215,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.315555124,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.316448674,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.316471885,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.317458918,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.317476666,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.326154215,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.326189325,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.335211793,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.335231583,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.344444584,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.34447779,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.353871789,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.35389954,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.362998287,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.363024013,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.372851961,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.372886617,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.38197198,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.381999109,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.391191069,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.391253446,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.400294253,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.400328933,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.409669878,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.409701647,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.419127245,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.419159075,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.419945426,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.419963633,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.420924874,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.420963357,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.429280442,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.429377214,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.438519548,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.438545869,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.447781916,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.447823988,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.456733637,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.456759003,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.465680149,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.465745931,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.477643269,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.477679292,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.478440393,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.478458396,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.47917521,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.479194288,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.487017705,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.487078147,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.48789515,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.487917464,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.48873013,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.488747484,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.498681868,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.498711248,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.511865659,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":378.511899412,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.512810343,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.51283665,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":378.51374889,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":378.51376881,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":378.61413013,"data":"[eval] frontiers_llm / tfidf_lr: n=5986 acc=0.8483 P=0.9990 R=0.8187 F1=0.8999 ROC-AUC=0.9748 FPR=0.0040\n"}
+,{"stream_name":"stderr","time":381.148382728,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.148420403,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.158562604,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.158598151,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.168388716,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.168420006,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.178327762,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.178360903,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.18836637,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.188399941,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.189162881,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.18918458,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.190020714,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.190034378,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.198026643,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.198049585,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.207118764,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.207144222,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.208011053,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.208026475,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.20890896,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.208928938,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.219198676,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.219221751,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.219915724,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.219928747,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.22068687,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.220704391,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.228482086,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.228502477,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.229311277,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.229331425,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.230160292,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.230179148,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.239696089,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.239720364,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.252887652,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":381.252919859,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.253750041,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.253774371,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":381.254676294,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":381.254695949,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":381.346799105,"data":"[eval] frontiers_human / tfidf_lr: n=6000 acc=0.8660 P=0.9990 R=0.8400 F1=0.9126 ROC-AUC=0.9823 FPR=0.0040\n"}
+,{"stream_name":"stderr","time":382.418892129,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.418936391,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.430663894,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.430702118,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.431524892,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.431563621,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.432436368,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.432461851,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.440620946,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.440648846,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.441544609,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.441567104,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.442466016,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.442486852,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.452158449,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.452181566,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.452853108,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.452866516,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.453630669,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.453650544,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.461437998,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.461464229,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.462149979,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.462170605,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.46293295,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.462976972,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.473250934,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.473280463,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.485658503,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":382.485684102,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.486497854,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.486520477,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":382.487458388,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":382.487474056,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":382.572671499,"data":"[eval] bec / tfidf_lr: n=5181 acc=0.4476 P=0.9970 R=0.3164 F1=0.4804 ROC-AUC=0.9067 FPR=0.0040\n"}
+,{"stream_name":"stderr","time":383.68473257,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.684762587,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.696976571,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.697026791,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.697762406,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.697782869,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.698565038,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.698582671,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.706991437,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.707016034,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.70796159,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.707983436,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.708909307,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.708925537,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.718720357,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.718757764,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.719447416,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.719461484,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.720257942,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.720271288,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.727996398,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.728013473,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.728801077,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.728815562,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.729767767,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.729805393,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.739049522,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.739100419,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.751506041,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:379: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.\n"}
+,{"stream_name":"stderr","time":383.751542011,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.752305245,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.752323593,"data":"  warnings.warn(\n"}
+,{"stream_name":"stderr","time":383.753282301,"data":"/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_ranking.py:1033: UserWarning: No positive class found in y_true, recall is set to one for all thresholds.\n"}
+,{"stream_name":"stderr","time":383.753296911,"data":"  warnings.warn(\n"}
+,{"stream_name":"stdout","time":383.835896252,"data":"[eval] bec_poisoned / tfidf_lr: n=5181 acc=0.4347 P=0.9968 R=0.3004 F1=0.4617 ROC-AUC=0.8975 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":385.456148501,"data":"[robustness] tfidf_lr: {'truncated': {'f1': 0.31118587047939444, 'accuracy': 0.5905, 'roc_auc': 0.752764}, 'urls_removed': {'f1': 0.29974597798475866, 'accuracy': 0.5865, 'roc_auc': 0.75902}, 'typo_synonym': {'f1': 0.2996632996632997, 'accuracy': 0.584, 'roc_auc': 0.763434}}\n"}
+,{"stream_name":"stdout","time":385.540707202,"data":"[done] outputs in experiments/modern_phishing_ood/results and experiments/modern_phishing_ood/predictions\n"}
+,{"stream_name":"stdout","time":387.783851729,"data":"\n"}
+,{"stream_name":"stdout","time":387.783890457,"data":"=== SUMMARY (TF-IDF OOD, threshold 0.5) ===\n"}
+,{"stream_name":"stdout","time":387.786290764,"data":"{\n"}
+,{"stream_name":"stdout","time":387.786315039,"data":"  \"phishnchips__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.786331114,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786335448,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786339223,"data":"  \"phishfuzzer__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.786350043,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786353388,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786355916,"data":"  \"frontiers_llm__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.78635993,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786363837,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786367538,"data":"  \"frontiers_human__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.786371241,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786374994,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786378526,"data":"  \"bec__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.78638209,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786385765,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786389297,"data":"  \"bec_poisoned__tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.786392937,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786397254,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786399962,"data":"  \"phishnchips__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786402496,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786405061,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786407633,"data":"  \"phishfuzzer__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786410189,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786412994,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786415508,"data":"  \"frontiers_llm__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786418073,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786420711,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786423227,"data":"  \"frontiers_human__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786425822,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786428409,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786430854,"data":"  \"bec__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786433431,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786436026,"data":"  },\n"}
+,{"stream_name":"stdout","time":387.786438518,"data":"  \"bec_poisoned__tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786441095,"data":"    \"status\": \"ok\"\n"}
+,{"stream_name":"stdout","time":387.786443676,"data":"  }\n"}
+,{"stream_name":"stdout","time":387.786446148,"data":"}\n"}
+,{"stream_name":"stdout","time":387.786448728,"data":"phishnchips__tfidf_svm: n=2000 acc=0.5360 P=0.9000 R=0.0810 F1=0.1486 ROC-AUC=0.6604 PR-AUC=0.6724 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":387.786451519,"data":"phishfuzzer__tfidf_svm: n=205 acc=0.5317 P=0.5263 R=0.6796 F1=0.5932 ROC-AUC=0.5819 PR-AUC=0.6379 FPR=0.6176\n"}
+,{"stream_name":"stdout","time":387.786454331,"data":"frontiers_llm__tfidf_svm: n=5986 acc=0.6816 P=0.9971 R=0.6195 F1=0.7642 ROC-AUC=0.9379 PR-AUC=0.9872 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":387.786583403,"data":"frontiers_human__tfidf_svm: n=6000 acc=0.8497 P=0.9978 R=0.8214 F1=0.9011 ROC-AUC=0.9699 PR-AUC=0.9940 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":387.786592977,"data":"bec__tfidf_svm: n=5181 acc=0.5045 P=0.9945 R=0.3882 F1=0.5584 ROC-AUC=0.9001 PR-AUC=0.9738 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":387.786606541,"data":"bec_poisoned__tfidf_svm: n=5181 acc=0.4868 P=0.9942 R=0.3662 F1=0.5352 ROC-AUC=0.8939 PR-AUC=0.9719 FPR=0.0090\n"}
+,{"stream_name":"stdout","time":387.786611191,"data":"phishnchips__tfidf_lr: n=2000 acc=0.5905 P=0.9788 R=0.1850 F1=0.3112 ROC-AUC=0.7528 PR-AUC=0.7771 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":387.786615263,"data":"phishfuzzer__tfidf_lr: n=205 acc=0.5317 P=0.5238 R=0.7476 F1=0.6160 ROC-AUC=0.5603 PR-AUC=0.5872 FPR=0.6863\n"}
+,{"stream_name":"stdout","time":387.786619277,"data":"frontiers_llm__tfidf_lr: n=5986 acc=0.8483 P=0.9990 R=0.8187 F1=0.8999 ROC-AUC=0.9748 PR-AUC=0.9951 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":387.786623403,"data":"frontiers_human__tfidf_lr: n=6000 acc=0.8660 P=0.9990 R=0.8400 F1=0.9126 ROC-AUC=0.9823 PR-AUC=0.9965 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":387.786627585,"data":"bec__tfidf_lr: n=5181 acc=0.4476 P=0.9970 R=0.3164 F1=0.4804 ROC-AUC=0.9067 PR-AUC=0.9747 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":387.786637718,"data":"bec_poisoned__tfidf_lr: n=5181 acc=0.4347 P=0.9968 R=0.3004 F1=0.4617 ROC-AUC=0.8975 PR-AUC=0.9720 FPR=0.0040\n"}
+,{"stream_name":"stdout","time":387.786641193,"data":"BEC poisoned contrast: {\n"}
+,{"stream_name":"stdout","time":387.786643905,"data":"  \"method\": \"positional pairing by email_id suffix; changed = text differs\",\n"}
+,{"stream_name":"stdout","time":387.786646811,"data":"  \"n_paired\": 4181,\n"}
+,{"stream_name":"stdout","time":387.786649458,"data":"  \"n_changed\": 1187,\n"}
+,{"stream_name":"stdout","time":387.786652155,"data":"  \"n_unchanged\": 2994,\n"}
+,{"stream_name":"stdout","time":387.786654824,"data":"  \"per_model\": {\n"}
+,{"stream_name":"stdout","time":387.786657391,"data":"    \"tfidf_svm\": {\n"}
+,{"stream_name":"stdout","time":387.786660037,"data":"      \"n_changed_scored\": 1187,\n"}
+,{"stream_name":"stdout","time":387.786662704,"data":"      \"recall_at_0_5_clean_changed\": 0.37405223251895536,\n"}
+,{"stream_name":"stdout","time":387.786665447,"data":"      \"recall_at_0_5_poisoned_changed\": 0.3024431339511373,\n"}
+,{"stream_name":"stdout","time":387.786668199,"data":"      \"recall_delta_poisoned_minus_clean\": -0.07160909856781805,\n"}
+,{"stream_name":"stdout","time":387.7866709,"data":"      \"median_prob_change_poisoned_minus_clean\": -0.024853665382932905,\n"}
+,{"stream_name":"stdout","time":387.786673594,"data":"      \"unchanged_rows_identical_predictions\": true,\n"}
+,{"stream_name":"stdout","time":387.786676257,"data":"      \"n_unchanged_scored\": 2994\n"}
+,{"stream_name":"stdout","time":387.786678887,"data":"    },\n"}
+,{"stream_name":"stdout","time":387.786685856,"data":"    \"tfidf_lr\": {\n"}
+,{"stream_name":"stdout","time":387.786688633,"data":"      \"n_changed_scored\": 1187,\n"}
+,{"stream_name":"stdout","time":387.786692541,"data":"      \"recall_at_0_5_clean_changed\": 0.3049705139005897,\n"}
+,{"stream_name":"stdout","time":387.786695352,"data":"      \"recall_at_0_5_poisoned_changed\": 0.2476832350463353,\n"}
+,{"stream_name":"stdout","time":387.786698163,"data":"      \"recall_delta_poisoned_minus_clean\": -0.057287278854254414,\n"}
+,{"stream_name":"stdout","time":387.786700977,"data":"      \"median_prob_change_poisoned_minus_clean\": -0.032856866589667355,\n"}
+,{"stream_name":"stdout","time":387.786703734,"data":"      \"unchanged_rows_identical_predictions\": true,\n"}
+,{"stream_name":"stdout","time":387.78670644,"data":"      \"n_unchanged_scored\": 2994\n"}
+,{"stream_name":"stdout","time":387.786709151,"data":"    }\n"}
+,{"stream_name":"stdout","time":387.786711794,"data":"  }\n"}
+,{"stream_name":"stdout","time":387.786714297,"data":"}\n"}
+,{"stream_name":"stdout","time":387.786720026,"data":"KERNEL4_OOD_TFIDF DONE\n"}
+,{"stream_name":"stderr","time":389.92397207,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":389.924011807,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":390.189220993,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":390.189248504,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":391.16597826,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":391.757553363,"data":"[NbConvertApp] Writing 292245 bytes to __results__.html\n"}
+]

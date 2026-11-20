@@ -1,0 +1,153 @@
+{
+  "train_n_texts": 17513,
+  "train_n_unique_normalized_hashes": 17484,
+  "train_n_phishing_urls": 979,
+  "minhash_train_n": 17513,
+  "minhash_train_sampled": false,
+  "per_set": {
+    "frontiers_llm": {
+      "method": "exact_md5_of_normalized_text + near_dup_hash(first_200_alnum)",
+      "n_ood": 5986,
+      "n_train": 17513,
+      "n_train_unique_exact_hashes": 17484,
+      "n_train_unique_near_dup_hashes": 16949,
+      "n_ood_exact_overlap": 0,
+      "n_ood_near_dup_hash_overlap": 0,
+      "minhash": {
+        "method": "minhash",
+        "n_perm": 64,
+        "shingle_k_words": 5,
+        "seed": 42,
+        "threshold": 0.9,
+        "n_ood": 5986,
+        "n_train": 17513,
+        "n_ood_with_max_jaccard_ge_threshold": 0,
+        "n_ood_with_max_jaccard_ge_0.8": 0,
+        "n_ood_with_max_jaccard_ge_0.5": 0,
+        "max_jaccard_median": 0.015625,
+        "max_jaccard_mean": 0.019699611593718677,
+        "max_jaccard_max": 0.078125
+      },
+      "url_overlap_vs_train_phishing": {
+        "n_ood_urls": 2241,
+        "n_train_urls": 979,
+        "n_shared_urls": 0,
+        "shared_urls": [],
+        "shared_url_fraction_of_ood": 0.0
+      },
+      "n_ood_body_only_exact_overlap": 0,
+      "n_rows": 5986,
+      "n_phish": 4986,
+      "n_legit": 1000
+    },
+    "frontiers_human": {
+      "method": "exact_md5_of_normalized_text + near_dup_hash(first_200_alnum)",
+      "n_ood": 6000,
+      "n_train": 17513,
+      "n_train_unique_exact_hashes": 17484,
+      "n_train_unique_near_dup_hashes": 16949,
+      "n_ood_exact_overlap": 1,
+      "n_ood_near_dup_hash_overlap": 1,
+      "minhash": {
+        "method": "minhash",
+        "n_perm": 64,
+        "shingle_k_words": 5,
+        "seed": 42,
+        "threshold": 0.9,
+        "n_ood": 6000,
+        "n_train": 17513,
+        "n_ood_with_max_jaccard_ge_threshold": 6,
+        "n_ood_with_max_jaccard_ge_0.8": 8,
+        "n_ood_with_max_jaccard_ge_0.5": 54,
+        "max_jaccard_median": 0.0,
+        "max_jaccard_mean": 0.026942708333333332,
+        "max_jaccard_max": 1.0
+      },
+      "url_overlap_vs_train_phishing": {
+        "n_ood_urls": 1998,
+        "n_train_urls": 979,
+        "n_shared_urls": 3,
+        "shared_urls": [
+          "http://www.mail.com/?sr=signup",
+          "http://www.thisdayonline.com",
+          "www.thisdayonline.com"
+        ],
+        "shared_url_fraction_of_ood": 0.0015015015015015015
+      },
+      "n_ood_body_only_exact_overlap": 0,
+      "n_rows": 6000,
+      "n_phish": 5000,
+      "n_legit": 1000
+    },
+    "bec": {
+      "method": "exact_md5_of_normalized_text + near_dup_hash(first_200_alnum)",
+      "n_ood": 5181,
+      "n_train": 17513,
+      "n_train_unique_exact_hashes": 17484,
+      "n_train_unique_near_dup_hashes": 16949,
+      "n_ood_exact_overlap": 0,
+      "n_ood_near_dup_hash_overlap": 0,
+      "minhash": {
+        "method": "minhash",
+        "n_perm": 64,
+        "shingle_k_words": 5,
+        "seed": 42,
+        "threshold": 0.9,
+        "n_ood": 5181,
+        "n_train": 17513,
+        "n_ood_with_max_jaccard_ge_threshold": 0,
+        "n_ood_with_max_jaccard_ge_0.8": 0,
+        "n_ood_with_max_jaccard_ge_0.5": 0,
+        "max_jaccard_median": 0.0,
+        "max_jaccard_mean": 0.0052415074309978766,
+        "max_jaccard_max": 0.09375
+      },
+      "url_overlap_vs_train_phishing": {
+        "n_ood_urls": 92,
+        "n_train_urls": 979,
+        "n_shared_urls": 0,
+        "shared_urls": [],
+        "shared_url_fraction_of_ood": 0.0
+      },
+      "n_ood_body_only_exact_overlap": 0,
+      "n_rows": 5181,
+      "n_phish": 4181,
+      "n_legit": 1000
+    },
+    "bec_poisoned": {
+      "method": "exact_md5_of_normalized_text + near_dup_hash(first_200_alnum)",
+      "n_ood": 5181,
+      "n_train": 17513,
+      "n_train_unique_exact_hashes": 17484,
+      "n_train_unique_near_dup_hashes": 16949,
+      "n_ood_exact_overlap": 0,
+      "n_ood_near_dup_hash_overlap": 0,
+      "minhash": {
+        "method": "minhash",
+        "n_perm": 64,
+        "shingle_k_words": 5,
+        "seed": 42,
+        "threshold": 0.9,
+        "n_ood": 5181,
+        "n_train": 17513,
+        "n_ood_with_max_jaccard_ge_threshold": 0,
+        "n_ood_with_max_jaccard_ge_0.8": 0,
+        "n_ood_with_max_jaccard_ge_0.5": 0,
+        "max_jaccard_median": 0.0,
+        "max_jaccard_mean": 0.005157064273306312,
+        "max_jaccard_max": 0.09375
+      },
+      "url_overlap_vs_train_phishing": {
+        "n_ood_urls": 89,
+        "n_train_urls": 979,
+        "n_shared_urls": 0,
+        "shared_urls": [],
+        "shared_url_fraction_of_ood": 0.0
+      },
+      "n_ood_body_only_exact_overlap": 0,
+      "n_rows": 5181,
+      "n_phish": 4181,
+      "n_legit": 1000
+    }
+  }
+}

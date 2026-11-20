@@ -1,0 +1,74 @@
+[{"stream_name":"stdout","time":13.340500417,"data":"repo at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-repo-ah-6b1\n"}
+,{"stream_name":"stdout","time":31.366407577,"data":"roberta checkpoint at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-checkpoint/best_model.pt\n"}
+,{"stream_name":"stdout","time":36.975399935,"data":"bilstm artefact at /kaggle/input/datasets/syedaaleezazainab/phishing-xai-results/results/bilstm/best_bilstm.pt\n"}
+,{"stream_name":"stdout","time":38.066736732,"data":"ood dataset at /kaggle/input/datasets/syedaaleezazainab\n"}
+,{"stream_name":"stdout","time":38.066783885,"data":"\n"}
+,{"stream_name":"stdout","time":38.06678931,"data":"$ pip install -q -r requirements-kaggle.txt\n"}
+,{"stream_name":"stdout","time":49.305626466,"data":"\n"}
+,{"stream_name":"stdout","time":49.305682318,"data":"$ pip install -q -e . --no-deps\n"}
+,{"stream_name":"stdout","time":53.680913082000004,"data":"\n"}
+,{"stream_name":"stdout","time":53.680951687,"data":"$ python scripts/download_data.py\n"}
+,{"stream_name":"stdout","time":57.367873424,"data":"Downloading dataset from: https://huggingface.co/datasets/zefang-liu/phishing-email-dataset/resolve/main/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":57.36790481,"data":"Target destination: data/Phishing_Email.csv\n"}
+,{"stream_name":"stdout","time":57.36791092,"data":"Download completed successfully.\n"}
+,{"stream_name":"stdout","time":57.367916601,"data":"Verifying downloaded dataset...\n"}
+,{"stream_name":"stdout","time":57.367929156,"data":"VERIFICATION PASSED:\n"}
+,{"stream_name":"stdout","time":57.367934619,"data":"  Shape:       (18650, 3)\n"}
+,{"stream_name":"stdout","time":57.367939747,"data":"  Columns:     ['Unnamed: 0', 'Email Text', 'Email Type']\n"}
+,{"stream_name":"stdout","time":57.367945604,"data":"  Row count:   18650 (matches ~18,650 target)\n"}
+,{"stream_name":"stdout","time":57.367952199,"data":"  Label counts:\n"}
+,{"stream_name":"stdout","time":57.36795773,"data":"Email Type\n"}
+,{"stream_name":"stdout","time":57.367962985,"data":"Safe Email        11322\n"}
+,{"stream_name":"stdout","time":57.36796913,"data":"Phishing Email     7328\n"}
+,{"stream_name":"stdout","time":57.485452723,"data":"Canonical splits verified: {'train_size': 11215, 'train_label_dist': {'0': 7039, '1': 4176}, 'val_size': 2803, 'val_label_dist': {'0': 1765, '1': 1038}, 'test_size': 3495, 'test_label_dist': {'0': 2173, '1': 1322}}\n"}
+,{"stream_name":"stdout","time":57.48548774,"data":"\n"}
+,{"stream_name":"stdout","time":57.485492911,"data":"$ python -m pytest tests/test_ood_eval.py -q\n"}
+,{"stream_name":"stdout","time":59.986812541,"data":".......................                                                  [100%]\n"}
+,{"stream_name":"stdout","time":59.986851743,"data":"23 passed in 0.52s\n"}
+,{"stream_name":"stdout","time":60.154547772,"data":"\n"}
+,{"stream_name":"stdout","time":60.154585143,"data":"$ python experiments/modern_phishing_ood/scripts/run_ood_eval.py --sets phishnchips phishfuzzer --models roberta bilstm --ood_dir /kaggle/input/datasets/syedaaleezazainab --data_path data/Phishing_Email.csv --splits_path results/splits.json --roberta_checkpoint results/best_model.pt --bilstm_checkpoint results/bilstm/best_bilstm.pt --output_dir experiments/modern_phishing_ood/results --predictions_dir experiments/modern_phishing_ood/predictions --floors 0.85 0.90 0.95 --latency_n_gpu 200 --latency_n_cpu 100\n"}
+,{"stream_name":"stdout","time":88.430584933,"data":"[setup] clean=phishing_xai.data.clean_text | metrics=phishing_xai.baselines.compute_metrics_full | thresholds=phishing_xai.baselines.fit_threshold_for_recall\n"}
+,{"stream_name":"stderr","time":88.435275018,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":88.436562552,"data":"  File \"/kaggle/working/repo/experiments/modern_phishing_ood/scripts/run_ood_eval.py\", line 708, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":88.436576497,"data":"    raise SystemExit(main())\n"}
+,{"stream_name":"stderr","time":88.436581472,"data":"                     ~~~~^^\n"}
+,{"stream_name":"stderr","time":88.436585825,"data":"  File \"/kaggle/working/repo/experiments/modern_phishing_ood/scripts/run_ood_eval.py\", line 457, in main\n"}
+,{"stream_name":"stderr","time":88.43659113,"data":"    frames[name] = load_ood_set(name, ood_dir)\n"}
+,{"stream_name":"stderr","time":88.436595034,"data":"                   ~~~~~~~~~~~~^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":88.436599437,"data":"  File \"/kaggle/working/repo/experiments/modern_phishing_ood/scripts/run_ood_eval.py\", line 136, in load_ood_set\n"}
+,{"stream_name":"stderr","time":88.436604445,"data":"    return oc.load_phishnchips(ood_dir / \"phishnchips_core_emails.csv\")\n"}
+,{"stream_name":"stderr","time":88.436609646,"data":"           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":88.436613942,"data":"  File \"/kaggle/working/repo/experiments/modern_phishing_ood/scripts/ood_common.py\", line 396, in load_phishnchips\n"}
+,{"stream_name":"stderr","time":88.436618037,"data":"    df = pd.read_csv(path)\n"}
+,{"stream_name":"stderr","time":88.436621774,"data":"  File \"/usr/local/lib/python3.13/dist-packages/pandas/io/parsers/readers.py\", line 1026, in read_csv\n"}
+,{"stream_name":"stderr","time":88.436628006,"data":"    return _read(filepath_or_buffer, kwds)\n"}
+,{"stream_name":"stderr","time":88.436636295,"data":"  File \"/usr/local/lib/python3.13/dist-packages/pandas/io/parsers/readers.py\", line 620, in _read\n"}
+,{"stream_name":"stderr","time":88.43663949,"data":"    parser = TextFileReader(filepath_or_buffer, **kwds)\n"}
+,{"stream_name":"stderr","time":88.436642073,"data":"  File \"/usr/local/lib/python3.13/dist-packages/pandas/io/parsers/readers.py\", line 1620, in __init__\n"}
+,{"stream_name":"stderr","time":88.436645041,"data":"    self._engine = self._make_engine(f, self.engine)\n"}
+,{"stream_name":"stderr","time":88.43664772,"data":"                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":88.436650352,"data":"  File \"/usr/local/lib/python3.13/dist-packages/pandas/io/parsers/readers.py\", line 1880, in _make_engine\n"}
+,{"stream_name":"stderr","time":88.436653169,"data":"    self.handles = get_handle(\n"}
+,{"stream_name":"stderr","time":88.436655727,"data":"                   ~~~~~~~~~~^\n"}
+,{"stream_name":"stderr","time":88.436658305,"data":"        f,\n"}
+,{"stream_name":"stderr","time":88.436660889,"data":"        ^^\n"}
+,{"stream_name":"stderr","time":88.436663347,"data":"    ...\u003c6 lines\u003e...\n"}
+,{"stream_name":"stderr","time":88.436666509,"data":"        storage_options=self.options.get(\"storage_options\", None),\n"}
+,{"stream_name":"stderr","time":88.436683337,"data":"        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":88.436687865,"data":"    )\n"}
+,{"stream_name":"stderr","time":88.436691825,"data":"    ^\n"}
+,{"stream_name":"stderr","time":88.436696016,"data":"  File \"/usr/local/lib/python3.13/dist-packages/pandas/io/common.py\", line 873, in get_handle\n"}
+,{"stream_name":"stderr","time":88.436700641,"data":"    handle = open(\n"}
+,{"stream_name":"stderr","time":88.436704684,"data":"        handle,\n"}
+,{"stream_name":"stderr","time":88.436720032,"data":"    ...\u003c3 lines\u003e...\n"}
+,{"stream_name":"stderr","time":88.436730749,"data":"        newline=\"\",\n"}
+,{"stream_name":"stderr","time":88.436734452,"data":"    )\n"}
+,{"stream_name":"stderr","time":88.436741429,"data":"FileNotFoundError: [Errno 2] No such file or directory: '/kaggle/input/datasets/syedaaleezazainab/phishnchips_core_emails.csv'\n"}
+,{"stream_name":"stderr","time":91.664589478,"data":"COMMAND FAILED (1): python experiments/modern_phishing_ood/scripts/run_ood_eval.py --sets phishnchips phishfuzzer --models roberta bilstm --ood_dir /kaggle/input/datasets/syedaaleezazainab --data_path data/Phishing_Email.csv --splits_path results/splits.json --roberta_checkpoint results/best_model.pt --bilstm_checkpoint results/bilstm/best_bilstm.pt --output_dir experiments/modern_phishing_ood/results --predictions_dir experiments/modern_phishing_ood/predictions --floors 0.85 0.90 0.95 --latency_n_gpu 200 --latency_n_cpu 100\n"}
+,{"stream_name":"stderr","time":93.425279278,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":93.42533478,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":93.628401869,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":93.628427069,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":94.396346607,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":94.905261785,"data":"[NbConvertApp] Writing 295226 bytes to __results__.html\n"}
+]

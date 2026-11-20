@@ -1,0 +1,72 @@
+{
+  "seed": 42,
+  "protocol": "Perturbations truncated / urls_removed / typo_synonym on the canonical test split (results/splits.json); threshold fixed at 0.5; no retraining; no threshold fitting. Clean F1 at 0.5 reported alongside.",
+  "models": {
+    "roberta": {
+      "clean_at_0_5": {
+        "f1": 0.980948823309675,
+        "accuracy": 0.9854077253218884,
+        "precision": 0.9690036900369003,
+        "recall": 0.9931921331316188,
+        "roc_auc": 0.9986272524929457,
+        "n": 3495
+      },
+      "robustness": {
+        "truncated": {
+          "f1": 0.9773149869840089,
+          "accuracy": 0.982546494992847,
+          "roc_auc": 0.997523937360802
+        },
+        "urls_removed": {
+          "f1": 0.975482912332838,
+          "accuracy": 0.9811158798283262,
+          "roc_auc": 0.9984911438901162
+        },
+        "typo_synonym": {
+          "f1": 0.9638025594149908,
+          "accuracy": 0.9716738197424892,
+          "roc_auc": 0.9976330679157561
+        }
+      },
+      "status": "ok",
+      "source": "loaded checkpoint results/best_model.pt (no retraining)",
+      "seconds": 304.65038586699984
+    },
+    "bilstm": {
+      "clean_at_0_5": {
+        "f1": 0.96580547112462,
+        "accuracy": 0.9742489270386266,
+        "precision": 0.9702290076335878,
+        "recall": 0.9614220877458396,
+        "roc_auc": 0.9954843969414204,
+        "n": 3495
+      },
+      "robustness": {
+        "truncated": {
+          "f1": 0.96580547112462,
+          "accuracy": 0.9742489270386266,
+          "roc_auc": 0.9954843969414204
+        },
+        "urls_removed": {
+          "f1": 0.9654386631219142,
+          "accuracy": 0.9739628040057224,
+          "roc_auc": 0.9954085103035256
+        },
+        "typo_synonym": {
+          "f1": 0.9637462235649547,
+          "accuracy": 0.9725321888412017,
+          "roc_auc": 0.9951248056710293
+        }
+      },
+      "status": "ok",
+      "source": "loaded saved artefact results/bilstm/best_bilstm.pt (no retraining)",
+      "seconds": 15.866695155000343
+    }
+  },
+  "not_attempted": {
+    "distilbert": "No saved DistilBERT checkpoint exists in the results dataset (Stage D ran 1 seed but saved no artefact); robustness would need a full fine-tune refit.",
+    "cnn": "No saved CNN artefact exists in the results dataset (Stage D ran 1 seed but saved no artefact); use run_baselines.py --models cnn --robustness for the refit route.",
+    "bilstm_big": "The bigger BiLSTM variant (hidden 256) was deliberately NOT saved into the results dataset, so no artefact exists to load; it would need a refit."
+  },
+  "n_test": 3495
+}

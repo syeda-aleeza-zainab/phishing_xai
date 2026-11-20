@@ -1,0 +1,3659 @@
+{
+  "method": "paired McNemar (errors only) + paired bootstrap 95% CIs (n_resamples=1000, seed=42) for precision/recall/F1 and ROC-AUC/PR-AUC differences, on identical examples aligned on email_id",
+  "correction": "Holm-Bonferroni across the McNemar family WITHIN each set (primary); global Holm across all pairs x sets reported as a sensitivity check; Bonferroni-adjusted p for reference. Significant = Holm-adjusted p < 0.05.",
+  "models_present": [
+    "bilstm",
+    "roberta",
+    "tfidf_lr",
+    "tfidf_svm"
+  ],
+  "tfidf_status": "COMPLETED",
+  "n_seeds": 1,
+  "multi_seed_note": "Checkpoints are single (one RoBERTa checkpoint, one BiLSTM artefact, one TF-IDF refit per model); no multi-seed variability is claimed.",
+  "per_set": {
+    "phishnchips": {
+      "set": "phishnchips",
+      "n": 2000,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              972,
+              28
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              945,
+              55
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              6,
+              24
+            ],
+            [
+              58,
+              1912
+            ]
+          ],
+          "error_table": {
+            "both_correct": 995,
+            "a_wrong_b_right": 51,
+            "a_right_b_wrong": 31,
+            "both_wrong": 923
+          },
+          "mcnemar": {
+            "b": 51,
+            "c": 31,
+            "statistic": 4.402439024390244,
+            "p_value": 0.03588757033175105,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.07395833333333335,
+              "ci_low": -0.0329407739312162,
+              "ci_high": 0.1802894467213115,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.027,
+              "ci_low": -0.043396925383739786,
+              "ci_high": -0.010160298921720337,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.049014526607781585,
+              "ci_low": -0.07962256630865486,
+              "ci_high": -0.017858193056537113,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.09860900000000006,
+              "ci_low": 0.07598756264085128,
+              "ci_high": 0.12471383637497646,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.11792207929617926,
+              "ci_low": 0.08777867947179699,
+              "ci_high": 0.14610056453537032,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.03588757033175105,
+          "mcnemar_p_bonferroni": 0.2153254219905063,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              972,
+              28
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              919,
+              81
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              7,
+              23
+            ],
+            [
+              83,
+              1887
+            ]
+          ],
+          "error_table": {
+            "both_correct": 996,
+            "a_wrong_b_right": 76,
+            "a_right_b_wrong": 30,
+            "both_wrong": 898
+          },
+          "mcnemar": {
+            "b": 76,
+            "c": 30,
+            "statistic": 19.10377358490566,
+            "p_value": 1.2379986564076902e-05,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.033333333333333326,
+              "ci_low": -0.07706949959897501,
+              "ci_high": 0.139546511627907,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.053000000000000005,
+              "ci_low": -0.07035316890575326,
+              "ci_high": -0.034656673435592464,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.09425492117217424,
+              "ci_low": -0.12575960331195493,
+              "ci_high": -0.06133235011208335,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.11833700000000003,
+              "ci_low": 0.09265305207402515,
+              "ci_high": 0.14382324326797274,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.12226669121206735,
+              "ci_low": 0.09189072047937705,
+              "ci_high": 0.15182645425069444,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.7139959692230705e-05,
+          "mcnemar_p_bonferroni": 7.427991938446141e-05,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              972,
+              28
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              815,
+              185
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              10,
+              20
+            ],
+            [
+              179,
+              1791
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1004,
+            "a_wrong_b_right": 177,
+            "a_right_b_wrong": 22,
+            "both_wrong": 797
+          },
+          "mcnemar": {
+            "b": 177,
+            "c": 22,
+            "statistic": 119.17587939698493,
+            "p_value": 9.584330673634316e-28,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.04550264550264549,
+              "ci_low": -0.14455570636865536,
+              "ci_high": 0.03260869565217395,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.157,
+              "ci_low": -0.1829646259606312,
+              "ci_high": -0.13314267419878814,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.2568169384405594,
+              "ci_low": -0.2917926667850288,
+              "ci_high": -0.21604772401188083,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.02593599999999996,
+              "ci_low": 0.0026963456367551787,
+              "ci_high": 0.04981904511952435,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.01753145167516479,
+              "ci_low": -0.008549715475289097,
+              "ci_high": 0.04287677703130079,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 5.7505984041805895e-27,
+          "mcnemar_p_bonferroni": 5.7505984041805895e-27,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              945,
+              55
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              919,
+              81
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              29,
+              35
+            ],
+            [
+              61,
+              1875
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1011,
+            "a_wrong_b_right": 61,
+            "a_right_b_wrong": 35,
+            "both_wrong": 893
+          },
+          "mcnemar": {
+            "b": 61,
+            "c": 35,
+            "statistic": 6.510416666666667,
+            "p_value": 0.010724437603060143,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.04062500000000002,
+              "ci_low": -0.13625757575757566,
+              "ci_high": 0.05626411398245981,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.026000000000000002,
+              "ci_low": -0.04268401235640027,
+              "ci_high": -0.008910450827691459,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.04524039456439265,
+              "ci_low": -0.07577228896647172,
+              "ci_high": -0.01812338947134684,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.019727999999999968,
+              "ci_low": -0.002789174027693378,
+              "ci_high": 0.04146379750448288,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.004344611915888086,
+              "ci_low": -0.019832834230717102,
+              "ci_high": 0.03144788416998146,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 0.021448875206120287,
+          "mcnemar_p_bonferroni": 0.06434662561836085,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              945,
+              55
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              815,
+              185
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              32,
+              32
+            ],
+            [
+              157,
+              1779
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1019,
+            "a_wrong_b_right": 162,
+            "a_right_b_wrong": 27,
+            "both_wrong": 792
+          },
+          "mcnemar": {
+            "b": 162,
+            "c": 27,
+            "statistic": 95.005291005291,
+            "p_value": 1.8987708433081882e-22,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.11946097883597884,
+              "ci_low": -0.2042559849788765,
+              "ci_high": -0.039041837072885006,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.13,
+              "ci_low": -0.1551252910600466,
+              "ci_high": -0.10609001920123665,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.20780241183277787,
+              "ci_low": -0.24460842654935586,
+              "ci_high": -0.17109747122686791,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.0726730000000001,
+              "ci_low": -0.09683178138240699,
+              "ci_high": -0.04927926695394305,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.10039062762101447,
+              "ci_low": -0.126720863798966,
+              "ci_high": -0.07389811140688955,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 9.49385421654094e-22,
+          "mcnemar_p_bonferroni": 1.1392625059849129e-21,
+          "mcnemar_significant_holm": true
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 2000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              919,
+              81
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              815,
+              185
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              65,
+              25
+            ],
+            [
+              124,
+              1786
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1052,
+            "a_wrong_b_right": 129,
+            "a_right_b_wrong": 20,
+            "both_wrong": 799
+          },
+          "mcnemar": {
+            "b": 129,
+            "c": 20,
+            "statistic": 78.28187919463087,
+            "p_value": 8.933763505320985e-19,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.07883597883597881,
+              "ci_low": -0.14299091679638518,
+              "ci_high": -0.02485688522281785,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.104,
+              "ci_low": -0.1257451860868565,
+              "ci_high": -0.08256638108991683,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.1625620172683852,
+              "ci_low": -0.19521189697407257,
+              "ci_high": -0.12916295642720024,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.09240100000000007,
+              "ci_low": -0.11045230803072023,
+              "ci_high": -0.07439667580551904,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.10473523953690256,
+              "ci_low": -0.12259151106186485,
+              "ci_high": -0.08703615344298779,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.573505402128394e-18,
+          "mcnemar_p_bonferroni": 5.360258103192591e-18,
+          "mcnemar_significant_holm": true
+        }
+      }
+    },
+    "phishfuzzer": {
+      "set": "phishfuzzer",
+      "n": 205,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              35,
+              67
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              57,
+              45
+            ],
+            [
+              52,
+              51
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              71,
+              66
+            ],
+            [
+              25,
+              43
+            ]
+          ],
+          "error_table": {
+            "both_correct": 61,
+            "a_wrong_b_right": 47,
+            "a_right_b_wrong": 44,
+            "both_wrong": 53
+          },
+          "mcnemar": {
+            "b": 47,
+            "c": 44,
+            "statistic": 0.04395604395604396,
+            "p_value": 0.833935414088552,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.020301094890510907,
+              "ci_low": -0.10844569736855551,
+              "ci_high": 0.056278352559731744,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.18446601941747576,
+              "ci_low": 0.06381061912976807,
+              "ci_high": 0.30775,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.07077051926298161,
+              "ci_low": -0.024479010833445006,
+              "ci_high": 0.16547192541310168,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.056158385684370926,
+              "ci_low": -0.042455528148743926,
+              "ci_high": 0.151358747382448,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.03753766170994044,
+              "ci_low": -0.04839924626785558,
+              "ci_high": 0.12479679711899201,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              35,
+              67
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              39,
+              63
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              106,
+              31
+            ],
+            [
+              27,
+              41
+            ]
+          ],
+          "error_table": {
+            "both_correct": 78,
+            "a_wrong_b_right": 31,
+            "a_right_b_wrong": 27,
+            "both_wrong": 69
+          },
+          "mcnemar": {
+            "b": 31,
+            "c": 27,
+            "statistic": 0.15517241379310345,
+            "p_value": 0.6936406217837585,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.015366884364195088,
+              "ci_low": -0.06902566144628405,
+              "ci_high": 0.039361739180412705,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.0,
+              "ci_low": -0.09262152777777782,
+              "ci_high": 0.09999999999999998,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "f1": {
+              "diff_A_minus_B": -0.00988700564971745,
+              "ci_low": -0.0774177347029839,
+              "ci_high": 0.052380142989586806,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.010755758614125144,
+              "ci_low": -0.08255574947977805,
+              "ci_high": 0.06943254786450659,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.023417709601213477,
+              "ci_low": -0.08498229046596205,
+              "ci_high": 0.04762942461542397,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              35,
+              67
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              32,
+              70
+            ],
+            [
+              26,
+              77
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              110,
+              27
+            ],
+            [
+              37,
+              31
+            ]
+          ],
+          "error_table": {
+            "both_correct": 75,
+            "a_wrong_b_right": 34,
+            "a_right_b_wrong": 30,
+            "both_wrong": 66
+          },
+          "mcnemar": {
+            "b": 34,
+            "c": 30,
+            "statistic": 0.140625,
+            "p_value": 0.7076604666545525,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.012860618700034743,
+              "ci_low": -0.06949370418512525,
+              "ci_high": 0.04058727968799458,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.06796116504854366,
+              "ci_low": -0.16666666666666674,
+              "ci_high": 0.030343326885880016,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "f1": {
+              "diff_A_minus_B": -0.03266666666666662,
+              "ci_low": -0.10164344609803108,
+              "ci_high": 0.029526203809876462,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.010755758614125366,
+              "ci_low": -0.06361100514972348,
+              "ci_high": 0.09043523592199576,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.027263217241390136,
+              "ci_low": -0.03698657423794075,
+              "ci_high": 0.09592353104983142,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              57,
+              45
+            ],
+            [
+              52,
+              51
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              39,
+              63
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              84,
+              12
+            ],
+            [
+              49,
+              60
+            ]
+          ],
+          "error_table": {
+            "both_correct": 78,
+            "a_wrong_b_right": 31,
+            "a_right_b_wrong": 30,
+            "both_wrong": 66
+          },
+          "mcnemar": {
+            "b": 31,
+            "c": 30,
+            "statistic": 0.0,
+            "p_value": 1.0,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.004934210526315819,
+              "ci_low": -0.060682496898917505,
+              "ci_high": 0.07430005213764332,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.18446601941747576,
+              "ci_low": -0.2832490518331225,
+              "ci_high": -0.07690476190476186,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.08065752491269906,
+              "ci_low": -0.16261464963454458,
+              "ci_high": -0.0009975091791805575,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.06691414429849607,
+              "ci_low": -0.1420955889151778,
+              "ci_high": 0.008202925917230238,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.060955371311153916,
+              "ci_low": -0.13307225702239528,
+              "ci_high": 0.016309014301875157,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              57,
+              45
+            ],
+            [
+              52,
+              51
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              32,
+              70
+            ],
+            [
+              26,
+              77
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              86,
+              10
+            ],
+            [
+              61,
+              48
+            ]
+          ],
+          "error_table": {
+            "both_correct": 73,
+            "a_wrong_b_right": 36,
+            "a_right_b_wrong": 35,
+            "both_wrong": 61
+          },
+          "mcnemar": {
+            "b": 36,
+            "c": 35,
+            "statistic": 0.0,
+            "p_value": 1.0,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.007440476190476164,
+              "ci_low": -0.06481292094850559,
+              "ci_high": 0.07503289473684203,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.2524271844660194,
+              "ci_low": -0.3431372549019608,
+              "ci_high": -0.16129032258064513,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.10343718592964823,
+              "ci_low": -0.17993159960620592,
+              "ci_high": -0.03081039410774835,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.04540262707024556,
+              "ci_low": -0.12254658855706058,
+              "ci_high": 0.034282957067727146,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.010274444468550303,
+              "ci_low": -0.08151079757113694,
+              "ci_high": 0.0609521538876739,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 205,
+          "confusion_matrix_a": [
+            [
+              39,
+              63
+            ],
+            [
+              33,
+              70
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              32,
+              70
+            ],
+            [
+              26,
+              77
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              121,
+              12
+            ],
+            [
+              26,
+              46
+            ]
+          ],
+          "error_table": {
+            "both_correct": 90,
+            "a_wrong_b_right": 19,
+            "a_right_b_wrong": 19,
+            "both_wrong": 77
+          },
+          "mcnemar": {
+            "b": 19,
+            "c": 19,
+            "statistic": 0.02631578947368421,
+            "p_value": 0.8711314915971582,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0025062656641603454,
+              "ci_low": -0.04305245368202393,
+              "ci_high": 0.044077343055445244,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.06796116504854366,
+              "ci_low": -0.13462837837837832,
+              "ci_high": -0.010299071144227798,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.02277966101694917,
+              "ci_low": -0.06879239999865544,
+              "ci_high": 0.022696106136675494,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.02151151722825051,
+              "ci_low": -0.034962629399585915,
+              "ci_high": 0.07496963192699536,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.05068092684260361,
+              "ci_low": -0.005794140122756185,
+              "ci_high": 0.11036337266153752,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.0,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        }
+      }
+    },
+    "frontiers_llm": {
+      "set": "frontiers_llm",
+      "n": 5986,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              302,
+              4684
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              2599,
+              2387
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              2378,
+              2308
+            ],
+            [
+              18,
+              1282
+            ]
+          ],
+          "error_table": {
+            "both_correct": 3367,
+            "a_wrong_b_right": 11,
+            "a_right_b_wrong": 2315,
+            "both_wrong": 293
+          },
+          "mcnemar": {
+            "b": 11,
+            "c": 2315,
+            "statistic": 2280.227429062769,
+            "p_value": 0.0,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0033294571903520476,
+              "ci_low": 0.001029784711632814,
+              "ci_high": 0.005851535715431733,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.46068993180906537,
+              "ci_low": 0.44588280691914334,
+              "ci_high": 0.4747146966081995,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.3218608561858489,
+              "ci_low": 0.3101838826740978,
+              "ci_high": 0.33436487831631984,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.0451612515042118,
+              "ci_low": 0.03839350197190178,
+              "ci_high": 0.051740013799512305,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.011530485427815429,
+              "ci_low": 0.009078909343140186,
+              "ci_high": 0.01477449946112226,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.0,
+          "mcnemar_p_bonferroni": 0.0,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              302,
+              4684
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              1897,
+              3089
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3083,
+              1603
+            ],
+            [
+              15,
+              1285
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4072,
+            "a_wrong_b_right": 8,
+            "a_right_b_wrong": 1610,
+            "both_wrong": 296
+          },
+          "mcnemar": {
+            "b": 8,
+            "c": 1610,
+            "statistic": 1584.1786155747836,
+            "p_value": 0.0,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0024782968208530987,
+              "ci_low": 0.0007649366840927153,
+              "ci_high": 0.004637679667533076,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.31989570798235056,
+              "ci_low": 0.30660250049210913,
+              "ci_high": 0.33280832577737945,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.20434343446745495,
+              "ci_low": 0.19482134703442988,
+              "ci_high": 0.21472800527268143,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.06147071801042914,
+              "ci_low": 0.05464604978270991,
+              "ci_high": 0.06803068950823976,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.01264637406062552,
+              "ci_low": 0.011171513439517824,
+              "ci_high": 0.014338686779120268,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.0,
+          "mcnemar_p_bonferroni": 0.0,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              302,
+              4684
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              904,
+              4082
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              4052,
+              634
+            ],
+            [
+              34,
+              1266
+            ]
+          ],
+          "error_table": {
+            "both_correct": 5046,
+            "a_wrong_b_right": 32,
+            "a_right_b_wrong": 636,
+            "both_wrong": 272
+          },
+          "mcnemar": {
+            "b": 32,
+            "c": 636,
+            "statistic": 544.3248502994012,
+            "p_value": 2.160614713831484e-120,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.000552149277098013,
+              "ci_low": -0.0004388550727083807,
+              "ci_high": 0.0017540708948298428,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.12073806658644204,
+              "ci_low": 0.11119425301286066,
+              "ci_high": 0.12957908418316338,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.06865724876477564,
+              "ci_low": 0.0626935309845993,
+              "ci_high": 0.07455878017368982,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.02452948255114329,
+              "ci_low": 0.021177532226865546,
+              "ci_high": 0.02796518995480696,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.004766601406471005,
+              "ci_low": 0.004073027757009104,
+              "ci_high": 0.005528205717874282,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 4.321229427662968e-120,
+          "mcnemar_p_bonferroni": 1.2963688282988902e-119,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              2599,
+              2387
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              1897,
+              3089
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              2061,
+              335
+            ],
+            [
+              1037,
+              2553
+            ]
+          ],
+          "error_table": {
+            "both_correct": 3043,
+            "a_wrong_b_right": 1037,
+            "a_right_b_wrong": 335,
+            "both_wrong": 1571
+          },
+          "mcnemar": {
+            "b": 1037,
+            "c": 335,
+            "statistic": 358.1639941690962,
+            "p_value": 7.069224093220866e-80,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0008511603694989489,
+              "ci_low": -0.003596381682970239,
+              "ci_high": 0.0020260528148990254,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.1407942238267148,
+              "ci_low": -0.1541265326351628,
+              "ci_high": -0.12661328505779143,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.11751742171839397,
+              "ci_low": -0.12932364297888926,
+              "ci_high": -0.10594031812697045,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.01630946650621734,
+              "ci_low": 0.009407666783650568,
+              "ci_high": 0.022905345307452293,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.0011158886328100914,
+              "ci_low": -0.001775953098617769,
+              "ci_high": 0.003573660789338212,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 7.069224093220866e-80,
+          "mcnemar_p_bonferroni": 4.2415344559325193e-79,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              2599,
+              2387
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              904,
+              4082
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              2347,
+              49
+            ],
+            [
+              1739,
+              1851
+            ]
+          ],
+          "error_table": {
+            "both_correct": 3334,
+            "a_wrong_b_right": 1744,
+            "a_right_b_wrong": 44,
+            "both_wrong": 864
+          },
+          "mcnemar": {
+            "b": 1744,
+            "c": 44,
+            "statistic": 1614.4300894854587,
+            "p_value": 0.0,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0027773079132540346,
+              "ci_low": -0.005319145832205316,
+              "ci_high": -0.0003486606655822261,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.33995186522262333,
+              "ci_low": -0.3530142614610043,
+              "ci_high": -0.32685321900081576,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.2532036074210733,
+              "ci_low": -0.2645835152502001,
+              "ci_high": -0.241969585437005,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.020631768953068508,
+              "ci_low": -0.02715509971512941,
+              "ci_high": -0.014189379951501477,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.006763884021344424,
+              "ci_low": -0.009705092974008804,
+              "ci_high": -0.004571804529686252,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.0,
+          "mcnemar_p_bonferroni": 0.0,
+          "mcnemar_significant_holm": true
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5986,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              1897,
+              3089
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              904,
+              4082
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3067,
+              31
+            ],
+            [
+              1019,
+              1869
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4054,
+            "a_wrong_b_right": 1024,
+            "a_right_b_wrong": 26,
+            "both_wrong": 882
+          },
+          "mcnemar": {
+            "b": 1024,
+            "c": 26,
+            "statistic": 946.6752380952381,
+            "p_value": 7.00593285494946e-208,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0019261475437550857,
+              "ci_low": -0.0038401626717787123,
+              "ci_high": -0.00023473433731786858,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.19915764139590852,
+              "ci_low": -0.21044692892884267,
+              "ci_high": -0.18819623818520104,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.13568618570267932,
+              "ci_low": -0.1448895476059315,
+              "ci_high": -0.12723945700519299,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.03694123545928585,
+              "ci_low": -0.04155566869772333,
+              "ci_high": -0.03200516939901625,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.007879772654154515,
+              "ci_low": -0.00909429478646879,
+              "ci_high": -0.006764360190507459,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 2.101779856484838e-207,
+          "mcnemar_p_bonferroni": 4.203559712969676e-207,
+          "mcnemar_significant_holm": true
+        }
+      }
+    },
+    "frontiers_human": {
+      "set": "frontiers_human",
+      "n": 6000,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              799,
+              4201
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              1387,
+              3613
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3346,
+              857
+            ],
+            [
+              276,
+              1521
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4335,
+            "a_wrong_b_right": 269,
+            "a_right_b_wrong": 864,
+            "both_wrong": 532
+          },
+          "mcnemar": {
+            "b": 269,
+            "c": 864,
+            "statistic": 311.41747572815535,
+            "p_value": 1.0726039245462725e-69,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0020089644364092996,
+              "ci_low": 0.0006337037463292034,
+              "ci_high": 0.0035924866485694067,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.11759999999999993,
+              "ci_low": 0.1047446587272383,
+              "ci_high": 0.13083775939017175,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.07487455365439222,
+              "ci_low": 0.0669155007186117,
+              "ci_high": 0.08338941410186271,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.04012419999999994,
+              "ci_low": 0.03536011429013184,
+              "ci_high": 0.04529842725051165,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.00793720589467417,
+              "ci_low": 0.006771720877994566,
+              "ci_high": 0.00914037402652602,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 5.363019622731363e-69,
+          "mcnemar_p_bonferroni": 6.435623547277635e-69,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              799,
+              4201
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              893,
+              4107
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3786,
+              417
+            ],
+            [
+              330,
+              1467
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4775,
+            "a_wrong_b_right": 323,
+            "a_right_b_wrong": 424,
+            "both_wrong": 478
+          },
+          "mcnemar": {
+            "b": 323,
+            "c": 424,
+            "statistic": 13.386880856760374,
+            "p_value": 0.0002533904244124125,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0017107383383657693,
+              "ci_low": 3.4767188370762884e-05,
+              "ci_high": 0.0033907826795105843,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.018799999999999928,
+              "ci_low": 0.007470306121127572,
+              "ci_high": 0.02940066395429562,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.011910070723546773,
+              "ci_low": 0.005556509301652631,
+              "ci_high": 0.018008835794646724,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.020344200000000034,
+              "ci_low": 0.01698937117055977,
+              "ci_high": 0.02379244181859888,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.0040097406570780425,
+              "ci_low": 0.003286773870911719,
+              "ci_high": 0.004784726353528934,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.000506780848824825,
+          "mcnemar_p_bonferroni": 0.0015203425464744749,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              799,
+              4201
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              800,
+              4200
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3871,
+              332
+            ],
+            [
+              333,
+              1464
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4865,
+            "a_wrong_b_right": 331,
+            "a_right_b_wrong": 334,
+            "both_wrong": 470
+          },
+          "mcnemar": {
+            "b": 331,
+            "c": 334,
+            "statistic": 0.006015037593984963,
+            "p_value": 0.9381807081112471,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.00047562420300117925,
+              "ci_low": -0.0007084396110490554,
+              "ci_high": 0.0016637126411564672,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.00019999999999997797,
+              "ci_low": -0.010025026822780206,
+              "ci_high": 0.00953498346143908,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "f1": {
+              "diff_A_minus_B": 0.0003164888270518196,
+              "ci_low": -0.005549252327888853,
+              "ci_high": 0.005820116729334212,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.007995400000000097,
+              "ci_low": 0.0053838685803369824,
+              "ci_high": 0.011048826887509905,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.0015240441792099269,
+              "ci_low": 0.0009864802364166036,
+              "ci_high": 0.0021147425197466482,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.9381807081112471,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              1387,
+              3613
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              893,
+              4107
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3441,
+              181
+            ],
+            [
+              675,
+              1703
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4423,
+            "a_wrong_b_right": 675,
+            "a_right_b_wrong": 181,
+            "both_wrong": 721
+          },
+          "mcnemar": {
+            "b": 675,
+            "c": 181,
+            "statistic": 283.9357476635514,
+            "p_value": 1.0421962328732096e-63,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0002982260980435303,
+              "ci_low": -0.0022138835464825908,
+              "ci_high": 0.0016648209283209384,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.0988,
+              "ci_low": -0.10976150290251625,
+              "ci_high": -0.08708469043664567,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.06296448293084544,
+              "ci_low": -0.07006533858817184,
+              "ci_high": -0.05657579004027446,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.01977999999999991,
+              "ci_low": -0.024433650113610664,
+              "ci_high": -0.015184266971779683,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.003927465237596128,
+              "ci_low": -0.0050317395792168875,
+              "ci_high": -0.00290575526967318,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 4.1687849314928383e-63,
+          "mcnemar_p_bonferroni": 6.253177397239258e-63,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              1387,
+              3613
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              800,
+              4200
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3497,
+              125
+            ],
+            [
+              707,
+              1671
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4484,
+            "a_wrong_b_right": 712,
+            "a_right_b_wrong": 120,
+            "both_wrong": 684
+          },
+          "mcnemar": {
+            "b": 712,
+            "c": 120,
+            "statistic": 419.8088942307692,
+            "p_value": 2.6856085988304677e-93,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0015333402334081203,
+              "ci_low": -0.00336205286408523,
+              "ci_high": 0.00023921034071108782,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.11739999999999995,
+              "ci_low": -0.1279444283414894,
+              "ci_high": -0.10670571689741845,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.0745580648273404,
+              "ci_low": -0.08211069243109975,
+              "ci_high": -0.06862408095602147,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.032128799999999846,
+              "ci_low": -0.03718764764534228,
+              "ci_high": -0.027000578848837945,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.006413161715464244,
+              "ci_low": -0.007610541935300816,
+              "ci_high": -0.005264719341566438,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 1.6113651592982808e-92,
+          "mcnemar_p_bonferroni": 1.6113651592982808e-92,
+          "mcnemar_significant_holm": true
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 6000,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              893,
+              4107
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              800,
+              4200
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              3994,
+              122
+            ],
+            [
+              210,
+              1674
+            ]
+          ],
+          "error_table": {
+            "both_correct": 4981,
+            "a_wrong_b_right": 215,
+            "a_right_b_wrong": 117,
+            "both_wrong": 687
+          },
+          "mcnemar": {
+            "b": 215,
+            "c": 117,
+            "statistic": 28.34036144578313,
+            "p_value": 1.0175216912943623e-07,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.00123511413536459,
+              "ci_low": -0.0027121125912506565,
+              "ci_high": -1.0180874017876122e-05,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.01859999999999995,
+              "ci_low": -0.025760368038936794,
+              "ci_high": -0.01158598100809383,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.011593581896494953,
+              "ci_low": -0.015939456259624115,
+              "ci_high": -0.007383034398821881,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.012348799999999938,
+              "ci_low": -0.01500559320009313,
+              "ci_high": -0.009660006301786253,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.0024856964778681157,
+              "ci_low": -0.00305261229240501,
+              "ci_high": -0.0019280081484228024,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.052565073883087e-07,
+          "mcnemar_p_bonferroni": 6.105130147766174e-07,
+          "mcnemar_significant_holm": true
+        }
+      }
+    },
+    "bec": {
+      "set": "bec",
+      "n": 5181,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2604,
+              1577
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              3302,
+              879
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              506,
+              1073
+            ],
+            [
+              382,
+              3220
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1495,
+            "a_wrong_b_right": 375,
+            "a_right_b_wrong": 1080,
+            "both_wrong": 2231
+          },
+          "mcnemar": {
+            "b": 375,
+            "c": 1080,
+            "statistic": 340.6295532646048,
+            "p_value": 4.6533473294810584e-76,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.008868510689283293,
+              "ci_low": 0.0033094292149952716,
+              "ci_high": 0.0152945387403392,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.1669457067687156,
+              "ci_low": 0.14938877331018507,
+              "ci_high": 0.18438406507345098,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.20075547719252085,
+              "ci_low": 0.18153061430405665,
+              "ci_high": 0.22169114287134717,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.1193779000239179,
+              "ci_low": 0.10724879107083372,
+              "ci_high": 0.13167481164018682,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.03614380066298162,
+              "ci_low": 0.03102615011410529,
+              "ci_high": 0.04201651335243995,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 2.3266736647405294e-75,
+          "mcnemar_p_bonferroni": 2.792008397688635e-75,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2604,
+              1577
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              2558,
+              1623
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              1024,
+              555
+            ],
+            [
+              608,
+              2994
+            ]
+          ],
+          "error_table": {
+            "both_correct": 2013,
+            "a_wrong_b_right": 601,
+            "a_right_b_wrong": 562,
+            "both_wrong": 2005
+          },
+          "mcnemar": {
+            "b": 601,
+            "c": 562,
+            "statistic": 1.2416165090283748,
+            "p_value": 0.2651597404137836,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.004248081436501128,
+              "ci_low": 0.000534728631982018,
+              "ci_high": 0.008276770173693732,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.011002152595072978,
+              "ci_low": -0.026705453750840775,
+              "ci_high": 0.006638673917780762,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "f1": {
+              "diff_A_minus_B": -0.010834133742378294,
+              "ci_low": -0.02772503471255138,
+              "ci_high": 0.007026271719205611,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.05126405166228187,
+              "ci_low": 0.0418616161748722,
+              "ci_high": 0.061528533669297836,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.014181767379366605,
+              "ci_low": 0.010939415281309645,
+              "ci_high": 0.017597129705495655,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 0.2651597404137836,
+          "mcnemar_p_bonferroni": 1.0,
+          "mcnemar_significant_holm": false
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2604,
+              1577
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2858,
+              1323
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              911,
+              668
+            ],
+            [
+              416,
+              3186
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1905,
+            "a_wrong_b_right": 414,
+            "a_right_b_wrong": 670,
+            "both_wrong": 2192
+          },
+          "mcnemar": {
+            "b": 414,
+            "c": 670,
+            "statistic": 59.98616236162361,
+            "p_value": 9.55266286700079e-15,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0017476935646982827,
+              "ci_low": -0.0017238256876388742,
+              "ci_high": 0.005408495435935711,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.060751016503228894,
+              "ci_low": 0.04528671708466601,
+              "ci_high": 0.07613907376793197,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.06717728758169922,
+              "ci_low": 0.049805744275506936,
+              "ci_high": 0.08365140220008778,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.04468117675197314,
+              "ci_low": 0.03480108023055027,
+              "ci_high": 0.05508635205910029,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.013306775207635235,
+              "ci_low": 0.010100264204166758,
+              "ci_high": 0.01668785974615214,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 1.910532573400158e-14,
+          "mcnemar_p_bonferroni": 5.731597720200474e-14,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              3302,
+              879
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              2558,
+              1623
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              619,
+              269
+            ],
+            [
+              1013,
+              3280
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1601,
+            "a_wrong_b_right": 1013,
+            "a_right_b_wrong": 269,
+            "both_wrong": 2298
+          },
+          "mcnemar": {
+            "b": 1013,
+            "c": 269,
+            "statistic": 430.6154446177847,
+            "p_value": 1.1938143529017158e-95,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0046204292527821655,
+              "ci_low": -0.01151248216679138,
+              "ci_high": 0.0023227222763136015,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.17794785936378857,
+              "ci_low": -0.19444084941846715,
+              "ci_high": -0.16160607518884712,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.21158961093489914,
+              "ci_low": -0.22873930952952926,
+              "ci_high": -0.19317897383685836,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.06811384836163603,
+              "ci_low": -0.07954440208179878,
+              "ci_high": -0.056397690943548316,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.021962033283615012,
+              "ci_low": -0.02715094336528396,
+              "ci_high": -0.017432843080643003,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 7.162886117410294e-95,
+          "mcnemar_p_bonferroni": 7.162886117410294e-95,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              3302,
+              879
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2858,
+              1323
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              547,
+              341
+            ],
+            [
+              780,
+              3513
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1534,
+            "a_wrong_b_right": 785,
+            "a_right_b_wrong": 336,
+            "both_wrong": 2526
+          },
+          "mcnemar": {
+            "b": 785,
+            "c": 336,
+            "statistic": 179.04014272970562,
+            "p_value": 7.852340636180923e-41,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0071208171245850105,
+              "ci_low": -0.014142539603273942,
+              "ci_high": -0.0003685533066896766,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": -0.1061946902654867,
+              "ci_low": -0.12191685054262169,
+              "ci_high": -0.09045082768674996,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.13357818961082163,
+              "ci_low": -0.1515924757893357,
+              "ci_high": -0.11546812437603407,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.07469672327194476,
+              "ci_low": -0.08734192893580597,
+              "ci_high": -0.06384073342844829,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.022837025455346383,
+              "ci_low": -0.02763557810042873,
+              "ci_high": -0.01836725775034125,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.140936254472369e-40,
+          "mcnemar_p_bonferroni": 4.711404381708554e-40,
+          "mcnemar_significant_holm": true
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              2558,
+              1623
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2858,
+              1323
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              1016,
+              616
+            ],
+            [
+              311,
+              3238
+            ]
+          ],
+          "error_table": {
+            "both_correct": 2003,
+            "a_wrong_b_right": 316,
+            "a_right_b_wrong": 611,
+            "both_wrong": 2251
+          },
+          "mcnemar": {
+            "b": 316,
+            "c": 611,
+            "statistic": 93.24271844660194,
+            "p_value": 4.625882601161117e-22,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.002500387871802845,
+              "ci_low": -0.006295429374491968,
+              "ci_high": 0.0011896668003770839,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.07175316909830187,
+              "ci_low": 0.057476649043894205,
+              "ci_high": 0.08548413272720941,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.07801142132407751,
+              "ci_low": 0.06249769372168964,
+              "ci_high": 0.0935551830667835,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.006582874910308734,
+              "ci_low": -0.013212820807689271,
+              "ci_high": 0.000741240279327243,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.0008749921717313702,
+              "ci_low": -0.00295152441303195,
+              "ci_high": 0.001185940303336716,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.3877647803483351e-21,
+          "mcnemar_p_bonferroni": 2.7755295606966702e-21,
+          "mcnemar_significant_holm": true
+        }
+      }
+    },
+    "bec_poisoned": {
+      "set": "bec_poisoned",
+      "n": 5181,
+      "pairs": {
+        "roberta_vs_bilstm": {
+          "models": [
+            "roberta",
+            "bilstm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2382,
+              1799
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              3243,
+              938
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              595,
+              1206
+            ],
+            [
+              352,
+              3028
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1584,
+            "a_wrong_b_right": 345,
+            "a_right_b_wrong": 1213,
+            "both_wrong": 2039
+          },
+          "mcnemar": {
+            "b": 345,
+            "c": 1213,
+            "statistic": 482.4704749679076,
+            "p_value": 6.196931289086904e-107,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.008393201711826226,
+              "ci_low": 0.00316707347457913,
+              "ci_high": 0.01442534271001293,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.2059315953121263,
+              "ci_low": 0.18873632706988716,
+              "ci_high": 0.22397575170262848,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.23563644652105037,
+              "ci_low": 0.21729517519285835,
+              "ci_high": 0.2545824772138988,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.11285756995934004,
+              "ci_low": 0.10151764635119227,
+              "ci_high": 0.12503767534853405,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.03412584844143163,
+              "ci_low": 0.02936113197097576,
+              "ci_high": 0.03990917238210345,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.718158773452142e-106,
+          "mcnemar_p_bonferroni": 3.718158773452142e-106,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_svm": {
+          "models": [
+            "roberta",
+            "tfidf_svm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2382,
+              1799
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              2650,
+              1531
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              1047,
+              754
+            ],
+            [
+              493,
+              2887
+            ]
+          ],
+          "error_table": {
+            "both_correct": 2036,
+            "a_wrong_b_right": 486,
+            "a_right_b_wrong": 761,
+            "both_wrong": 1898
+          },
+          "mcnemar": {
+            "b": 486,
+            "c": 761,
+            "statistic": 60.20529270248597,
+            "p_value": 8.546208772957062e-15,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.004733661674250267,
+              "ci_low": 0.0009058161226570666,
+              "ci_high": 0.008829211954377933,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "recall": {
+              "diff_A_minus_B": 0.06409949772781631,
+              "ci_low": 0.047731548693075075,
+              "ci_high": 0.08122179530500309,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.06624996471673361,
+              "ci_low": 0.04862957147803757,
+              "ci_high": 0.08294390981638615,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.06263776608466876,
+              "ci_low": 0.05265734203355765,
+              "ci_high": 0.07302730323333198,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.017523622052385557,
+              "ci_low": 0.014136703925852057,
+              "ci_high": 0.020998345392477642,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 8.546208772957062e-15,
+          "mcnemar_p_bonferroni": 5.1277252637742374e-14,
+          "mcnemar_significant_holm": true
+        },
+        "roberta_vs_tfidf_lr": {
+          "models": [
+            "roberta",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              998,
+              2
+            ],
+            [
+              2382,
+              1799
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2925,
+              1256
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              922,
+              879
+            ],
+            [
+              338,
+              3042
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1916,
+            "a_wrong_b_right": 336,
+            "a_right_b_wrong": 881,
+            "both_wrong": 2048
+          },
+          "mcnemar": {
+            "b": 336,
+            "c": 881,
+            "statistic": 243.1684470008217,
+            "p_value": 8.014217335026055e-55,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": 0.0020641090046975563,
+              "ci_low": -0.0013558610880065544,
+              "ci_high": 0.005838361535587339,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.12987323606792633,
+              "ci_low": 0.11420394711232719,
+              "ci_high": 0.14542928725673143,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.13979124164136109,
+              "ci_low": 0.12199376870713122,
+              "ci_high": 0.15616418722106984,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": 0.05904341066730445,
+              "ci_low": 0.04864592820312368,
+              "ci_high": 0.06995268260988174,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": 0.017418627614833704,
+              "ci_low": 0.014053960640407828,
+              "ci_high": 0.02100185564898339,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 3.205686934010422e-54,
+          "mcnemar_p_bonferroni": 4.808530401015633e-54,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_svm": {
+          "models": [
+            "bilstm",
+            "tfidf_svm"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              3243,
+              938
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              991,
+              9
+            ],
+            [
+              2650,
+              1531
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              629,
+              318
+            ],
+            [
+              911,
+              3323
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1611,
+            "a_wrong_b_right": 911,
+            "a_right_b_wrong": 318,
+            "both_wrong": 2341
+          },
+          "mcnemar": {
+            "b": 911,
+            "c": 318,
+            "statistic": 285.1619202603743,
+            "p_value": 5.6332657374459945e-64,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.003659540037575959,
+              "ci_low": -0.01032534839831556,
+              "ci_high": 0.0032184480399260664,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.14183209758430998,
+              "ci_low": -0.1580718490718619,
+              "ci_high": -0.12544717386119725,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.16938648180431676,
+              "ci_low": -0.1868178451507423,
+              "ci_high": -0.15112721055906278,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.05021980387467129,
+              "ci_low": -0.06166401282557446,
+              "ci_high": -0.039072006784516486,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.01660222638904607,
+              "ci_low": -0.02172609837813788,
+              "ci_high": -0.012193273519435438,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 2.816632868722997e-63,
+          "mcnemar_p_bonferroni": 3.3799594424675966e-63,
+          "mcnemar_significant_holm": true
+        },
+        "bilstm_vs_tfidf_lr": {
+          "models": [
+            "bilstm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              3243,
+              938
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2925,
+              1256
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              557,
+              390
+            ],
+            [
+              703,
+              3531
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1544,
+            "a_wrong_b_right": 708,
+            "a_right_b_wrong": 385,
+            "both_wrong": 2544
+          },
+          "mcnemar": {
+            "b": 708,
+            "c": 385,
+            "statistic": 94.86184812442818,
+            "p_value": 2.0414667533523475e-22,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0063290927071286696,
+              "ci_low": -0.013108321965180624,
+              "ci_high": 0.00012057929558336166,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": -0.07605835924419996,
+              "ci_low": -0.0918231143980695,
+              "ci_high": -0.06088700392910456,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": -0.09584520487968928,
+              "ci_low": -0.11384247322071729,
+              "ci_high": -0.07795915790332196,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.05381415929203559,
+              "ci_low": -0.06598161896506663,
+              "ci_high": -0.04261273656660065,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.016707220826597924,
+              "ci_low": -0.02148395907913247,
+              "ci_high": -0.012291969661240682,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "mcnemar_p_holm": 6.124400260057042e-22,
+          "mcnemar_p_bonferroni": 1.2248800520114085e-21,
+          "mcnemar_significant_holm": true
+        },
+        "tfidf_svm_vs_tfidf_lr": {
+          "models": [
+            "tfidf_svm",
+            "tfidf_lr"
+          ],
+          "n_paired": 5181,
+          "confusion_matrix_a": [
+            [
+              991,
+              9
+            ],
+            [
+              2650,
+              1531
+            ]
+          ],
+          "confusion_matrix_b": [
+            [
+              996,
+              4
+            ],
+            [
+              2925,
+              1256
+            ]
+          ],
+          "prediction_agreement": [
+            [
+              937,
+              603
+            ],
+            [
+              323,
+              3318
+            ]
+          ],
+          "error_table": {
+            "both_correct": 1924,
+            "a_wrong_b_right": 328,
+            "a_right_b_wrong": 598,
+            "both_wrong": 2331
+          },
+          "mcnemar": {
+            "b": 328,
+            "c": 598,
+            "statistic": 78.14362850971922,
+            "p_value": 9.581418290500199e-19,
+            "note": "McNemar compares overall errors only; it is NOT a precision test and says nothing about which model has higher precision or recall."
+          },
+          "paired_metric_diff_ci": {
+            "precision": {
+              "diff_A_minus_B": -0.0026695526695527105,
+              "ci_low": -0.006679907676337302,
+              "ci_high": 0.0012235256417250145,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "recall": {
+              "diff_A_minus_B": 0.06577373834011002,
+              "ci_low": 0.05152610326638928,
+              "ci_high": 0.07910006073895515,
+              "n_resamples": 1000,
+              "significant": true
+            },
+            "f1": {
+              "diff_A_minus_B": 0.07354127692462747,
+              "ci_low": 0.056899460963253524,
+              "ci_high": 0.08837541483978098,
+              "n_resamples": 1000,
+              "significant": true
+            }
+          },
+          "paired_auc_diff_ci": {
+            "roc_auc": {
+              "diff_A_minus_B": -0.0035943554173643033,
+              "ci_low": -0.01070261311494025,
+              "ci_high": 0.004225348019143867,
+              "n_resamples": 1000,
+              "significant": false
+            },
+            "pr_auc": {
+              "diff_A_minus_B": -0.000104994437551853,
+              "ci_low": -0.002324544437939196,
+              "ci_high": 0.0021049108216340566,
+              "n_resamples": 1000,
+              "significant": false
+            }
+          },
+          "mcnemar_p_holm": 1.9162836581000397e-18,
+          "mcnemar_p_bonferroni": 5.748850974300119e-18,
+          "mcnemar_significant_holm": true
+        }
+      }
+    }
+  },
+  "global_holm_sensitivity": [
+    {
+      "set": "phishnchips",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 0.03588757033175105,
+      "holm_adjusted_p": 0.32298813298575946,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishnchips",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 1.2379986564076902e-05,
+      "holm_adjusted_p": 0.00014855983876892282,
+      "significant_holm_global": true
+    },
+    {
+      "set": "phishnchips",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 9.584330673634316e-28,
+      "holm_adjusted_p": 2.0127094414632064e-26,
+      "significant_holm_global": true
+    },
+    {
+      "set": "phishnchips",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 0.010724437603060143,
+      "holm_adjusted_p": 0.10724437603060144,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishnchips",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 1.8987708433081882e-22,
+      "holm_adjusted_p": 3.797541686616376e-21,
+      "significant_holm_global": true
+    },
+    {
+      "set": "phishnchips",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 8.933763505320985e-19,
+      "holm_adjusted_p": 1.5187397959045674e-17,
+      "significant_holm_global": true
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 0.833935414088552,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 0.6936406217837585,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 0.7076604666545525,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 1.0,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 1.0,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "phishfuzzer",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 0.8711314915971582,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 0.0,
+      "holm_adjusted_p": 0.0,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 0.0,
+      "holm_adjusted_p": 0.0,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 2.160614713831484e-120,
+      "holm_adjusted_p": 6.913967084260748e-119,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 7.069224093220866e-80,
+      "holm_adjusted_p": 1.9793827461018424e-78,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 0.0,
+      "holm_adjusted_p": 0.0,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_llm",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 7.00593285494946e-208,
+      "holm_adjusted_p": 2.3119578421333216e-206,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 1.0726039245462725e-69,
+      "holm_adjusted_p": 2.7887702038203084e-68,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 0.0002533904244124125,
+      "holm_adjusted_p": 0.0027872946685365374,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 0.9381807081112471,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 1.0421962328732096e-63,
+      "holm_adjusted_p": 2.501270958895703e-62,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 2.6856085988304677e-93,
+      "holm_adjusted_p": 7.788264936608357e-92,
+      "significant_holm_global": true
+    },
+    {
+      "set": "frontiers_human",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 1.0175216912943623e-07,
+      "holm_adjusted_p": 1.322778198682671e-06,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 4.6533473294810584e-76,
+      "holm_adjusted_p": 1.2564037789598858e-74,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 0.2651597404137836,
+      "holm_adjusted_p": 1.0,
+      "significant_holm_global": false
+    },
+    {
+      "set": "bec",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 9.55266286700079e-15,
+      "holm_adjusted_p": 1.3373728013801105e-13,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 1.1938143529017158e-95,
+      "holm_adjusted_p": 3.581443058705147e-94,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 7.852340636180923e-41,
+      "holm_adjusted_p": 1.727514939959803e-39,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 4.625882601161117e-22,
+      "holm_adjusted_p": 8.32658868209001e-21,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "roberta_vs_bilstm",
+      "raw_p": 6.196931289086904e-107,
+      "holm_adjusted_p": 1.92104869961694e-105,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "roberta_vs_tfidf_svm",
+      "raw_p": 8.546208772957062e-15,
+      "holm_adjusted_p": 1.2819313159435593e-13,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "roberta_vs_tfidf_lr",
+      "raw_p": 8.014217335026055e-55,
+      "holm_adjusted_p": 1.8432699870559927e-53,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "bilstm_vs_tfidf_svm",
+      "raw_p": 5.6332657374459945e-64,
+      "holm_adjusted_p": 1.4083164343614986e-62,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "bilstm_vs_tfidf_lr",
+      "raw_p": 2.0414667533523475e-22,
+      "holm_adjusted_p": 3.87878683136946e-21,
+      "significant_holm_global": true
+    },
+    {
+      "set": "bec_poisoned",
+      "pair": "tfidf_svm_vs_tfidf_lr",
+      "raw_p": 9.581418290500199e-19,
+      "holm_adjusted_p": 1.5330269264800318e-17,
+      "significant_holm_global": true
+    }
+  ],
+  "hypotheses": {
+    "recall_floor": 0.85,
+    "primary_set": "phishnchips",
+    "H1a_ranking": {
+      "roc_auc_diff_roberta_minus_bilstm": {
+        "diff_A_minus_B": 0.09860900000000006,
+        "ci_low": 0.07598756264085128,
+        "ci_high": 0.12471383637497646,
+        "n_resamples": 1000,
+        "significant": true
+      },
+      "pr_auc_diff_roberta_minus_bilstm": {
+        "diff_A_minus_B": 0.11792207929617926,
+        "ci_low": 0.08777867947179699,
+        "ci_high": 0.14610056453537032,
+        "n_resamples": 1000,
+        "significant": true
+      },
+      "verdict": "SUPPORTED",
+      "note": "Ranking only. A ranking win does not imply deployment readiness (see H1b)."
+    },
+    "H1b_operational": {
+      "roberta": {
+        "recall_at_0_5": 0.028,
+        "recall_at_fitted_0.85": 0.0,
+        "recall_at_fitted_0.90": 0.0,
+        "recall_at_fitted_0.95": 0.007,
+        "floor_met_at_0_5": false,
+        "floor_met_at_any_fitted": false
+      },
+      "bilstm": {
+        "recall_at_0_5": 0.055,
+        "recall_at_fitted_0.85": 0.003,
+        "recall_at_fitted_0.90": 0.006,
+        "recall_at_fitted_0.95": 0.026,
+        "floor_met_at_0_5": false,
+        "floor_met_at_any_fitted": false
+      },
+      "verdict": "REJECTED \u2014 NEITHER model meets the predefined recall floor 0.85 on the primary OOD set, at threshold 0.5 or at any validation-fitted threshold",
+      "note": "Deployment criteria are recall floor 0.85 (predefined) plus the operational metrics in the Final Decision (precision, FPR, latency). H1b is judged on those, never on ROC-AUC/PR-AUC."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "model": "bilstm",
+  "set": "phishnchips",
+  "n": 2000,
+  "robustness": {
+    "truncated": {
+      "f1": 0.10338345864661654,
+      "accuracy": 0.523,
+      "roc_auc": 0.6800909999999999
+    },
+    "urls_removed": {
+      "f1": 0.09262759924385633,
+      "accuracy": 0.52,
+      "roc_auc": 0.671526
+    },
+    "typo_synonym": {
+      "f1": 0.13419117647058823,
+      "accuracy": 0.529,
+      "roc_auc": 0.6878569999999999
+    }
+  }
+}

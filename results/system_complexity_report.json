@@ -275,7 +275,11 @@
       "params": 124647170,
       "size_mb": 475.5714359283447,
       "train_seconds": null,
-      "latency_cpu_ms": null,
+      "latency_cpu_ms": {
+        "mean": 242.49847450002449,
+        "std": 0.0,
+        "n": 1
+      },
       "latency_gpu_ms": null,
       "peak_memory_cpu_mb": null,
       "peak_memory_cuda_mb": null,
@@ -393,7 +397,7 @@
       "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
     }
   },
-  "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at unknown latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
+  "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 223.7x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
   "recommended_deployment_model": "distilbert (S3, precision 0.9731, recall 0.9849; recall floor 0.85 met)",
   "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 1.30 precision points (RoBERTa 0.9690 vs tfidf_svm 0.9820; McNemar p = 0.2530) at unknown latency and 31.4x parameters. (F1 gap: -0.45 points, RoBERTa 0.9809 vs tfidf_svm 0.9854) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
   "agreement": {

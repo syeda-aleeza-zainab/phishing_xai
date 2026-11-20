@@ -1,0 +1,152 @@
+{
+  "floor_0.80": {
+    "floor": "floor_0.80",
+    "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 223.7x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
+    "mm_check": {
+      "gap_points": 0.0,
+      "ci_overlaps": true,
+      "mcnemar_p": 1.0,
+      "missing": [],
+      "passes": true,
+      "significant": false
+    },
+    "best_simple_multimodal": "bilstm",
+    "stats": {
+      "tfidf_lr": {
+        "mcnemar_p_vs_roberta": 0.625,
+        "mcnemar_b": 1,
+        "mcnemar_c": 3,
+        "bootstrap_ci_low": 0.8717592592592593,
+        "bootstrap_ci_high": 1.0
+      },
+      "bilstm": {
+        "mcnemar_p_vs_roberta": 1.0,
+        "mcnemar_b": 1,
+        "mcnemar_c": 0,
+        "bootstrap_ci_low": 1.0,
+        "bootstrap_ci_high": 1.0
+      },
+      "tfidf_svm": {
+        "mcnemar_p_vs_roberta": 0.0703125,
+        "mcnemar_b": 1,
+        "mcnemar_c": 7,
+        "bootstrap_ci_low": 0.8863636363636364,
+        "bootstrap_ci_high": 1.0
+      },
+      "rule_based": {
+        "mcnemar_p_vs_roberta": 0.015625,
+        "mcnemar_b": 0,
+        "mcnemar_c": 7,
+        "bootstrap_ci_low": 1.0,
+        "bootstrap_ci_high": 1.0
+      }
+    },
+    "multimodal": {
+      "roberta": {
+        "precision": 1.0,
+        "recall": 0.9791666666666666,
+        "f1": 0.9894736842105264,
+        "n": 96
+      },
+      "tfidf_lr": {
+        "precision": 0.9411764705882353,
+        "recall": 1.0,
+        "f1": 0.9696969696969697,
+        "n": 96
+      },
+      "bilstm": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n": 96
+      },
+      "tfidf_svm": {
+        "precision": 0.9555555555555556,
+        "recall": 0.8958333333333334,
+        "f1": 0.924731182795699,
+        "n": 96
+      },
+      "rule_based": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "n": 96
+      }
+    }
+  },
+  "floor_0.85": {
+    "floor": "floor_0.85",
+    "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 223.7x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
+    "mm_check": {
+      "gap_points": 0.0,
+      "ci_overlaps": true,
+      "mcnemar_p": 1.0,
+      "missing": [],
+      "passes": true,
+      "significant": false
+    },
+    "best_simple_multimodal": "bilstm",
+    "stats": {
+      "tfidf_lr": {
+        "mcnemar_p_vs_roberta": 0.625,
+        "mcnemar_b": 1,
+        "mcnemar_c": 3,
+        "bootstrap_ci_low": 0.8717592592592593,
+        "bootstrap_ci_high": 1.0
+      },
+      "bilstm": {
+        "mcnemar_p_vs_roberta": 1.0,
+        "mcnemar_b": 1,
+        "mcnemar_c": 0,
+        "bootstrap_ci_low": 1.0,
+        "bootstrap_ci_high": 1.0
+      },
+      "tfidf_svm": {
+        "mcnemar_p_vs_roberta": 0.0703125,
+        "mcnemar_b": 1,
+        "mcnemar_c": 7,
+        "bootstrap_ci_low": 0.8863636363636364,
+        "bootstrap_ci_high": 1.0
+      },
+      "rule_based": {
+        "mcnemar_p_vs_roberta": 0.000274658203125,
+        "mcnemar_b": 1,
+        "mcnemar_c": 16,
+        "bootstrap_ci_low": 0.6363329238329238,
+        "bootstrap_ci_high": 0.8484848484848485
+      }
+    },
+    "multimodal": {
+      "roberta": {
+        "precision": 1.0,
+        "recall": 0.9791666666666666,
+        "f1": 0.9894736842105264,
+        "n": 96
+      },
+      "tfidf_lr": {
+        "precision": 0.9411764705882353,
+        "recall": 1.0,
+        "f1": 0.9696969696969697,
+        "n": 96
+      },
+      "bilstm": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "n": 96
+      },
+      "tfidf_svm": {
+        "precision": 0.9555555555555556,
+        "recall": 0.8958333333333334,
+        "f1": 0.924731182795699,
+        "n": 96
+      },
+      "rule_based": {
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571428571428571,
+        "n": 96
+      }
+    }
+  }
+}

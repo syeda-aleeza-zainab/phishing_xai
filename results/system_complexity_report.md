@@ -36,7 +36,7 @@ Precision is the primary metric (user decision 2026-11-19); F1, recall, ROC-AUC 
 
 ## Verdict
 
-Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at unknown latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.
+Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 223.7x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.
 
 **Recommended deployment model:** distilbert (S3, precision 0.9731, recall 0.9849; recall floor 0.85 met)
 
