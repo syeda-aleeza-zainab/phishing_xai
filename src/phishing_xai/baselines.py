@@ -87,6 +87,14 @@ BASELINE_MODELS: List[str] = [
     "distilbert",
     "roberta_eval",
 ]
+#: Hugging Face backbone for the DistilBERT baseline.
+DISTILBERT_MODEL_NAME: str = "distilbert-base-uncased"
+#: Format marker written into every saved DistilBERT artefact. A RoBERTa
+#: ``best_model.pt`` (``{"model_state_dict", ...}``) never contains it, so
+#: :func:`load_distilbert_model` refuses such a file instead of misreading it.
+DISTILBERT_ARTEFACT_FORMAT: str = "phishing_xai.distilbert.v1"
+#: Default token window for DistilBERT (RoBERTa tuning precedent, Stage B).
+DISTILBERT_MAX_LENGTH: int = 256
 # Hyperparameter-search effort, fixed by design so the comparison is fair:
 # a small random search scored on VALIDATION only, never on test.
 RANDOM_SEARCH_TRIALS: int = 8
@@ -1336,6 +1344,473 @@ def _is_baseline_artefact(path: str | Path) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# DistilBERT: standalone checkpoint save / load + training loop
+# ---------------------------------------------------------------------------
+# Gap this section closes (verified 2026-11-20): the single-seed
+# DistilBERT run (text test P 0.9731 / R 0.9849 / F1 0.9789) left NO
+# loadable checkpoint. ``scripts/run_baselines.py::_fit_distilbert`` called
+# ``phishing_xai.train.train_model``, which DOES write a ``best_model.pt``
+# into the seed run dir — but that file holds only
+# ``{"epoch", "model_state_dict", "val_f1", "val_metrics"}``: no tokenizer,
+# no config, no model name, and a filename that collides with RoBERTa's
+# ``best_model.pt``. Nothing records that the weights are DistilBERT, so no
+# loader can rebuild the model from that file alone, and
+# :func:`save_baseline_model` / :func:`load_baseline_model` only support
+# ``bilstm`` / ``cnn`` / ``tfidf_*`` (``BASELINE_ARTEFACT_KINDS``).
+#
+# The artefact defined here, ``best_distilbert.pt``, is standalone: the
+# ``.pt`` payload carries the format marker, ``kind="distilbert"``, the
+# model name, the full config dict and the state dict, and the tokenizer
+# files plus ``config.json`` are saved alongside it in the same run
+# directory, so :func:`load_distilbert_model` rebuilds the model from the
+# config (no Hub download at load time) and the saved tokenizer. The
+# ``.pt`` alone is sufficient; the sibling files are for inspection and
+# for ``AutoTokenizer.from_pretrained(<run dir>/tokenizer)``.
+#
+# Best-epoch selection inside :func:`train_distilbert` is precision-first
+# (validation PRECISION subject to validation recall >= 0.85, with the
+# best-F1 state as fallback), the same rule as
+# :func:`train_torch_classifier` — NOT the val-F1 rule of the shared
+# ``train_model`` loop, which is left untouched (RoBERTa uses it).
+# Across-trial selection in the tuning driver reuses
+# :func:`select_best_bilstm_trial` (same precision-first rule).
+
+def distilbert_predict_proba(
+    model: Any,
+    tokenizer: Any,
+    texts: Sequence[str],
+    batch_size: int = 64,
+    device: Optional[torch.device] = None,
+    max_length: int = DISTILBERT_MAX_LENGTH,
+) -> np.ndarray:
+    """Batched softmax probabilities (rows sum to 1) for a DistilBERT pair."""
+    device = device or get_device()
+    model.eval()
+    model.to(device)
+    texts = ["" if t is None else str(t) for t in texts]
+    if not texts:
+        return np.zeros((0, 2), dtype=float)
+    probs: List[np.ndarray] = []
+    with torch.no_grad():
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            enc = tokenizer(
+                batch, padding=True, truncation=True,
+                max_length=int(max_length), return_tensors="pt",
+            )
+            logits = model(
+                enc["input_ids"].to(device),
+                attention_mask=enc["attention_mask"].to(device),
+            ).logits
+            probs.append(torch.softmax(logits, dim=1).cpu().numpy())
+    return np.vstack(probs)
+
+
+def build_distilbert_wrapper(
+    model: Any,
+    tokenizer: Any,
+    device: Optional[torch.device] = None,
+    max_length: int = DISTILBERT_MAX_LENGTH,
+    extra: Optional[Dict[str, Any]] = None,
+) -> BaselineModel:
+    """Wrap a fitted (model, tokenizer) DistilBERT pair as a BaselineModel.
+
+    ``kind="transformer"`` (deliberately NOT ``"torch"``): the torch
+    save/load path (:func:`save_baseline_model`) only supports the
+    from-scratch BiLSTM/CNN classes and must never be used for this
+    wrapper — DistilBERT artefacts go through
+    :func:`save_distilbert_model` / :func:`load_distilbert_model`.
+    The fitted model/tokenizer are re-attached in ``extra`` (``_model`` /
+    ``_tokenizer`` / ``_device_holder``) exactly like
+    :func:`build_torch_baseline`, so ``BaselineModel.set_device`` switches
+    the inference device and ``evaluate_explainability(method="lime")``
+    works unchanged. Captum-IG via :func:`integrated_gradients_scores`
+    does NOT support this wrapper: that helper assumes a word-level
+    ``SimpleTokenizer``; the transformer second method for DistilBERT is
+    ``TransformerExplainer`` (TI / Captum) via :func:`explain_word_scores`.
+    """
+    device_obj = device or get_device()
+    device_holder: Dict[str, Any] = {"device": device_obj}
+    n_params = int(sum(p.numel() for p in model.parameters() if p.requires_grad))
+    size_mb = float(sum(p.numel() * 4 for p in model.parameters()) / (1024.0 * 1024.0))
+    wrapper = BaselineModel(
+        "distilbert", "transformer",
+        lambda texts: distilbert_predict_proba(
+            model, tokenizer, texts,
+            device=device_holder["device"], max_length=int(max_length),
+        ),
+        n_params=n_params, size_mb=size_mb,
+        extra={"model_name": DISTILBERT_MODEL_NAME, "max_length": int(max_length),
+               **(extra or {})},
+    )
+    wrapper.extra["_device_holder"] = device_holder
+    wrapper.extra["_model"] = model  # type: ignore[assignment]
+    wrapper.extra["_tokenizer"] = tokenizer  # type: ignore[assignment]
+    wrapper.extra["_device"] = device_obj  # type: ignore[assignment]
+    return wrapper
+
+
+def save_distilbert_model(
+    model: Any,
+    tokenizer: Any,
+    path: str | Path,
+    extra: Optional[Dict[str, Any]] = None,
+) -> Path:
+    """Save a fitted DistilBERT pair as a standalone artefact; return the path.
+
+    Writes ``<path>`` (``best_distilbert.pt``: ``{"format", "kind",
+    "model_name", "config", "state_dict", "n_params", "extra"}``) plus,
+    in the same directory, ``tokenizer/`` (``tokenizer.save_pretrained``)
+    and ``config.json`` (``model.config.save_pretrained``). The parent
+    directory is created if needed. The ``.pt`` alone loads via
+    :func:`load_distilbert_model`; the sibling files let the run directory
+    be inspected (and the tokenizer reloaded) without opening the ``.pt``.
+    """
+    path = Path(path)
+    ensure_dir(path.parent)
+    if not hasattr(model, "config") or not hasattr(model, "state_dict"):
+        raise TypeError(
+            "save_distilbert_model: expected a Hugging Face sequence-"
+            f"classification model, got {type(model).__name__!r}."
+        )
+    if not hasattr(tokenizer, "save_pretrained"):
+        raise TypeError(
+            "save_distilbert_model: expected a Hugging Face tokenizer with "
+            f"save_pretrained, got {type(tokenizer).__name__!r}."
+        )
+    model_name = getattr(model.config, "_name_or_path", None) or DISTILBERT_MODEL_NAME
+    payload: Dict[str, Any] = {
+        "format": DISTILBERT_ARTEFACT_FORMAT,
+        "kind": "distilbert",
+        "model_name": str(model_name),
+        "config": model.config.to_dict(),
+        "state_dict": {k: v.detach().cpu().clone() for k, v in model.state_dict().items()},
+        "n_params": int(sum(p.numel() for p in model.parameters())),
+        "extra": dict(extra or {}),
+    }
+    torch.save(payload, path)
+    tokenizer.save_pretrained(str(path.parent / "tokenizer"))
+    try:
+        model.config.save_pretrained(str(path.parent))
+    except Exception as exc:  # noqa: BLE001 - config.json is a convenience copy
+        logger.warning(f"save_distilbert_model: could not write config.json ({exc}).")
+    size_mb = path.stat().st_size / (1024.0 * 1024.0)
+    logger.info(f"Saved DistilBERT checkpoint -> {path} ({size_mb:.2f} MB, "
+                f"tokenizer in {path.parent / 'tokenizer'})")
+    return path
+
+
+def load_distilbert_model(
+    path: str | Path,
+    device: Any = None,
+) -> Tuple[Any, Any, Dict[str, Any]]:
+    """Load a DistilBERT artefact saved by :func:`save_distilbert_model`.
+
+    Returns ``(model, tokenizer, payload)``. The model is rebuilt from the
+    config stored in the payload (no Hub download); the tokenizer is
+    loaded from the sibling ``tokenizer/`` directory when present, else
+    from the stored model name. Raises ``FileNotFoundError`` for a missing
+    path, ``RuntimeError`` for an unreadable file, and ``ValueError`` for
+    a readable file that is not a DistilBERT artefact — including a
+    RoBERTa ``best_model.pt`` and a baseline artefact: neither is ever
+    misread as DistilBERT, and nothing here silently refits.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"DistilBERT checkpoint not found: {path}")
+    try:
+        payload = torch.load(path, map_location="cpu", weights_only=False)
+    except Exception:
+        # A baseline artefact is a plain pickle, not a torch zip: try
+        # pickle so a readable-but-wrong-kind file raises ValueError
+        # below ("not a DistilBERT artefact") instead of RuntimeError.
+        try:
+            import pickle
+
+            with open(path, "rb") as f:
+                payload = pickle.load(f)
+        except Exception as exc:  # noqa: BLE001 - neither loader could read it
+            raise RuntimeError(f"Could not load DistilBERT checkpoint {path}: {exc}") from exc
+    if not isinstance(payload, dict) or payload.get("format") != DISTILBERT_ARTEFACT_FORMAT:
+        raise ValueError(
+            f"DistilBERT checkpoint {path} has format {payload.get('format') if isinstance(payload, dict) else type(payload).__name__!r}, "
+            f"expected {DISTILBERT_ARTEFACT_FORMAT!r}: not a saved DistilBERT artefact "
+            "(a RoBERTa best_model.pt or a baseline artefact must not be loaded here)."
+        )
+    if payload.get("kind") != "distilbert":
+        raise ValueError(
+            f"DistilBERT checkpoint {path} has kind {payload.get('kind')!r}, expected 'distilbert'."
+        )
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer, DistilBertConfig
+
+    config = DistilBertConfig.from_dict(dict(payload["config"]))
+    model = AutoModelForSequenceClassification.from_config(config)
+    state_dict = payload.get("state_dict") or payload.get("model_state_dict")
+    if not isinstance(state_dict, dict):
+        raise ValueError(f"DistilBERT checkpoint {path} carries no state_dict.")
+    model.load_state_dict(state_dict)
+    tokenizer_dir = path.parent / "tokenizer"
+    if tokenizer_dir.exists():
+        tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_dir), use_fast=True)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            str(payload.get("model_name") or DISTILBERT_MODEL_NAME), use_fast=True
+        )
+    device_obj = device or get_device()
+    model.to(device_obj)
+    model.eval()
+    logger.info(f"Loaded DistilBERT checkpoint {path} "
+                f"({path.stat().st_size / (1024.0 * 1024.0):.2f} MB, "
+                f"model_name={payload.get('model_name')}, device={device_obj})")
+    return model, tokenizer, payload
+
+
+def train_distilbert(
+    train_texts: Sequence[str],
+    train_labels: Sequence[int],
+    val_texts: Sequence[str],
+    val_labels: Sequence[int],
+    test_texts: Optional[Sequence[str]] = None,
+    test_labels: Optional[Sequence[int]] = None,
+    *,
+    model_name: str = DISTILBERT_MODEL_NAME,
+    batch_size: int = 8,
+    lr: float = 2e-5,
+    epochs: int = 3,
+    max_length: int = DISTILBERT_MAX_LENGTH,
+    weight_decay: float = 0.01,
+    patience: int = 3,
+    seed: int = 42,
+    device: Optional[torch.device] = None,
+    output_dir: str | Path = "results/distilbert/seed_42",
+    checkpoint_name: str = "best_distilbert.pt",
+    save_best: bool = True,
+    resume: bool = False,
+    use_amp: bool = True,
+    keep_latest: bool = True,
+) -> Dict[str, Any]:
+    """Fine-tune DistilBERT with precision-first best-epoch selection.
+
+    The training loop mirrors ``phishing_xai.train.train_model`` (AdamW,
+    AMP on CUDA only, per-epoch ``latest_checkpoint.pt`` with model +
+    optimizer + scaler state for resumability) but differs in three
+    deliberate ways: (1) best-epoch selection is validation PRECISION
+    subject to validation recall >= 0.85 (fallback: best-F1 state), the
+    repo precision-first rule — ``train_model`` selects on val F1 and is
+    left untouched for RoBERTa; (2) the best state is saved as a
+    standalone artefact via :func:`save_distilbert_model`
+    (``<output_dir>/best_distilbert.pt`` + ``tokenizer/`` + ``config.json``)
+    whenever it improves, unless ``save_best=False`` (tuning trials);
+    (3) when ``test_texts`` / ``test_labels`` are given, the test set is
+    evaluated EXACTLY ONCE, after training, on the frozen best state,
+    and the returned ``y_pred`` / ``y_prob`` are from that single pass.
+    Pass ``test_texts=None`` (tuning) to never touch the test set.
+
+    Returns a JSON-plain dict (plus ``_model`` / ``_tokenizer`` holding
+    the fitted pair — callers must pop those before serialising).
+    """
+    from phishing_xai.model import create_dataloader, load_tokenizer_and_model
+    from phishing_xai.train import evaluate_dataloader
+
+    set_seed(seed)
+    device = device or get_device()
+    out_dir = ensure_dir(output_dir)
+    checkpoint_path = out_dir / checkpoint_name
+    latest_path = out_dir / "latest_checkpoint.pt"
+
+    tokenizer, model = load_tokenizer_and_model(
+        model_name=model_name, num_labels=2, device=device
+    )
+    train_loader = create_dataloader(
+        list(train_texts), [int(y) for y in train_labels], tokenizer,
+        batch_size=int(batch_size), shuffle=True, max_length=int(max_length),
+    )
+    val_loader = create_dataloader(
+        list(val_texts), [int(y) for y in val_labels], tokenizer,
+        batch_size=int(batch_size) * 2, shuffle=False, max_length=int(max_length),
+    )
+    test_loader = None
+    if test_texts is not None and test_labels is not None:
+        test_loader = create_dataloader(
+            list(test_texts), [int(y) for y in test_labels], tokenizer,
+            batch_size=int(batch_size) * 2, shuffle=False, max_length=int(max_length),
+        )
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=float(lr), weight_decay=float(weight_decay))
+    loss_fn = nn.CrossEntropyLoss()
+    amp_enabled = bool(use_amp) and (device.type == "cuda")
+    if hasattr(torch.amp, "GradScaler"):
+        scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
+    else:
+        scaler = torch.cuda.amp.GradScaler(enabled=amp_enabled)
+
+    recall_floor = 0.85
+    start_epoch = 1
+    best_score = -float("inf")
+    best_val_f1 = -1.0
+    best_val_metrics: Dict[str, Any] = {}
+    best_val_y_prob: List[float] = []
+    best_epoch = 0
+    floor_met = False
+    best_state: Optional[Dict[str, torch.Tensor]] = None
+    best_f1_state: Optional[Dict[str, torch.Tensor]] = None
+    best_f1_value = -1.0
+    patience_counter = 0
+    history: Dict[str, List[float]] = {
+        "train_loss": [], "val_f1": [], "val_precision": [], "val_recall": [],
+    }
+
+    if resume and latest_path.exists():
+        chk = torch.load(latest_path, map_location=device, weights_only=False)
+        model.load_state_dict(chk["model_state_dict"])
+        optimizer.load_state_dict(chk["optimizer_state_dict"])
+        if amp_enabled and chk.get("scaler_state_dict") is not None:
+            scaler.load_state_dict(chk["scaler_state_dict"])
+        start_epoch = int(chk["epoch"]) + 1
+        best_val_f1 = float(chk.get("best_val_f1", -1.0))
+        best_epoch = int(chk.get("best_epoch", 0))
+        history = chk.get("history", history)
+        logger.info(f"Resuming DistilBERT training from {latest_path} "
+                    f"(next epoch {start_epoch}, best val F1 {best_val_f1:.4f}).")
+        # The standalone best file on disk (if any) holds the best state
+        # from the previous run; keep it as the restore candidate until a
+        # new best epoch is found in this run.
+        if checkpoint_path.exists():
+            try:
+                _m, _t, payload = load_distilbert_model(checkpoint_path, device=device)
+                best_state = {k: v.detach().cpu().clone()
+                              for k, v in _m.state_dict().items()}
+                best_val_metrics = dict(payload.get("extra", {}).get("best_val_metrics") or {})
+                del _m, _t
+            except Exception as exc:  # noqa: BLE001 - stale best file must not block resume
+                logger.warning(f"Could not restore previous best state from {checkpoint_path} ({exc}).")
+
+    start = time.perf_counter()
+    epochs_run = 0
+    for epoch in range(start_epoch, int(epochs) + 1):
+        epochs_run = epoch
+        model.train()
+        total_loss = 0.0
+        for batch in train_loader:
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            labels = batch["labels"].to(device)
+            optimizer.zero_grad(set_to_none=True)
+            with torch.autocast(device_type=device.type, enabled=amp_enabled):
+                outputs = model(input_ids, attention_mask=attention_mask)
+                loss = loss_fn(outputs.logits, labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+            total_loss += loss.item()
+        val_loss, val_true, _val_pred, val_prob = evaluate_dataloader(model, val_loader, device)
+        val_metrics = compute_metrics_full(val_true, val_prob)
+        val_metrics["val_loss"] = float(val_loss)
+        history["train_loss"].append(total_loss / max(1, len(train_loader)))
+        history["val_f1"].append(val_metrics["f1"])
+        history["val_precision"].append(val_metrics["precision"])
+        history["val_recall"].append(val_metrics["recall"])
+        logger.info(f"DistilBERT epoch {epoch}/{epochs}: train_loss={history['train_loss'][-1]:.4f} "
+                    f"val_precision={val_metrics['precision']:.4f} val_recall={val_metrics['recall']:.4f} "
+                    f"val_f1={val_metrics['f1']:.4f}")
+        torch.save(
+            {
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "scaler_state_dict": scaler.state_dict() if amp_enabled else None,
+                "best_val_f1": best_val_f1,
+                "best_epoch": best_epoch,
+                "history": history,
+                "val_metrics": val_metrics,
+            },
+            latest_path,
+        )
+        if val_metrics["f1"] > best_f1_value:
+            best_f1_value = val_metrics["f1"]
+            best_f1_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        score = (val_metrics["precision"] if val_metrics["recall"] >= recall_floor
+                 else val_metrics["precision"] - 2.0)
+        if score > best_score:
+            best_score = score
+            best_val_f1 = val_metrics["f1"]
+            best_val_metrics = dict(val_metrics)
+            best_val_y_prob = [float(v) for v in val_prob]
+            best_epoch = epoch
+            floor_met = bool(val_metrics["recall"] >= recall_floor)
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            patience_counter = 0
+            if save_best:
+                save_distilbert_model(
+                    model, tokenizer, checkpoint_path,
+                    extra={"seed": seed, "best_epoch": epoch,
+                           "best_val_metrics": dict(val_metrics),
+                           "config": {"batch_size": int(batch_size), "lr": float(lr),
+                                      "epochs": int(epochs), "max_length": int(max_length),
+                                      "weight_decay": float(weight_decay)}},
+                )
+        else:
+            patience_counter += 1
+            if patience_counter >= int(patience):
+                logger.info(f"DistilBERT early stopping after epoch {epoch} (patience {patience}).")
+                break
+    train_seconds = time.perf_counter() - start
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    elif best_f1_state is not None:
+        model.load_state_dict(best_f1_state)
+        if not best_val_metrics:
+            best_val_metrics = {"f1": float(best_f1_value)}
+    model.eval()
+
+    result: Dict[str, Any] = {
+        "model": "distilbert",
+        "status": "ok",
+        "model_name": model_name,
+        "config": {"batch_size": int(batch_size), "lr": float(lr), "epochs": int(epochs),
+                   "max_length": int(max_length), "weight_decay": float(weight_decay),
+                   "patience": int(patience), "seed": int(seed)},
+        "train_seconds": float(train_seconds),
+        "epochs_run": int(epochs_run),
+        "best_epoch": int(best_epoch),
+        "best_val_f1": float(best_val_f1),
+        "best_val_metrics": best_val_metrics,
+        "best_val_y_prob": best_val_y_prob,
+        "recall_floor": recall_floor,
+        "floor_met": bool(floor_met),
+        "history": history,
+        "n_params": int(sum(p.numel() for p in model.parameters())),
+        "size_mb": float(checkpoint_path.stat().st_size / (1024.0 * 1024.0))
+        if (save_best and checkpoint_path.exists()) else None,
+        "checkpoint": str(checkpoint_path) if save_best else None,
+        "checkpoint_format": DISTILBERT_ARTEFACT_FORMAT if save_best else None,
+        "peak_memory_mb": peak_memory_mb(),
+        "test_metrics": None,
+        "y_pred": None,
+        "y_prob": None,
+        "_model": model,
+        "_tokenizer": tokenizer,
+    }
+    if test_loader is not None:
+        # SINGLE test evaluation, on the frozen best state.
+        _loss, y_true, y_pred, y_prob = evaluate_dataloader(model, test_loader, device)
+        result["test_metrics"] = compute_metrics_full(y_true, y_prob)
+        result["y_pred"] = [int(v) for v in y_pred]
+        result["y_prob"] = [float(v) for v in y_prob]
+        logger.info(f"DistilBERT test (once, best epoch {best_epoch}): "
+                    f"P={result['test_metrics']['precision']:.4f} "
+                    f"R={result['test_metrics']['recall']:.4f} "
+                    f"F1={result['test_metrics']['f1']:.4f}")
+    if not keep_latest and latest_path.exists():
+        try:
+            latest_path.unlink()
+        except OSError as exc:
+            logger.warning(f"Could not remove {latest_path} ({exc}).")
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Small random search on VALIDATION only (fairness: ~8 trials, never test)
 # ---------------------------------------------------------------------------
 
@@ -1966,7 +2441,7 @@ def evaluate_multimodal(
 # eval set) via the same ``load_splits`` / builders Section E already uses.
 
 #: Model kinds ``load_scorer`` accepts (also the ``--model`` CLI choices).
-SCORER_MODELS: Tuple[str, ...] = ("roberta", "tfidf_lr", "tfidf_svm", "bilstm", "cnn", "rule_based")
+SCORER_MODELS: Tuple[str, ...] = ("roberta", "distilbert", "tfidf_lr", "tfidf_svm", "bilstm", "cnn", "rule_based")
 
 
 @runtime_checkable
@@ -2031,6 +2506,60 @@ class RobertaScorer:
         tokenizer: Any,
         device: Any = None,
         max_length: int = 512,
+    ) -> None:
+        self.model = model
+        self.tokenizer = tokenizer
+        self.device = device if device is not None else get_device()
+        self.max_length = int(max_length)
+
+    def predict_proba(self, texts: Sequence[str]) -> np.ndarray:
+        _score_text = _load_predict_module().score_text
+
+        texts = ["" if t is None else str(t) for t in texts]
+        if not texts:
+            return np.zeros((0, 2), dtype=float)
+        rows: List[List[float]] = []
+        for text in texts:
+            _pred, p_safe, p_phish = _score_text(
+                self.model, self.tokenizer, text,
+                device=self.device, max_length=self.max_length,
+            )
+            rows.append([float(p_safe), float(p_phish)])
+        return np.asarray(rows, dtype=float)
+
+    def tokenize_words(self, text: str) -> List[str]:
+        return split_words(text)
+
+    def truncate(self, text: str, max_length: Optional[int] = None) -> str:
+        from phishing_xai.data import truncate_text_to_model_window
+
+        return truncate_text_to_model_window(
+            text, self.tokenizer,
+            max_length=int(max_length) if max_length is not None else self.max_length,
+        )
+
+
+class DistilBertScorer:
+    """TextScorer wrapping a (model, tokenizer, device) DistilBERT pair.
+
+    Mirrors :class:`RobertaScorer` exactly: ``predict_proba`` calls the
+    existing ``score_text`` logic from ``scripts.run_multimodal_predict``
+    (generic over any ``.logits`` sequence-classification model), so an
+    empty text maps to ``(0, 1.0, 0.0)`` and non-empty text is truncated
+    with ``truncate_text_to_model_window``. The pair comes from
+    :func:`load_distilbert_model` — never from a refit, never from a
+    base ``distilbert-base-uncased`` fallback: a missing or wrong-kind
+    checkpoint raises in :func:`load_scorer` before this class is built.
+    """
+
+    name: str = "distilbert"
+
+    def __init__(
+        self,
+        model: Any,
+        tokenizer: Any,
+        device: Any = None,
+        max_length: int = DISTILBERT_MAX_LENGTH,
     ) -> None:
         self.model = model
         self.tokenizer = tokenizer
@@ -2156,12 +2685,19 @@ def load_scorer(
     ``"roberta"`` delegates to the existing
     ``scripts.run_multimodal_predict.load_trained_roberta`` (with
     ``resolve_default_checkpoint`` when no checkpoint is given) and returns
-    a :class:`RobertaScorer`. ``"tfidf_lr"`` / ``"tfidf_svm"`` / ``"bilstm"`` /
-    ``"cnn"`` load a SAVED baseline artefact when ``checkpoint`` is a path
-    to an existing one (see :func:`save_baseline_model` /
-    :func:`load_baseline_model`); when ``checkpoint`` is None, missing, or
-    a RoBERTa ``.pt`` (which is not a baseline artefact), they fit on the
-    REAL train split via :func:`load_splits` + :func:`build_tfidf_lr` /
+    a :class:`RobertaScorer`. ``"distilbert"`` loads a SAVED DistilBERT
+    artefact (``best_distilbert.pt`` from :func:`save_distilbert_model`)
+    via :func:`load_distilbert_model` and returns a
+    :class:`DistilBertScorer`; a missing checkpoint, a RoBERTa ``.pt`` or
+    a baseline artefact raises — DistilBERT is NEVER silently refit here
+    (a refit is a full fine-tune, not a cheap baseline fit) and NEVER run
+    from untrained base weights. ``"tfidf_lr"`` / ``"tfidf_svm"`` /
+    ``"bilstm"`` / ``"cnn"`` load a SAVED baseline artefact when
+    ``checkpoint`` is a path to an existing one (see
+    :func:`save_baseline_model` / :func:`load_baseline_model`); when
+    ``checkpoint`` is None, missing, or a RoBERTa ``.pt`` (which is not a
+    baseline artefact), they fit on the REAL train split via
+    :func:`load_splits` + :func:`build_tfidf_lr` /
     :func:`build_tfidf_svm` / :func:`build_torch_baseline` exactly as
     ``run_multimodal_eval.run_cheap_baselines`` does, and the synthetic
     eval set is never fitted on. A checkpoint that exists but is neither
@@ -2183,6 +2719,22 @@ def load_scorer(
             ckpt, device=device,
         )
         return RobertaScorer(fitted_model, tokenizer, used_device)
+
+    if model == "distilbert":
+        if checkpoint is None:
+            raise ValueError(
+                "load_scorer('distilbert') requires a saved DistilBERT artefact "
+                "(best_distilbert.pt); pass checkpoint=<path>. DistilBERT is never "
+                "silently refit and never run from untrained base weights."
+            )
+        ckpt_path = Path(checkpoint)
+        if not ckpt_path.exists():
+            raise FileNotFoundError(
+                f"DistilBERT checkpoint not found: {ckpt_path} "
+                "(no refit is attempted; train it first with scripts/run_distilbert_final.py)."
+            )
+        fitted_model, tokenizer, _payload = load_distilbert_model(ckpt_path, device=device)
+        return DistilBertScorer(fitted_model, tokenizer, device)
 
     if model in ("tfidf_lr", "tfidf_svm", "bilstm", "cnn"):
         if checkpoint is not None:
@@ -2269,7 +2821,7 @@ def evaluate_random_baseline_with_proba_fn(
 
 def _explain_method_name(scorer: Any) -> str:
     """Second-method name for a scorer (``lime_only`` when there is none)."""
-    if isinstance(scorer, RobertaScorer):
+    if isinstance(scorer, (RobertaScorer, DistilBertScorer)):
         return "lita"
     if isinstance(scorer, BaselineScorer):
         if scorer.name == "tfidf_lr":
@@ -2293,6 +2845,16 @@ def explain_word_scores(
 
     * RoBERTa (``RobertaScorer`` only): LIME via ``LimeExplainer`` + TI via
       ``TransformerExplainer`` (aggregated to words); ``method_name="lita"``.
+    * DistilBERT (``DistilBertScorer`` only): the same LITA branch as
+      RoBERTa. ``TransformerExplainer`` handles DistilBERT natively
+      (``distilbert.embeddings`` word embeddings + position-table cap in
+      ``phishing_xai.explain``); ``evaluate_faithfulness_single_method``
+      is generic over any ``(PreTrainedModel, tokenizer)`` pair, so the
+      faithfulness / alpha-ablation scripts work for DistilBERT through
+      this scorer with no further change (add ``"distilbert"`` to their
+      ``--model`` choices). ``integrated_gradients_scores`` does NOT
+      support DistilBERT (it assumes a word-level ``SimpleTokenizer``)
+      and is never used on this path.
     * ``tfidf_lr``: LIME via :func:`lime_scores_for_text` + TF-IDF+LR
       coefficients via :func:`tfidf_lr_coefficient_scores`;
       ``method_name="lime_coefficients"``.
@@ -2319,7 +2881,7 @@ def explain_word_scores(
         lime_scores += [0.0] * (len(words) - len(lime_scores))
     lime_scores = lime_scores[: len(words)]
 
-    if isinstance(scorer, RobertaScorer):
+    if isinstance(scorer, (RobertaScorer, DistilBertScorer)):
         from phishing_xai.explain import (
             LimeExplainer,
             TransformerExplainer,

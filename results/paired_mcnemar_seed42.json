@@ -1,0 +1,25 @@
+{
+  "method": "Exact two-sided binomial McNemar on paired test-set errors (seed-42 single-seed predictions); b = first model wrong / second right, c = first right / second wrong. Predictions verified against known seed-42 metrics before pairing.",
+  "n_test": 3495,
+  "seed": 42,
+  "sources": {
+    "tfidf_svm": "results_v7/results/stage_a/tfidf_svm_seed42_test_pred.npy",
+    "bilstm": "results_v7/results/bilstm/bilstm_seed42_test_pred.npy",
+    "tfidf_lr": "results_v7/results/stage_a/tfidf_lr_seed42_test_pred.npy",
+    "labels": "canonical test split (results/splits.json), rebuilt via baselines.load_splits"
+  },
+  "pairs": {
+    "tfidf_svm_vs_bilstm": {
+      "b": 16,
+      "c": 65,
+      "p_exact_two_sided": 3.641398627788796e-08,
+      "n_discordant": 81
+    },
+    "tfidf_svm_vs_tfidf_lr": {
+      "b": 13,
+      "c": 39,
+      "p_exact_two_sided": 0.0004095414537825804,
+      "n_discordant": 52
+    }
+  }
+}

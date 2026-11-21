@@ -1,0 +1,33 @@
+{
+  "files": {
+    "rerun_latency": "results/rerun_latency/latency_explain_time.json",
+    "tfidf_latency": "results/robustness_rerun/baseline_results.json (seed-42 refit, latency_cpu_ms per model)"
+  },
+  "protocol_rerun": "Latency: baselines.measure_latency (median of n_latency single-email predict_proba calls after warmup), CPU and GPU measured separately on the same model and labelled by device. Explanation time: baselines.explain_word_scores timed once per email (LIME + second method), same 10 test emails Stage C explained, lime_samples=1000.",
+  "gpu": "Tesla T4",
+  "n_timed": 200,
+  "batch_size": 1,
+  "verified_values_median_ms": {
+    "roberta_gpu": 15.495662500001117,
+    "roberta_cpu": 242.49847450002449,
+    "bilstm_gpu": 8.373501999926702,
+    "bilstm_cpu": 19.897559000014553,
+    "tfidf_svm_cpu": 8.469151000099373,
+    "tfidf_lr_cpu": 1.0892905000048358
+  },
+  "task_numbers_match": {
+    "roberta_gpu_15.50": true,
+    "roberta_cpu_242.50": true,
+    "bilstm_gpu_8.37": true,
+    "bilstm_cpu_19.90": true,
+    "tfidf_svm_cpu_8.469": true,
+    "tfidf_lr_cpu_1.089": true
+  },
+  "tfidf_gpu": null,
+  "tfidf_gpu_note": "NOT COMPUTABLE \u2014 TF-IDF+SVC and TF-IDF+LR are CPU-only (sklearn); no GPU latency was ever measured for them (latency_gpu_ms is None in both source files). Any GPU multiple vs TF-IDF+SVC is therefore NOT COMPUTABLE and is not reported.",
+  "cpu_multiples_vs_tfidf_svm_median": {
+    "roberta_cpu_div_svc_cpu": 28.63315041816814,
+    "bilstm_cpu_div_svc_cpu": 2.349416015818006,
+    "tfidf_lr_cpu_div_svc_cpu": 0.12861861832337795
+  }
+}

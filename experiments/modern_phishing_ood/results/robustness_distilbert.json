@@ -1,0 +1,22 @@
+{
+  "model": "distilbert",
+  "set": "phishnchips",
+  "n": 2000,
+  "robustness": {
+    "truncated": {
+      "f1": 0.027613412228796843,
+      "accuracy": 0.507,
+      "roc_auc": 0.82222
+    },
+    "urls_removed": {
+      "f1": 0.019801980198019802,
+      "accuracy": 0.505,
+      "roc_auc": 0.8249979999999999
+    },
+    "typo_synonym": {
+      "f1": 0.06389157792836399,
+      "accuracy": 0.5165,
+      "roc_auc": 0.8284475
+    }
+  }
+}

@@ -1,9 +1,9 @@
 Subject: Account Notice
 From: security@alerts-example.com
 To: user@example.org
-Content-Type: multipart/mixed; boundary="===============6839596180442651345=="
+Content-Type: multipart/mixed; boundary="===============1026847926404610461=="
 
---===============6839596180442651345==
+--===============1026847926404610461==
 Content-Type: image/png
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="account_notice.png"
@@ -229,4 +229,4 @@ AABABwjuAAAAgA4Q3AEAAAAdILgDAAAAOkBwBwAAAHSA4A4AAADoAMEdAAAA0AGCOwAAAKADBHcA
 AABABwjuAAAAgA4Q3AEAAAAdILgDAAAAOkBwBwAAAHSA4A4AAADoAMEdAAAA0AGCOwAAAKADBHcA
 AABAB/4f20+frv7oNo8AAAAASUVORK5CYII=
 
---===============6839596180442651345==--
+--===============1026847926404610461==--

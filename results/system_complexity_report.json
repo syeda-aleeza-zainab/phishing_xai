@@ -6,8 +6,8 @@
       "label": "S1 TF-IDF+LR",
       "status": "ok",
       "reasons": {
-        "robustness": "no per-seed robustness block in baseline_results.json",
-        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+        "latency_gpu": "NOT MEASURED \u2014 TF-IDF has no GPU implementation",
+        "explanation_time": "explanation seconds/email was never measured for this model (run_latency_explain_time.py covers RoBERTa LITA and BiLSTM LITA-IG only); NOT RUN YET"
       },
       "accuracy": {
         "mean": 0.9821649976156414,
@@ -52,14 +52,20 @@
         "n": 3
       },
       "latency_cpu_ms": {
-        "mean": 1.084115999825978,
-        "std": 0.11197965870541056,
-        "n": 3
+        "mean": 1.0892905000048358,
+        "n": 1
       },
       "latency_gpu_ms": null,
+      "latency_source": "robustness_rerun/baseline_results.json (seed-42 refit)",
       "peak_memory_cpu_mb": 2276.2109375,
       "peak_memory_cuda_mb": 0.0,
-      "robustness_f1": null,
+      "robustness_f1": {
+        "truncated": 0.9667924528301887,
+        "urls_removed": 0.9729526671675433,
+        "typo_synonym": 0.9738610903659447,
+        "clean": 0.9747645951035782
+      },
+      "robustness_source": "robustness_rerun/baseline_results.json (seed-42 refit)",
       "explanation_time_s_per_email": null,
       "faithfulness_at_5": {
         "comprehensiveness": 0.02724601154890917,
@@ -69,14 +75,15 @@
       "mm_precision": 0.9411764705882353,
       "mm_recall": 1.0,
       "mm_f1": 0.9696969696969697,
-      "mm_n": 120,
+      "mm_n": 96,
       "mm_status": "ok",
       "mm_mcnemar_p_vs_roberta": 0.625,
       "mm_precision_ci": {
         "ci_low": 0.8717592592592593,
         "ci_high": 1.0
       },
-      "mm_untrained_fallback": false
+      "mm_untrained_fallback": false,
+      "mm_source": "rerun_mm/verdicts.json floor_0.85 (n=96)"
     },
     {
       "system": "S2",
@@ -84,8 +91,7 @@
       "label": "S2 BiLSTM",
       "status": "ok",
       "reasons": {
-        "robustness": "no per-seed robustness block in baseline_results.json",
-        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+        "latency_cpu_note": "baseline aggregate CPU latency 8.31 ms differs from the rerun measurement 19.90 ms; the rerun value is used (CPU/GPU measured separately, n=200)"
       },
       "accuracy": {
         "mean": 0.9680495946590367,
@@ -130,19 +136,30 @@
         "n": 3
       },
       "latency_cpu_ms": {
-        "mean": 8.308459333325876,
-        "std": 0.30537045068581053,
-        "n": 3
+        "mean": 19.897559000014553,
+        "n": 1
       },
       "latency_gpu_ms": {
-        "mean": 8.232105666650114,
-        "std": 0.2717468174977155,
-        "n": 3
+        "mean": 8.373501999926702,
+        "n": 1
       },
+      "latency_source": "rerun_latency/latency_explain_time.json (median of 200, batch 1, Tesla T4 host)",
       "peak_memory_cpu_mb": 2554.13671875,
       "peak_memory_cuda_mb": 166.51611328125,
-      "robustness_f1": null,
-      "explanation_time_s_per_email": null,
+      "robustness_f1": {
+        "clean": 0.96580547112462,
+        "truncated": 0.96580547112462,
+        "urls_removed": 0.9654386631219142,
+        "typo_synonym": 0.9637462235649547
+      },
+      "robustness_source": "robustness_rerun/robustness_loaded.json (loaded checkpoint, thr 0.5, n=3,495)",
+      "explanation_time_s_per_email": {
+        "median": 1.8724162105000346,
+        "mean": 1.7124666100000128,
+        "n": 10,
+        "method": "lime_ig",
+        "source": "rerun_latency/latency_explain_time.json"
+      },
       "faithfulness_at_5": {
         "comprehensiveness": 0.0950456752507349,
         "sufficiency": -0.0027057391778856914,
@@ -158,76 +175,101 @@
         "ci_low": 1.0,
         "ci_high": 1.0
       },
-      "mm_untrained_fallback": false
+      "mm_untrained_fallback": false,
+      "mm_source": "rerun_mm/verdicts.json floor_0.85 (n=96)"
     },
     {
       "system": "S3",
       "model": "distilbert",
       "label": "S3 DistilBERT",
       "status": "ok",
-      "reasons": {
-        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json",
-        "robustness": "no per-seed robustness block in baseline_results.json",
-        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET",
-        "faithfulness": "no faithfulness @5 found (baseline_results.json faithfulness block or faithfulness.json)",
-        "multimodal": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
-      },
+      "reasons": {},
       "accuracy": {
-        "mean": 0.9839771101573677,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9761564139246542,
+        "std": 0.0038102020706605607,
+        "n": 3
       },
       "precision": {
-        "mean": 0.9730941704035875,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9889680628776336,
+        "std": 0.002207472773668197,
+        "n": 3
       },
       "recall": {
-        "mean": 0.9848714069591528,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9475542107917296,
+        "std": 0.012157905649259894,
+        "n": 3
       },
       "f1": {
-        "mean": 0.9789473684210527,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9677825413929476,
+        "std": 0.00535634679829627,
+        "n": 3
       },
       "roc_auc": {
-        "mean": 0.9982932468550559,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.9982834999474365,
+        "std": 0.00047551660335914676,
+        "n": 3
       },
       "false_positive_rate": {
-        "mean": 0.016566958122411414,
-        "std": 0.0,
-        "n": 1
+        "mean": 0.006442705936493327,
+        "std": 0.0013805798435342844,
+        "n": 3
       },
       "precision_ci": {
-        "ci_low": 0.9635400497626004,
-        "ci_high": 0.9819532947285957
+        "ci_low": 0.9799208344557181,
+        "ci_high": 0.9930236604974909
       },
-      "mcnemar_p_vs_roberta": 0.602537006105314,
+      "mcnemar_p_vs_roberta": 0.07544035962680037,
       "params": 66955010,
-      "size_mb": 255.45360660552979,
+      "size_mb": 255.44833278656006,
       "train_seconds": {
-        "mean": 518.4906888980004,
-        "std": 0.0,
-        "n": 1
+        "mean": 388.671569741,
+        "std": 0.4215458608855796,
+        "n": 3
       },
-      "latency_cpu_ms": null,
-      "latency_gpu_ms": null,
-      "peak_memory_cpu_mb": null,
-      "peak_memory_cuda_mb": null,
-      "robustness_f1": null,
-      "explanation_time_s_per_email": null,
-      "faithfulness_at_5": null,
-      "mm_precision": null,
-      "mm_recall": null,
-      "mm_f1": null,
+      "latency_cpu_ms": {
+        "mean": 118.61517900001672,
+        "std": 0.0,
+        "n": 1,
+        "source": "results/distilbert/latency/latency_explain_time.json (seed-42 DistilBERT checkpoint, device switched to CPU, median of 200, batch 1, Tesla T4 host)"
+      },
+      "latency_gpu_ms": {
+        "mean": 9.567535666690219,
+        "std": 0.044479056187018966,
+        "n": 3,
+        "source": "run_distilbert_final.py 3-seed aggregate (GPU timing, CUDA)"
+      },
+      "latency_source": "baselines/baseline_results.json aggregate",
+      "peak_memory_cpu_mb": 5586.140625,
+      "peak_memory_cuda_mb": 1725.16015625,
+      "robustness_f1": {
+        "clean": 0.9739463601532568,
+        "truncated": 0.9688101655756642,
+        "urls_removed": 0.9739463601532568,
+        "typo_synonym": 0.9744956223829463
+      },
+      "robustness_source": "baselines/baseline_results.json per-seed block",
+      "explanation_time_s_per_email": {
+        "median": 15.692972198499888,
+        "mean": 14.320645545299977,
+        "n": 10,
+        "method": "lita",
+        "source": "distilbert/latency/latency_explain_time.json"
+      },
+      "faithfulness_at_5": {
+        "comprehensiveness": 0.04975501477679948,
+        "sufficiency": 0.036349427723085755,
+        "method": "lita_magnitude"
+      },
+      "mm_precision": 1.0,
+      "mm_recall": 0.9375,
+      "mm_f1": 0.967741935483871,
       "mm_n": null,
-      "mm_status": "NOT RUN YET",
+      "mm_status": "ok",
       "mm_mcnemar_p_vs_roberta": null,
-      "mm_precision_ci": null,
+      "mm_precision_ci": {
+        "ci_low": 1.0,
+        "ci_high": 1.0
+      },
       "mm_untrained_fallback": false
     },
     {
@@ -236,9 +278,7 @@
       "label": "S4 RoBERTa",
       "status": "ok",
       "reasons": {
-        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json",
-        "robustness": "no per-seed robustness block in baseline_results.json",
-        "explanation_time": "no script records explanation seconds/email (run_explain.py / run_faithfulness.py record no timing); NOT RUN YET"
+        "peak_memory": "no per-seed peak_memory_mb in baseline_results.json"
       },
       "accuracy": {
         "mean": 0.9854077253218884,
@@ -277,14 +317,29 @@
       "train_seconds": null,
       "latency_cpu_ms": {
         "mean": 242.49847450002449,
-        "std": 0.0,
         "n": 1
       },
-      "latency_gpu_ms": null,
+      "latency_gpu_ms": {
+        "mean": 15.495662500001117,
+        "n": 1
+      },
+      "latency_source": "rerun_latency/latency_explain_time.json (median of 200, batch 1, Tesla T4 host)",
       "peak_memory_cpu_mb": null,
       "peak_memory_cuda_mb": null,
-      "robustness_f1": null,
-      "explanation_time_s_per_email": null,
+      "robustness_f1": {
+        "clean": 0.980948823309675,
+        "truncated": 0.9773149869840089,
+        "urls_removed": 0.975482912332838,
+        "typo_synonym": 0.9638025594149908
+      },
+      "robustness_source": "robustness_rerun/robustness_loaded.json (loaded checkpoint, thr 0.5, n=3,495)",
+      "explanation_time_s_per_email": {
+        "median": 30.86714004499993,
+        "mean": 36.64865412539996,
+        "n": 10,
+        "method": "lita",
+        "source": "rerun_latency/latency_explain_time.json"
+      },
       "faithfulness_at_5": {
         "comprehensiveness": 0.10552617425600681,
         "sufficiency": 0.08087266534182828,
@@ -298,6 +353,89 @@
       "mm_mcnemar_p_vs_roberta": null,
       "mm_precision_ci": null,
       "mm_untrained_fallback": false
+    },
+    {
+      "system": "S0",
+      "model": "tfidf_svm",
+      "label": "S0 TF-IDF+SVC (best simple baseline)",
+      "status": "ok",
+      "reasons": {
+        "latency_gpu": "NOT MEASURED \u2014 TF-IDF has no GPU implementation",
+        "explanation_time": "explanation seconds/email was never measured for this model (run_latency_explain_time.py covers RoBERTa LITA and BiLSTM LITA-IG only); NOT RUN YET",
+        "faithfulness": "no faithfulness @5 found (baseline_results.json faithfulness block or faithfulness.json)",
+        "multimodal": "no multimodal_eval.json for this backbone"
+      },
+      "accuracy": {
+        "mean": 0.9889365760610396,
+        "std": 0.0005956125892607093,
+        "n": 3
+      },
+      "precision": {
+        "mean": 0.981973479716395,
+        "std": 0.0007307259437334279,
+        "n": 3
+      },
+      "recall": {
+        "mean": 0.988905698436712,
+        "std": 0.0015746338876445939,
+        "n": 3
+      },
+      "f1": {
+        "mean": 0.9854268111525153,
+        "std": 0.0007938417089860079,
+        "n": 3
+      },
+      "roc_auc": {
+        "mean": 0.9992439184518012,
+        "std": 4.841147121846197e-05,
+        "n": 3
+      },
+      "false_positive_rate": {
+        "mean": 0.011044638748274277,
+        "std": 0.00046019328117809493,
+        "n": 3
+      },
+      "precision_ci": {
+        "ci_low": 0.9745841274631694,
+        "ci_high": 0.9888562826001649
+      },
+      "mcnemar_p_vs_roberta": 0.2530381164947516,
+      "params": 3972261,
+      "size_mb": 54.806246757507324,
+      "train_seconds": {
+        "mean": 109.44190656400004,
+        "std": 19.65213030550252,
+        "n": 3
+      },
+      "latency_cpu_ms": {
+        "mean": 8.469151000099373,
+        "n": 1
+      },
+      "latency_gpu_ms": null,
+      "latency_source": "robustness_rerun/baseline_results.json (seed-42 refit)",
+      "peak_memory_cpu_mb": 4652.72265625,
+      "peak_memory_cuda_mb": 0.0,
+      "robustness_f1": {
+        "truncated": 0.9725609756097561,
+        "urls_removed": 0.9849397590361446,
+        "typo_synonym": 0.9834834834834835,
+        "clean": 0.984534138061109
+      },
+      "robustness_source": "robustness_rerun/baseline_results.json (seed-42 refit)",
+      "explanation_time_s_per_email": null,
+      "faithfulness_at_5": null,
+      "mm_precision": 0.9555555555555556,
+      "mm_recall": 0.8958333333333334,
+      "mm_f1": 0.924731182795699,
+      "mm_n": 96,
+      "mm_status": "ok",
+      "mm_mcnemar_p_vs_roberta": 0.0703125,
+      "mm_precision_ci": {
+        "ci_low": 0.8863636363636364,
+        "ci_high": 1.0
+      },
+      "mm_untrained_fallback": false,
+      "mm_source": "rerun_mm/verdicts.json floor_0.85 (n=96)"
     }
   ],
   "multimodal_by_system": {
@@ -393,32 +531,153 @@
       "bootstrap_ci_high": 1.0
     },
     "S3": {
-      "status": "NOT RUN YET",
-      "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)"
+      "status": "ok",
+      "reason": "DistilBERT multimodal run not present (skipped, like S3 on the text set)",
+      "precision": 1.0,
+      "recall": 0.9375,
+      "f1": 0.967741935483871,
+      "mcnemar_p_vs_roberta": null,
+      "bootstrap_ci_low": 1.0,
+      "bootstrap_ci_high": 1.0
     }
   },
-  "verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 223.7x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
-  "recommended_deployment_model": "distilbert (S3, precision 0.9731, recall 0.9849; recall floor 0.85 met)",
-  "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 1.30 precision points (RoBERTa 0.9690 vs tfidf_svm 0.9820; McNemar p = 0.2530) at unknown latency and 31.4x parameters. (F1 gap: -0.45 points, RoBERTa 0.9809 vs tfidf_svm 0.9854) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
+  "verdict": "Verdict (precision-first, vs best simple baseline TF-IDF+SVC): RoBERTa is below the best simple baseline by 1.30 precision points on the text test set (RoBERTa 0.9690 vs SVC 0.9820; McNemar p = 0.2530) at 28.6x CPU latency and 31.4x parameters. GPU latency multiple: NOT MEASURED (TF-IDF has no GPU implementation). Its complexity is NOT justified by a precision gain on this dataset. BiLSTM is also below SVC, by 1.00 precision points (0.9719 vs 0.9820; paired seed-42 McNemar p = 3.64e-08 \u2014 SVC is significantly better than BiLSTM on test errors), at 2.35x CPU latency and 1.57x parameters. In plain terms: on this old, highly separable Enron-style test set the cheapest model wins on precision, and neither neural model earns its cost in accuracy \u2014 RoBERTa does buy the highest recall (0.9932 vs SVC 0.9889) and the LITA explanations plus image/PDF/QR handling the baselines do not provide, while BiLSTM buys the fastest explanations (1.87 s/email vs RoBERTa 30.87 s/email). Whether that is worth it depends on the deployment budget, not on accuracy.",
+  "best_baseline_comparison": {
+    "baseline": "tfidf_svm (best simple baseline by 3-seed precision)",
+    "text_test_n": 3495,
+    "roberta_vs_svc": {
+      "precision": [
+        0.9690036900369003,
+        0.981973479716395
+      ],
+      "recall": [
+        0.9931921331316188,
+        0.988905698436712
+      ],
+      "f1": [
+        0.9809488233096749,
+        0.9854268111525153
+      ],
+      "roc_auc": [
+        0.9986272524929457,
+        0.9992439184518012
+      ],
+      "precision_gap_points": -1.2969789679494692,
+      "mcnemar_p_vs_svc": 0.2530381164947516,
+      "mcnemar_note": "stored seed-42 McNemar vs RoBERTa (b=36, c=26) \u2014 the same paired errors, read from the SVC side",
+      "params_multiple": 31.37940079969569,
+      "size_multiple": 8.677321729994242,
+      "cpu_latency_multiple": 28.63315041816814,
+      "gpu_latency_multiple": null,
+      "gpu_latency_note": "NOT MEASURED \u2014 TF-IDF has no GPU implementation",
+      "explanation_time_s_per_email_median": [
+        30.86714004499993,
+        null
+      ],
+      "robustness_f1": [
+        {
+          "clean": 0.980948823309675,
+          "truncated": 0.9773149869840089,
+          "urls_removed": 0.975482912332838,
+          "typo_synonym": 0.9638025594149908
+        },
+        {
+          "truncated": 0.9725609756097561,
+          "urls_removed": 0.9849397590361446,
+          "typo_synonym": 0.9834834834834835,
+          "clean": 0.984534138061109
+        }
+      ],
+      "multimodal_precision_recall": [
+        [
+          1.0,
+          0.9791666666666666
+        ],
+        [
+          0.9555555555555556,
+          0.8958333333333334
+        ]
+      ],
+      "multimodal_mcnemar_p_vs_roberta": 0.0703125
+    },
+    "bilstm_vs_svc": {
+      "precision": [
+        0.9719453883503436,
+        0.981973479716395
+      ],
+      "recall": [
+        0.942763489662128,
+        0.988905698436712
+      ],
+      "f1": [
+        0.9570747183670113,
+        0.9854268111525153
+      ],
+      "roc_auc": [
+        0.9942262336162025,
+        0.9992439184518012
+      ],
+      "precision_gap_points": -1.0028091366051428,
+      "mcnemar_p_vs_svc": 3.641398627788796e-08,
+      "mcnemar_note": "paired seed-42 test predictions (n=3,495), exact two-sided binomial McNemar; b=16 (SVC wrong, BiLSTM right), c=65 (SVC right, BiLSTM wrong)",
+      "params_multiple": 1.569895331651168,
+      "size_multiple": 0.4340487308572355,
+      "cpu_latency_multiple": 2.349416015818006,
+      "gpu_latency_multiple": null,
+      "gpu_latency_note": "NOT MEASURED \u2014 TF-IDF has no GPU implementation",
+      "explanation_time_s_per_email_median": [
+        1.8724162105000346,
+        null
+      ],
+      "robustness_f1": [
+        {
+          "clean": 0.96580547112462,
+          "truncated": 0.96580547112462,
+          "urls_removed": 0.9654386631219142,
+          "typo_synonym": 0.9637462235649547
+        },
+        {
+          "truncated": 0.9725609756097561,
+          "urls_removed": 0.9849397590361446,
+          "typo_synonym": 0.9834834834834835,
+          "clean": 0.984534138061109
+        }
+      ],
+      "multimodal_precision_recall": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.9555555555555556,
+          0.8958333333333334
+        ]
+      ],
+      "multimodal_mcnemar_p_vs_roberta": 1.0
+    }
+  },
+  "verdict_vs_tfidf_lr": "Verdict (precision-first): Transformer is below the best simple baseline by 0.11 precision points on the text test set (RoBERTa 0.9690 vs tfidf_lr 0.9701; McNemar p = 0.3491) at 222.6x latency and 3116.1x parameters. Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer.",
+  "recommended_deployment_model": "distilbert (S3, precision 0.9890, recall 0.9476; recall floor 0.85 met)",
+  "text_only_verdict": "Verdict (precision-first): Transformer is below the best simple baseline by 2.00 precision points (RoBERTa 0.9690 vs distilbert 0.9890; McNemar p = 0.0754) at unknown latency and 1.9x parameters. (F1 gap: 1.32 points, RoBERTa 0.9809 vs distilbert 0.9678) Its complexity is NOT justified by a precision gain on this dataset; value lies in the XAI/multimodal layer: LIME / Integrated Gradients / LITA explanations and image/PDF/QR handling that the simple baselines do not provide.",
   "agreement": {
     "status": "ok",
     "n_emails": 10,
-    "mean_jaccard": 1.0,
-    "mean_spearman": 0.9999999999999998,
+    "mean_jaccard": 0.1003968253968254,
+    "mean_spearman": -0.49739483318812816,
     "n_spearman": 10,
-    "roberta_method": "bilstm",
+    "roberta_method": "roberta",
     "bilstm_method": "bilstm",
     "per_email": [
       {
         "email_id": "email_1",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.25,
+        "spearman": -0.19446111706564934,
         "roberta_top5": [
-          "other",
-          "spanish",
           "the",
-          "spanish",
-          "spanish"
+          "the",
+          "the",
+          "the",
+          "someone"
         ],
         "bilstm_top5": [
           "other",
@@ -430,14 +689,14 @@
       },
       {
         "email_id": "email_17",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.16666666666666666,
+        "spearman": -0.5083042452524145,
         "roberta_top5": [
-          "lucky",
-          ":",
-          ":",
+          "linguists",
           "issue",
-          "offer"
+          "linguists",
+          "linguists",
+          "like"
         ],
         "bilstm_top5": [
           "lucky",
@@ -449,14 +708,14 @@
       },
       {
         "email_id": "email_18",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.14285714285714285,
+        "spearman": -0.14189894037078124,
         "roberta_top5": [
-          "look",
           "enron",
-          "under",
-          "at",
-          "ability"
+          "resume",
+          "resume",
+          "john",
+          "john"
         ],
         "bilstm_top5": [
           "look",
@@ -468,14 +727,14 @@
       },
       {
         "email_id": "email_25",
-        "jaccard": 1.0,
-        "spearman": 1.0,
+        "jaccard": 0.16666666666666666,
+        "spearman": -0.4514621575840976,
         "roberta_top5": [
+          "agenda",
+          "rebecca",
           "her",
-          "legal",
-          "notification",
-          "her",
-          "us"
+          "rebecca",
+          "agenda"
         ],
         "bilstm_top5": [
           "her",
@@ -487,14 +746,14 @@
       },
       {
         "email_id": "email_27",
-        "jaccard": 1.0,
-        "spearman": 1.0,
+        "jaccard": 0.0,
+        "spearman": -0.7169241683455057,
         "roberta_top5": [
-          "pat",
-          "completion",
-          "completion",
-          "completion",
-          "o"
+          "enron",
+          "enron",
+          "appears",
+          "meter",
+          "meter"
         ],
         "bilstm_top5": [
           "pat",
@@ -506,14 +765,14 @@
       },
       {
         "email_id": "email_29",
-        "jaccard": 1.0,
-        "spearman": 1.0,
+        "jaccard": 0.0,
+        "spearman": -0.7046325664605391,
         "roberta_top5": [
-          "-",
-          "-",
-          "ricki",
-          "thank",
-          "5754"
+          "culture",
+          "for",
+          "culture",
+          "attendance",
+          "for"
         ],
         "bilstm_top5": [
           "-",
@@ -525,14 +784,14 @@
       },
       {
         "email_id": "email_30",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.0,
+        "spearman": -0.8519427513705974,
         "roberta_top5": [
-          "cross",
-          "cross",
-          "control",
-          "v",
-          "v"
+          "syntax",
+          "(",
+          "(",
+          "(",
+          "("
         ],
         "bilstm_top5": [
           "cross",
@@ -544,14 +803,14 @@
       },
       {
         "email_id": "email_37",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.0,
+        "spearman": -0.6546536707079771,
         "roberta_top5": [
-          "now",
-          "overwritten",
-          "exmh's",
-          "@",
-          "in"
+          "brent",
+          "brent",
+          "brent",
+          "brent",
+          "brent"
         ],
         "bilstm_top5": [
           "now",
@@ -563,14 +822,14 @@
       },
       {
         "email_id": "email_42",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.16666666666666666,
+        "spearman": -0.31633538139038603,
         "roberta_top5": [
-          "business",
-          "hpl",
           "enron",
           "enron",
-          "hpl"
+          "to",
+          "team",
+          "gain"
         ],
         "bilstm_top5": [
           "business",
@@ -582,14 +841,14 @@
       },
       {
         "email_id": "email_44",
-        "jaccard": 1.0,
-        "spearman": 0.9999999999999998,
+        "jaccard": 0.1111111111111111,
+        "spearman": -0.43333333333333335,
         "roberta_top5": [
-          "remove",
+          "price",
+          "free",
           "adult",
-          "line",
-          "type",
-          "email"
+          "get",
+          "regular"
         ],
         "bilstm_top5": [
           "remove",
@@ -608,7 +867,631 @@
   "dataset_caveat": "Dataset caveat: this is an old Enron-style dataset that is highly separable, so high simple-model scores do not imply the same performance on modern, AI-written or multimodal phishing. A harder out-of-distribution test is needed before any deployment claim.",
   "sampling_note": "Sampling comparability (checked against the scripts, 2026-11-19). run_faithfulness.py and run_ablation.py draw their emails with test_df.sample(n=sample_size, random_state=seed) from the same test split, so the SAME --seed and SAME --sample_size give the SAME emails for RoBERTa and for BiLSTM (--model bilstm) \u2014 provided the splits are identical. The sampled email ids are verifiable post-hoc in faithfulness_records.jsonl (one record per email, with email_id); faithfulness.json / alpha_ablation.json themselves store only the summary plus metadata seed/sample_count, no per-email words. run_explain.py is DIFFERENT: it takes test_df.head(num_samples) \u2014 the first N test rows, seed-independent \u2014 so its emails are NOT the faithfulness sample. Agreement between models is still valid from explanations.json because both models explain the same head(N) emails, but only when both runs use the same --num_samples AND different --output_dir values (the default results/explanations/explanations.json would be overwritten by the second run). Per-email top words ARE stored by run_explain.py (word_level_attributions with lita_score per word, plus lime_top_words top 15, keyed by id) \u2014 so no code change is needed for agreement; the discipline is CLI-level (same --num_samples, separate --output_dir). If a future explain run stops storing per-email words, agreement falls back to NOT RUN YET.",
   "ood_csv": null,
-  "ood_status": "NOT RUN YET",
+  "ood_summary": {
+    "dir": "results",
+    "sets": {
+      "phishnchips": {
+        "roberta": {
+          "n": 2000,
+          "accuracy": 0.513,
+          "precision": 0.9333333333333333,
+          "recall": 0.028,
+          "f1": 0.05436893203883495,
+          "roc_auc": 0.7787,
+          "pr_auc": 0.7946792109638081,
+          "false_positive_rate": 0.002,
+          "confusion_matrix": [
+            [
+              998,
+              2
+            ],
+            [
+              972,
+              28
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 2000,
+          "accuracy": 0.523,
+          "precision": 0.859375,
+          "recall": 0.055,
+          "f1": 0.10338345864661654,
+          "roc_auc": 0.6800909999999999,
+          "pr_auc": 0.6767571316676289,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              945,
+              55
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 2000,
+          "accuracy": 0.536,
+          "precision": 0.9,
+          "recall": 0.081,
+          "f1": 0.14862385321100918,
+          "roc_auc": 0.6603629999999999,
+          "pr_auc": 0.6724125197517408,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              919,
+              81
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 2000,
+          "accuracy": 0.5905,
+          "precision": 0.9788359788359788,
+          "recall": 0.185,
+          "f1": 0.31118587047939444,
+          "roc_auc": 0.752764,
+          "pr_auc": 0.7771477592886433,
+          "false_positive_rate": 0.004,
+          "confusion_matrix": [
+            [
+              996,
+              4
+            ],
+            [
+              815,
+              185
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 2000,
+          "accuracy": 0.507,
+          "precision": 1.0,
+          "recall": 0.014,
+          "f1": 0.027613412228796843,
+          "roc_auc": 0.82222,
+          "pr_auc": 0.8249558074737283,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              986,
+              14
+            ]
+          ]
+        }
+      },
+      "phishfuzzer": {
+        "roberta": {
+          "n": 205,
+          "accuracy": 0.5121951219512195,
+          "precision": 0.5109489051094891,
+          "recall": 0.6796116504854369,
+          "f1": 0.5833333333333334,
+          "roc_auc": 0.5711022272986865,
+          "pr_auc": 0.6145102685094116,
+          "false_positive_rate": 0.6568627450980392,
+          "confusion_matrix": [
+            [
+              35,
+              67
+            ],
+            [
+              33,
+              70
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 205,
+          "accuracy": 0.526829268292683,
+          "precision": 0.53125,
+          "recall": 0.49514563106796117,
+          "f1": 0.5125628140703518,
+          "roc_auc": 0.5149438416143156,
+          "pr_auc": 0.5769726067994712,
+          "false_positive_rate": 0.4411764705882353,
+          "confusion_matrix": [
+            [
+              57,
+              45
+            ],
+            [
+              52,
+              51
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 205,
+          "accuracy": 0.5317073170731708,
+          "precision": 0.5263157894736842,
+          "recall": 0.6796116504854369,
+          "f1": 0.5932203389830508,
+          "roc_auc": 0.5818579859128117,
+          "pr_auc": 0.6379279781106251,
+          "false_positive_rate": 0.6176470588235294,
+          "confusion_matrix": [
+            [
+              39,
+              63
+            ],
+            [
+              33,
+              70
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 205,
+          "accuracy": 0.5317073170731708,
+          "precision": 0.5238095238095238,
+          "recall": 0.7475728155339806,
+          "f1": 0.616,
+          "roc_auc": 0.5603464686845612,
+          "pr_auc": 0.5872470512680215,
+          "false_positive_rate": 0.6862745098039216,
+          "confusion_matrix": [
+            [
+              32,
+              70
+            ],
+            [
+              26,
+              77
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 205,
+          "accuracy": 0.5317073170731708,
+          "precision": 0.5299145299145299,
+          "recall": 0.6019417475728155,
+          "f1": 0.5636363636363636,
+          "roc_auc": 0.5477822196839901,
+          "pr_auc": 0.5897493858447459,
+          "false_positive_rate": 0.5392156862745098,
+          "confusion_matrix": [
+            [
+              47,
+              55
+            ],
+            [
+              41,
+              62
+            ]
+          ]
+        }
+      },
+      "frontiers_llm": {
+        "roberta": {
+          "n": 5986,
+          "accuracy": 0.9492148346140996,
+          "precision": 0.9995731967562953,
+          "recall": 0.9394304051343763,
+          "f1": 0.9685690653432589,
+          "roc_auc": 0.999367027677497,
+          "pr_auc": 0.9998462409663434,
+          "false_positive_rate": 0.002,
+          "confusion_matrix": [
+            [
+              998,
+              2
+            ],
+            [
+              302,
+              4684
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 5986,
+          "accuracy": 0.5643167390578016,
+          "precision": 0.9962437395659433,
+          "recall": 0.4787404733253109,
+          "f1": 0.6467082091574099,
+          "roc_auc": 0.9542057761732852,
+          "pr_auc": 0.988315755538528,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              2599,
+              2387
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 5986,
+          "accuracy": 0.6815903775476111,
+          "precision": 0.9970948999354422,
+          "recall": 0.6195346971520257,
+          "f1": 0.7642256308758041,
+          "roc_auc": 0.9378963096670678,
+          "pr_auc": 0.9871998669057179,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              1897,
+              3089
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 5986,
+          "accuracy": 0.8483127297026395,
+          "precision": 0.9990210474791973,
+          "recall": 0.8186923385479342,
+          "f1": 0.8999118165784833,
+          "roc_auc": 0.9748375451263537,
+          "pr_auc": 0.9950796395598724,
+          "false_positive_rate": 0.004,
+          "confusion_matrix": [
+            [
+              996,
+              4
+            ],
+            [
+              904,
+              4082
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 5986,
+          "accuracy": 0.805880387570999,
+          "precision": 1.0,
+          "recall": 0.7669474528680305,
+          "f1": 0.8681044267877412,
+          "roc_auc": 0.9988076614520658,
+          "pr_auc": 0.999755048929815,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              1162,
+              3824
+            ]
+          ]
+        }
+      },
+      "frontiers_human": {
+        "roberta": {
+          "n": 6000,
+          "accuracy": 0.8665,
+          "precision": 0.999524149417083,
+          "recall": 0.8402,
+          "f1": 0.9129631641855916,
+          "roc_auc": 0.9902488,
+          "pr_auc": 0.9980516200064995,
+          "false_positive_rate": 0.002,
+          "confusion_matrix": [
+            [
+              998,
+              2
+            ],
+            [
+              799,
+              4201
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 6000,
+          "accuracy": 0.7673333333333333,
+          "precision": 0.9975151849806737,
+          "recall": 0.7226,
+          "f1": 0.8380886105311992,
+          "roc_auc": 0.9501246000000001,
+          "pr_auc": 0.9901144141118253,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              1387,
+              3613
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 6000,
+          "accuracy": 0.8496666666666667,
+          "precision": 0.9978134110787172,
+          "recall": 0.8214,
+          "f1": 0.9010530934620448,
+          "roc_auc": 0.9699046,
+          "pr_auc": 0.9940418793494215,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              893,
+              4107
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 6000,
+          "accuracy": 0.866,
+          "precision": 0.9990485252140818,
+          "recall": 0.84,
+          "f1": 0.9126466753585397,
+          "roc_auc": 0.9822533999999999,
+          "pr_auc": 0.9965275758272896,
+          "false_positive_rate": 0.004,
+          "confusion_matrix": [
+            [
+              996,
+              4
+            ],
+            [
+              800,
+              4200
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 6000,
+          "accuracy": 0.881,
+          "precision": 1.0,
+          "recall": 0.8572,
+          "f1": 0.9231100581520568,
+          "roc_auc": 0.9970968,
+          "pr_auc": 0.999428810555111,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              714,
+              4286
+            ]
+          ]
+        }
+      },
+      "bec": {
+        "roberta": {
+          "n": 5181,
+          "accuracy": 0.49700829955607023,
+          "precision": 0.9987333755541482,
+          "recall": 0.37718249222674,
+          "f1": 0.5475694444444444,
+          "roc_auc": 0.9513405883759867,
+          "pr_auc": 0.9879706108327236,
+          "false_positive_rate": 0.002,
+          "confusion_matrix": [
+            [
+              998,
+              2
+            ],
+            [
+              2604,
+              1577
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 5181,
+          "accuracy": 0.3609341825902335,
+          "precision": 0.9898648648648649,
+          "recall": 0.2102367854580244,
+          "f1": 0.3468139672519235,
+          "roc_auc": 0.8319626883520688,
+          "pr_auc": 0.951826810169742,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              3302,
+              879
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 5181,
+          "accuracy": 0.5045358038988612,
+          "precision": 0.9944852941176471,
+          "recall": 0.388184644821813,
+          "f1": 0.5584035781868226,
+          "roc_auc": 0.9000765367137048,
+          "pr_auc": 0.973788843453357,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              2558,
+              1623
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 5181,
+          "accuracy": 0.4475969889982629,
+          "precision": 0.9969856819894499,
+          "recall": 0.3164314757235111,
+          "f1": 0.4803921568627451,
+          "roc_auc": 0.9066594116240135,
+          "pr_auc": 0.9746638356250884,
+          "false_positive_rate": 0.004,
+          "confusion_matrix": [
+            [
+              996,
+              4
+            ],
+            [
+              2858,
+              1323
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 5181,
+          "accuracy": 0.31422505307855625,
+          "precision": 1.0,
+          "recall": 0.15020330064577853,
+          "f1": 0.2611769598669162,
+          "roc_auc": 0.9559806266443435,
+          "pr_auc": 0.9891019539461815,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              3553,
+              628
+            ]
+          ]
+        }
+      },
+      "bec_poisoned": {
+        "roberta": {
+          "n": 5181,
+          "accuracy": 0.5398571704304188,
+          "precision": 0.9988895058300944,
+          "recall": 0.4302798373594834,
+          "f1": 0.6014710799063858,
+          "roc_auc": 0.9565055010762976,
+          "pr_auc": 0.9894197876364624,
+          "false_positive_rate": 0.002,
+          "confusion_matrix": [
+            [
+              998,
+              2
+            ],
+            [
+              2382,
+              1799
+            ]
+          ]
+        },
+        "bilstm": {
+          "n": 5181,
+          "accuracy": 0.3723219455703532,
+          "precision": 0.9904963041182682,
+          "recall": 0.2243482420473571,
+          "f1": 0.3658346333853354,
+          "roc_auc": 0.8436479311169576,
+          "pr_auc": 0.9552939391950308,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              3243,
+              938
+            ]
+          ]
+        },
+        "tfidf_svm": {
+          "n": 5181,
+          "accuracy": 0.4867786141671492,
+          "precision": 0.9941558441558441,
+          "recall": 0.3661803396316671,
+          "f1": 0.5352211151896522,
+          "roc_auc": 0.8938677349916289,
+          "pr_auc": 0.9718961655840769,
+          "false_positive_rate": 0.009,
+          "confusion_matrix": [
+            [
+              991,
+              9
+            ],
+            [
+              2650,
+              1531
+            ]
+          ]
+        },
+        "tfidf_lr": {
+          "n": 5181,
+          "accuracy": 0.4346651225632117,
+          "precision": 0.9968253968253968,
+          "recall": 0.30040660129155705,
+          "f1": 0.4616798382650248,
+          "roc_auc": 0.8974620904089932,
+          "pr_auc": 0.9720011600216287,
+          "false_positive_rate": 0.004,
+          "confusion_matrix": [
+            [
+              996,
+              4
+            ],
+            [
+              2925,
+              1256
+            ]
+          ]
+        },
+        "distilbert": {
+          "n": 5181,
+          "accuracy": 0.3821656050955414,
+          "precision": 1.0,
+          "recall": 0.23439368572111935,
+          "f1": 0.3797713621391203,
+          "roc_auc": 0.9613642669217892,
+          "pr_auc": 0.99063420889423,
+          "false_positive_rate": 0.0,
+          "confusion_matrix": [
+            [
+              1000,
+              0
+            ],
+            [
+              3201,
+              980
+            ]
+          ]
+        }
+      }
+    },
+    "status": {
+      "roberta": "ok",
+      "bilstm": "ok",
+      "tfidf_svm": "ok",
+      "tfidf_lr": "ok",
+      "distilbert": "ok"
+    }
+  },
+  "ood_status": "ok",
   "inputs_status": {
     "baselines/baseline_results.json": "ok",
     "metrics.json": "ok",
@@ -616,20 +1499,26 @@
     "bilstm/faithfulness.json": "ok",
     "bilstm/alpha_ablation.json": "ok",
     "bilstm/explanations/explanations.json": "ok",
-    "bilstm/explanations.json": "missing: /home/hatch/workspace/kaggle_downloads/regen/bilstm/explanations.json not found",
+    "bilstm/explanations.json": "missing: bilstm/explanations.json not found",
     "explanations/explanations.json": "ok",
     "faithfulness.json": "ok",
     "alpha_ablation.json": "ok",
     "multimodal_eval/multimodal_eval.json": "ok",
     "bilstm/multimodal_eval.json": "ok",
-    "bilstm/multimodal_eval/multimodal_eval.json": "missing: /home/hatch/workspace/kaggle_downloads/regen/bilstm/multimodal_eval/multimodal_eval.json not found",
-    "multimodal_eval_rule_based/multimodal_eval.json": "ok"
+    "bilstm/multimodal_eval/multimodal_eval.json": "missing: bilstm/multimodal_eval/multimodal_eval.json not found",
+    "multimodal_eval_rule_based/multimodal_eval.json": "ok",
+    "rerun_mm/verdicts.json": "ok",
+    "rerun_latency/latency_explain_time.json": "ok",
+    "distilbert/latency/latency_explain_time.json": "ok",
+    "robustness_rerun/robustness_loaded.json": "ok",
+    "robustness_rerun/baseline_results.json": "ok",
+    "paired_mcnemar_seed42.json": "ok"
   },
   "plots": {
-    "precision_vs_latency": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/precision_vs_latency.png",
-    "faithfulness": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/faithfulness_at_5.png",
-    "multimodal_ablation": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/multimodal_ablation.png",
-    "agreement": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots/top_word_agreement.png"
+    "precision_vs_latency": "system_complexity_plots/precision_vs_latency.png",
+    "faithfulness": "system_complexity_plots/faithfulness_at_5.png",
+    "multimodal_ablation": "system_complexity_plots/multimodal_ablation.png",
+    "agreement": "system_complexity_plots/top_word_agreement.png"
   },
-  "plot_dir": "/home/hatch/workspace/kaggle_downloads/regen/out/system_complexity_plots"
+  "plot_dir": "system_complexity_plots"
 }

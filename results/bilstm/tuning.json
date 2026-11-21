@@ -1,0 +1,319 @@
+{
+  "seed": 42,
+  "n_trials": 10,
+  "epochs": 3,
+  "recall_floor": 0.85,
+  "floor_met": true,
+  "best_params": {
+    "emb_dim": 200,
+    "hidden": 64,
+    "layers": 2,
+    "dropout": 0.5,
+    "lr": 0.002,
+    "max_len": 128,
+    "batch_size": 16
+  },
+  "best_val_precision": 0.9798387096774194,
+  "best_val_recall": 0.9364161849710982,
+  "best_val_f1": 0.9576354679802955,
+  "selection": {
+    "best": {
+      "trial": 9,
+      "params": {
+        "emb_dim": 200,
+        "hidden": 64,
+        "layers": 2,
+        "dropout": 0.5,
+        "lr": 0.002,
+        "max_len": 128,
+        "batch_size": 16
+      },
+      "val_precision": 0.9798387096774194,
+      "val_recall": 0.9364161849710982,
+      "val_f1": 0.9576354679802955,
+      "val_accuracy": 0.96931858722797,
+      "train_info": {
+        "best_val_precision": 0.9798387096774194,
+        "best_val_recall": 0.9364161849710982,
+        "best_val_f1": 0.9576354679802955,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 57.4,
+      "n_params": 6236034
+    },
+    "best_params": {
+      "emb_dim": 200,
+      "hidden": 64,
+      "layers": 2,
+      "dropout": 0.5,
+      "lr": 0.002,
+      "max_len": 128,
+      "batch_size": 16
+    },
+    "best_val_precision": 0.9798387096774194,
+    "best_val_recall": 0.9364161849710982,
+    "best_val_f1": 0.9576354679802955,
+    "recall_floor": 0.85,
+    "floor_met": true,
+    "n_trials": 10,
+    "n_eligible": 10
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 64,
+        "layers": 2,
+        "dropout": 0.2,
+        "lr": 0.0005,
+        "max_len": 128,
+        "batch_size": 16
+      },
+      "val_precision": 0.9441816461684012,
+      "val_recall": 0.9614643545279383,
+      "val_f1": 0.952744630071599,
+      "val_accuracy": 0.9646806992508027,
+      "train_info": {
+        "best_val_precision": 0.9441816461684012,
+        "best_val_recall": 0.9614643545279383,
+        "best_val_f1": 0.952744630071599,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 57.6,
+      "n_params": 3184834
+    },
+    {
+      "trial": 1,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 256,
+        "layers": 2,
+        "dropout": 0.2,
+        "lr": 0.0005,
+        "max_len": 128,
+        "batch_size": 16
+      },
+      "val_precision": 0.922365988909427,
+      "val_recall": 0.9614643545279383,
+      "val_f1": 0.9415094339622642,
+      "val_accuracy": 0.9557616839100963,
+      "train_info": {
+        "best_val_precision": 0.922365988909427,
+        "best_val_recall": 0.9614643545279383,
+        "best_val_f1": 0.9415094339622642,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 59.3,
+      "n_params": 5312194
+    },
+    {
+      "trial": 2,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 256,
+        "layers": 1,
+        "dropout": 0.5,
+        "lr": 0.0005,
+        "max_len": 256,
+        "batch_size": 16
+      },
+      "val_precision": 0.9296803652968036,
+      "val_recall": 0.9807321772639692,
+      "val_f1": 0.9545241443975622,
+      "val_accuracy": 0.9653942204780592,
+      "train_info": {
+        "best_val_precision": 0.9296803652968036,
+        "best_val_recall": 0.9807321772639692,
+        "best_val_f1": 0.9545241443975622,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 58.6,
+      "n_params": 3735234
+    },
+    {
+      "trial": 3,
+      "params": {
+        "emb_dim": 200,
+        "hidden": 256,
+        "layers": 2,
+        "dropout": 0.2,
+        "lr": 0.0005,
+        "max_len": 256,
+        "batch_size": 32
+      },
+      "val_precision": 0.9356343283582089,
+      "val_recall": 0.9662813102119461,
+      "val_f1": 0.9507109004739337,
+      "val_accuracy": 0.9628968961826614,
+      "train_info": {
+        "best_val_precision": 0.9356343283582089,
+        "best_val_recall": 0.9662813102119461,
+        "best_val_f1": 0.9507109004739337,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 56.4,
+      "n_params": 8516994
+    },
+    {
+      "trial": 4,
+      "params": {
+        "emb_dim": 200,
+        "hidden": 64,
+        "layers": 1,
+        "dropout": 0.3,
+        "lr": 0.0005,
+        "max_len": 128,
+        "batch_size": 32
+      },
+      "val_precision": 0.9514563106796117,
+      "val_recall": 0.9441233140655106,
+      "val_f1": 0.9477756286266924,
+      "val_accuracy": 0.9614698537281484,
+      "train_info": {
+        "best_val_precision": 0.9514563106796117,
+        "best_val_recall": 0.9441233140655106,
+        "best_val_f1": 0.9477756286266924,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 22.1,
+      "n_params": 6136706
+    },
+    {
+      "trial": 5,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 128,
+        "layers": 2,
+        "dropout": 0.5,
+        "lr": 0.001,
+        "max_len": 128,
+        "batch_size": 32
+      },
+      "val_precision": 0.9110287303058388,
+      "val_recall": 0.9470134874759152,
+      "val_f1": 0.9286726499763817,
+      "val_accuracy": 0.9461291473421334,
+      "train_info": {
+        "best_val_precision": 0.9110287303058388,
+        "best_val_recall": 0.9470134874759152,
+        "best_val_f1": 0.9286726499763817,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 30.5,
+      "n_params": 3631810
+    },
+    {
+      "trial": 6,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 128,
+        "layers": 1,
+        "dropout": 0.5,
+        "lr": 0.001,
+        "max_len": 256,
+        "batch_size": 16
+      },
+      "val_precision": 0.9504672897196261,
+      "val_recall": 0.9797687861271677,
+      "val_f1": 0.9648956356736242,
+      "val_accuracy": 0.9735997145915091,
+      "train_info": {
+        "best_val_precision": 0.9504672897196261,
+        "best_val_recall": 0.9797687861271677,
+        "best_val_f1": 0.9648956356736242,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 56.6,
+      "n_params": 3236546
+    },
+    {
+      "trial": 7,
+      "params": {
+        "emb_dim": 100,
+        "hidden": 64,
+        "layers": 1,
+        "dropout": 0.3,
+        "lr": 0.0005,
+        "max_len": 128,
+        "batch_size": 16
+      },
+      "val_precision": 0.9076923076923077,
+      "val_recall": 0.9662813102119461,
+      "val_f1": 0.9360709286047597,
+      "val_accuracy": 0.951123795932929,
+      "train_info": {
+        "best_val_precision": 0.9076923076923077,
+        "best_val_recall": 0.9662813102119461,
+        "best_val_f1": 0.9360709286047597,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 35.4,
+      "n_params": 3085506
+    },
+    {
+      "trial": 8,
+      "params": {
+        "emb_dim": 200,
+        "hidden": 128,
+        "layers": 2,
+        "dropout": 0.5,
+        "lr": 0.001,
+        "max_len": 128,
+        "batch_size": 32
+      },
+      "val_precision": 0.9558541266794626,
+      "val_recall": 0.9595375722543352,
+      "val_f1": 0.9576923076923077,
+      "val_accuracy": 0.9686050660007135,
+      "train_info": {
+        "best_val_precision": 0.9558541266794626,
+        "best_val_recall": 0.9595375722543352,
+        "best_val_f1": 0.9576923076923077,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 32.8,
+      "n_params": 6734210
+    },
+    {
+      "trial": 9,
+      "params": {
+        "emb_dim": 200,
+        "hidden": 64,
+        "layers": 2,
+        "dropout": 0.5,
+        "lr": 0.002,
+        "max_len": 128,
+        "batch_size": 16
+      },
+      "val_precision": 0.9798387096774194,
+      "val_recall": 0.9364161849710982,
+      "val_f1": 0.9576354679802955,
+      "val_accuracy": 0.96931858722797,
+      "train_info": {
+        "best_val_precision": 0.9798387096774194,
+        "best_val_recall": 0.9364161849710982,
+        "best_val_f1": 0.9576354679802955,
+        "epochs_run": 3,
+        "floor_met": true
+      },
+      "train_seconds": 57.4,
+      "n_params": 6236034
+    }
+  ],
+  "splits": {
+    "train": 11215,
+    "val": 2803
+  },
+  "selection_rule": "Highest validation precision among trials with validation recall >= 0.85; if none meets the floor, highest recall then precision (floor_met=false)."
+}

@@ -3,14 +3,15 @@
 Measures, on the SAME canonical test split and the SAME trained
 checkpoints used everywhere else (no retraining):
 
-* Inference latency, median of 200 emails at batch size 1, for RoBERTa
-  and the tuned BiLSTM — separately on CPU and on GPU, each labelled
-  with the device it was actually measured on. TF-IDF latency is NOT
+* Inference latency, median of 200 emails at batch size 1, for RoBERTa,
+  the tuned BiLSTM and DistilBERT — separately on CPU and on GPU, each
+  labelled with the device it was actually measured on. TF-IDF latency is NOT
   re-measured here: the Stage D ladder file already holds it
   (``results/baselines/baseline_results.json``: TF-IDF+LR CPU 1.08 ms,
   TF-IDF+SVC CPU 8.11 ms, 3-seed means; sklearn has no GPU path).
 * Explanation time per email for RoBERTa (LITA: LIME + Transformers-
-  Interpret, ``alpha=0.5``) and BiLSTM (LITA-IG: LIME + integrated
+  Interpret, ``alpha=0.5``), DistilBERT (LITA, same path via the
+  ``DistilBertScorer``) and BiLSTM (LITA-IG: LIME + integrated
   gradients) via the existing ``baselines.explain_word_scores`` path —
   the same path ``scripts/run_explain.py`` uses, with the same
   ``lime_samples=1000`` default and the same 10 test emails Stage C
@@ -40,8 +41,10 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from phishing_xai.baselines import (  # noqa: E402
+    build_distilbert_wrapper,
     explain_word_scores,
     load_baseline_model,
+    load_distilbert_model,
     load_scorer,
     load_splits,
     measure_latency,
@@ -103,6 +106,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     parser.add_argument("--roberta_checkpoint", type=str, default="results/best_model.pt")
     parser.add_argument("--bilstm_checkpoint", type=str, default="results/bilstm/best_bilstm.pt")
+    parser.add_argument("--distilbert_checkpoint", type=str,
+                        default="results/distilbert/seed_42/best_distilbert.pt",
+                        help="Saved DistilBERT artefact (best_distilbert.pt, best-validation seed)")
     parser.add_argument("--data_path", type=str, default="data/Phishing_Email.csv")
     parser.add_argument("--splits_path", type=str, default="results/splits.json")
     parser.add_argument("--output_dir", type=str, default="results/rerun_latency")
@@ -200,6 +206,38 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "status": "NOT RUN YET", "reason": str(exc), "device": device_label,
             }
 
+    # --- DistilBERT latency: one load, set_device to switch (as BiLSTM) ---
+    try:
+        _d_model, _d_tokenizer, _d_payload = load_distilbert_model(args.distilbert_checkpoint)
+        distilbert = build_distilbert_wrapper(_d_model, _d_tokenizer)
+        for device_label, device in (("gpu", "cuda"), ("cpu", "cpu")):
+            if device_label == "gpu" and not cuda:
+                results["latency_ms_per_email"]["distilbert_gpu"] = {
+                    "status": "NOT RUN YET", "reason": "No CUDA device in this environment.",
+                }
+                continue
+            try:
+                distilbert.set_device(torch.device(device))
+                timed = measure_latency(distilbert.predict_proba, latency_texts, n=args.n_latency)
+                results["latency_ms_per_email"][f"distilbert_{device_label}"] = {
+                    "status": "ok", "device": device_label,
+                    "checkpoint": args.distilbert_checkpoint, **timed,
+                }
+                logger.info(f"DistilBERT latency ({device_label}): median "
+                            f"{timed['latency_ms_per_email_median']:.2f} ms/email")
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(f"DistilBERT latency ({device_label}) NOT RUN YET: {exc}")
+                results["latency_ms_per_email"][f"distilbert_{device_label}"] = {
+                    "status": "NOT RUN YET", "reason": str(exc), "device": device_label,
+                }
+        distilbert.set_device(torch.device("cpu"))
+    except Exception as exc:  # noqa: BLE001 — artefact missing/unreadable
+        logger.warning(f"DistilBERT latency NOT RUN YET: {exc}")
+        for device_label in ("gpu", "cpu"):
+            results["latency_ms_per_email"][f"distilbert_{device_label}"] = {
+                "status": "NOT RUN YET", "reason": str(exc), "device": device_label,
+            }
+
     # --- Explanation time: same 10 test emails Stage C explained ---
     try:
         df = load_data(args.data_path)
@@ -230,6 +268,22 @@ def main(argv: Optional[List[str]] = None) -> int:
             bilstm_scorer, explain_items,
             lime_samples=args.lime_samples, seed=args.seed,
         )
+        # DistilBERT LITA (LIME + Transformers-Interpret / Captum) via the
+        # DistilBertScorer: explain_word_scores takes the LITA branch for
+        # it, exactly as for RoBERTa.
+        try:
+            distilbert_scorer = load_scorer(
+                "distilbert", checkpoint=args.distilbert_checkpoint,
+            )
+            results["explanation_seconds_per_email"]["distilbert_lita"] = time_explanations(
+                distilbert_scorer, explain_items,
+                lime_samples=args.lime_samples, seed=args.seed,
+            )
+        except Exception as exc:  # noqa: BLE001 — artefact missing/unreadable
+            logger.warning(f"DistilBERT explanation timing NOT RUN YET: {exc}")
+            results["explanation_seconds_per_email"]["distilbert_lita"] = {
+                "status": "NOT RUN YET", "reason": str(exc),
+            }
     except Exception as exc:  # noqa: BLE001
         logger.warning(f"Explanation timing NOT RUN YET: {exc}")
         results["explanation_seconds_per_email"]["error"] = {

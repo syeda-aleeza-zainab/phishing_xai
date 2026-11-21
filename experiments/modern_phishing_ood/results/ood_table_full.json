@@ -1,0 +1,792 @@
+{
+  "experiment": "modern_phishing_ood task 2a",
+  "method": "recomputed locally from the 30 saved per-email prediction CSVs with repo phishing_xai.baselines.compute_metrics_full (threshold 0.5); precision@recall 0.90 is the repo precision_at_recall (max precision over thresholds with recall >= 0.90).",
+  "sets": [
+    "phishnchips",
+    "frontiers_human",
+    "frontiers_llm",
+    "bec",
+    "bec_poisoned",
+    "phishfuzzer"
+  ],
+  "models": [
+    "roberta",
+    "bilstm",
+    "tfidf_svm",
+    "tfidf_lr",
+    "distilbert"
+  ],
+  "distilbert": {
+    "status": "computed",
+    "reason": "computed here from the 6 saved DistilBERT OOD prediction CSVs (Kernel 4) and the saved Kernel-2 seed-42 test probabilities for in-distribution ECE."
+  },
+  "cross_check_vs_saved_metrics_jsons": {
+    "max_abs_diff": 0.0,
+    "mismatches": [],
+    "checked": 270
+  },
+  "table": {
+    "phishnchips": {
+      "roberta": {
+        "n": 2000,
+        "n_phish": 1000,
+        "n_legit": 1000,
+        "precision": 0.9333333333333333,
+        "recall": 0.028,
+        "f1": 0.05436893203883495,
+        "roc_auc": 0.7787,
+        "pr_auc": 0.7946792109638081,
+        "precision_at_recall_0.90": 0.5635566687539136,
+        "precision_at_recall_0.90_threshold": 9.344004502054304e-05,
+        "fpr": 0.002,
+        "confusion_matrix": [
+          [
+            998,
+            2
+          ],
+          [
+            972,
+            28
+          ]
+        ],
+        "accuracy": 0.513,
+        "source": "experiments/modern_phishing_ood/predictions/phishnchips_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 2000,
+        "n_phish": 1000,
+        "n_legit": 1000,
+        "precision": 0.859375,
+        "recall": 0.055,
+        "f1": 0.10338345864661654,
+        "roc_auc": 0.6800909999999999,
+        "pr_auc": 0.6767571316676289,
+        "precision_at_recall_0.90": 0.5263157894736842,
+        "precision_at_recall_0.90_threshold": 1.091840727747414e-09,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            945,
+            55
+          ]
+        ],
+        "accuracy": 0.523,
+        "source": "experiments/modern_phishing_ood/predictions/phishnchips_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 2000,
+        "n_phish": 1000,
+        "n_legit": 1000,
+        "precision": 0.9,
+        "recall": 0.081,
+        "f1": 0.14862385321100918,
+        "roc_auc": 0.6603629999999999,
+        "pr_auc": 0.6724125197517408,
+        "precision_at_recall_0.90": 0.5440821256038647,
+        "precision_at_recall_0.90_threshold": 0.0018574900160123952,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            919,
+            81
+          ]
+        ],
+        "accuracy": 0.536,
+        "source": "experiments/modern_phishing_ood/predictions/phishnchips_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 2000,
+        "n_phish": 1000,
+        "n_legit": 1000,
+        "precision": 0.9788359788359788,
+        "recall": 0.185,
+        "f1": 0.31118587047939444,
+        "roc_auc": 0.752764,
+        "pr_auc": 0.7771477592886433,
+        "precision_at_recall_0.90": 0.5714285714285714,
+        "precision_at_recall_0.90_threshold": 0.06190770701527484,
+        "fpr": 0.004,
+        "confusion_matrix": [
+          [
+            996,
+            4
+          ],
+          [
+            815,
+            185
+          ]
+        ],
+        "accuracy": 0.5905,
+        "source": "experiments/modern_phishing_ood/predictions/phishnchips_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 2000,
+        "n_phish": 1000,
+        "n_legit": 1000,
+        "precision": 1.0,
+        "recall": 0.014,
+        "f1": 0.027613412228796843,
+        "roc_auc": 0.82222,
+        "pr_auc": 0.8249558074737283,
+        "precision_at_recall_0.90": 0.6347642505277973,
+        "precision_at_recall_0.90_threshold": 6.884829781483859e-05,
+        "fpr": 0.0,
+        "confusion_matrix": [
+          [
+            1000,
+            0
+          ],
+          [
+            986,
+            14
+          ]
+        ],
+        "accuracy": 0.507,
+        "source": "experiments/modern_phishing_ood/predictions/phishnchips_distilbert_predictions.csv"
+      }
+    },
+    "frontiers_human": {
+      "roberta": {
+        "n": 6000,
+        "n_phish": 5000,
+        "n_legit": 1000,
+        "precision": 0.999524149417083,
+        "recall": 0.8402,
+        "f1": 0.9129631641855916,
+        "roc_auc": 0.9902488,
+        "pr_auc": 0.9980516200064995,
+        "precision_at_recall_0.90": 0.9986731534719151,
+        "precision_at_recall_0.90_threshold": 0.011474069207906723,
+        "fpr": 0.002,
+        "confusion_matrix": [
+          [
+            998,
+            2
+          ],
+          [
+            799,
+            4201
+          ]
+        ],
+        "accuracy": 0.8665,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_human_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 6000,
+        "n_phish": 5000,
+        "n_legit": 1000,
+        "precision": 0.9975151849806737,
+        "recall": 0.7226,
+        "f1": 0.8380886105311992,
+        "roc_auc": 0.9501246000000001,
+        "pr_auc": 0.9901144141118253,
+        "precision_at_recall_0.90": 0.9733939000648929,
+        "precision_at_recall_0.90_threshold": 1.47537761741405e-05,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            1387,
+            3613
+          ]
+        ],
+        "accuracy": 0.7673333333333333,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_human_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 6000,
+        "n_phish": 5000,
+        "n_legit": 1000,
+        "precision": 0.9978134110787172,
+        "recall": 0.8214,
+        "f1": 0.9010530934620448,
+        "roc_auc": 0.9699046,
+        "pr_auc": 0.9940418793494215,
+        "precision_at_recall_0.90": 0.980178610324548,
+        "precision_at_recall_0.90_threshold": 0.126901124253572,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            893,
+            4107
+          ]
+        ],
+        "accuracy": 0.8496666666666667,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_human_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 6000,
+        "n_phish": 5000,
+        "n_legit": 1000,
+        "precision": 0.9990485252140818,
+        "recall": 0.84,
+        "f1": 0.9126466753585397,
+        "roc_auc": 0.9822533999999999,
+        "pr_auc": 0.9965275758272896,
+        "precision_at_recall_0.90": 0.9901055408970977,
+        "precision_at_recall_0.90_threshold": 0.35241590276976054,
+        "fpr": 0.004,
+        "confusion_matrix": [
+          [
+            996,
+            4
+          ],
+          [
+            800,
+            4200
+          ]
+        ],
+        "accuracy": 0.866,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_human_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 6000,
+        "n_phish": 5000,
+        "n_legit": 1000,
+        "precision": 1.0,
+        "recall": 0.8572,
+        "f1": 0.9231100581520568,
+        "roc_auc": 0.9970968,
+        "pr_auc": 0.999428810555111,
+        "precision_at_recall_0.90": 1.0,
+        "precision_at_recall_0.90_threshold": 0.007615495938807726,
+        "fpr": 0.0,
+        "confusion_matrix": [
+          [
+            1000,
+            0
+          ],
+          [
+            714,
+            4286
+          ]
+        ],
+        "accuracy": 0.881,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_human_distilbert_predictions.csv"
+      }
+    },
+    "frontiers_llm": {
+      "roberta": {
+        "n": 5986,
+        "n_phish": 4986,
+        "n_legit": 1000,
+        "precision": 0.9995731967562953,
+        "recall": 0.9394304051343763,
+        "f1": 0.9685690653432589,
+        "roc_auc": 0.999367027677497,
+        "pr_auc": 0.9998462409663434,
+        "precision_at_recall_0.90": 0.999780316344464,
+        "precision_at_recall_0.90_threshold": 0.7024392485618591,
+        "fpr": 0.002,
+        "confusion_matrix": [
+          [
+            998,
+            2
+          ],
+          [
+            302,
+            4684
+          ]
+        ],
+        "accuracy": 0.9492148346140996,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_llm_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 5986,
+        "n_phish": 4986,
+        "n_legit": 1000,
+        "precision": 0.9962437395659433,
+        "recall": 0.4787404733253109,
+        "f1": 0.6467082091574099,
+        "roc_auc": 0.9542057761732852,
+        "pr_auc": 0.988315755538528,
+        "precision_at_recall_0.90": 0.9719827586206896,
+        "precision_at_recall_0.90_threshold": 1.0452235472990423e-05,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            2599,
+            2387
+          ]
+        ],
+        "accuracy": 0.5643167390578016,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_llm_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 5986,
+        "n_phish": 4986,
+        "n_legit": 1000,
+        "precision": 0.9970948999354422,
+        "recall": 0.6195346971520257,
+        "f1": 0.7642256308758041,
+        "roc_auc": 0.9378963096670678,
+        "pr_auc": 0.9871998669057179,
+        "precision_at_recall_0.90": 0.9583689154568744,
+        "precision_at_recall_0.90_threshold": 0.04560155650350145,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            1897,
+            3089
+          ]
+        ],
+        "accuracy": 0.6815903775476111,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_llm_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 5986,
+        "n_phish": 4986,
+        "n_legit": 1000,
+        "precision": 0.9990210474791973,
+        "recall": 0.8186923385479342,
+        "f1": 0.8999118165784833,
+        "roc_auc": 0.9748375451263537,
+        "pr_auc": 0.9950796395598724,
+        "precision_at_recall_0.90": 0.9881161971830986,
+        "precision_at_recall_0.90_threshold": 0.3286297466909301,
+        "fpr": 0.004,
+        "confusion_matrix": [
+          [
+            996,
+            4
+          ],
+          [
+            904,
+            4082
+          ]
+        ],
+        "accuracy": 0.8483127297026395,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_llm_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 5986,
+        "n_phish": 4986,
+        "n_legit": 1000,
+        "precision": 1.0,
+        "recall": 0.7669474528680305,
+        "f1": 0.8681044267877412,
+        "roc_auc": 0.9988076614520658,
+        "pr_auc": 0.999755048929815,
+        "precision_at_recall_0.90": 0.9995602462620933,
+        "precision_at_recall_0.90_threshold": 0.0025222336407750845,
+        "fpr": 0.0,
+        "confusion_matrix": [
+          [
+            1000,
+            0
+          ],
+          [
+            1162,
+            3824
+          ]
+        ],
+        "accuracy": 0.805880387570999,
+        "source": "experiments/modern_phishing_ood/predictions/frontiers_llm_distilbert_predictions.csv"
+      }
+    },
+    "bec": {
+      "roberta": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9987333755541482,
+        "recall": 0.37718249222674,
+        "f1": 0.5475694444444444,
+        "roc_auc": 0.9513405883759867,
+        "pr_auc": 0.9879706108327236,
+        "precision_at_recall_0.90": 0.9718927282104177,
+        "precision_at_recall_0.90_threshold": 0.00016699939442332834,
+        "fpr": 0.002,
+        "confusion_matrix": [
+          [
+            998,
+            2
+          ],
+          [
+            2604,
+            1577
+          ]
+        ],
+        "accuracy": 0.49700829955607023,
+        "source": "experiments/modern_phishing_ood/predictions/bec_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9898648648648649,
+        "recall": 0.2102367854580244,
+        "f1": 0.3468139672519235,
+        "roc_auc": 0.8319626883520688,
+        "pr_auc": 0.951826810169742,
+        "precision_at_recall_0.90": 0.8773892773892774,
+        "precision_at_recall_0.90_threshold": 1.4173176209402558e-08,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            3302,
+            879
+          ]
+        ],
+        "accuracy": 0.3609341825902335,
+        "source": "experiments/modern_phishing_ood/predictions/bec_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9944852941176471,
+        "recall": 0.388184644821813,
+        "f1": 0.5584035781868226,
+        "roc_auc": 0.9000765367137048,
+        "pr_auc": 0.973788843453357,
+        "precision_at_recall_0.90": 0.9202739056003912,
+        "precision_at_recall_0.90_threshold": 0.02247010449296209,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            2558,
+            1623
+          ]
+        ],
+        "accuracy": 0.5045358038988612,
+        "source": "experiments/modern_phishing_ood/predictions/bec_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9969856819894499,
+        "recall": 0.3164314757235111,
+        "f1": 0.4803921568627451,
+        "roc_auc": 0.9066594116240135,
+        "pr_auc": 0.9746638356250884,
+        "precision_at_recall_0.90": 0.9284657128761716,
+        "precision_at_recall_0.90_threshold": 0.14488760847468668,
+        "fpr": 0.004,
+        "confusion_matrix": [
+          [
+            996,
+            4
+          ],
+          [
+            2858,
+            1323
+          ]
+        ],
+        "accuracy": 0.4475969889982629,
+        "source": "experiments/modern_phishing_ood/predictions/bec_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 1.0,
+        "recall": 0.15020330064577853,
+        "f1": 0.2611769598669162,
+        "roc_auc": 0.9559806266443435,
+        "pr_auc": 0.9891019539461815,
+        "precision_at_recall_0.90": 0.9706034038164002,
+        "precision_at_recall_0.90_threshold": 0.00012890665675513446,
+        "fpr": 0.0,
+        "confusion_matrix": [
+          [
+            1000,
+            0
+          ],
+          [
+            3553,
+            628
+          ]
+        ],
+        "accuracy": 0.31422505307855625,
+        "source": "experiments/modern_phishing_ood/predictions/bec_distilbert_predictions.csv"
+      }
+    },
+    "bec_poisoned": {
+      "roberta": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9988895058300944,
+        "recall": 0.4302798373594834,
+        "f1": 0.6014710799063858,
+        "roc_auc": 0.9565055010762976,
+        "pr_auc": 0.9894197876364624,
+        "precision_at_recall_0.90": 0.9758879958516982,
+        "precision_at_recall_0.90_threshold": 0.00018184031068813056,
+        "fpr": 0.002,
+        "confusion_matrix": [
+          [
+            998,
+            2
+          ],
+          [
+            2382,
+            1799
+          ]
+        ],
+        "accuracy": 0.5398571704304188,
+        "source": "experiments/modern_phishing_ood/predictions/bec_poisoned_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9904963041182682,
+        "recall": 0.2243482420473571,
+        "f1": 0.3658346333853354,
+        "roc_auc": 0.8436479311169576,
+        "pr_auc": 0.9552939391950308,
+        "precision_at_recall_0.90": 0.8877358490566037,
+        "precision_at_recall_0.90_threshold": 2.2264344538571944e-08,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            3243,
+            938
+          ]
+        ],
+        "accuracy": 0.3723219455703532,
+        "source": "experiments/modern_phishing_ood/predictions/bec_poisoned_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9941558441558441,
+        "recall": 0.3661803396316671,
+        "f1": 0.5352211151896522,
+        "roc_auc": 0.8938677349916289,
+        "pr_auc": 0.9718961655840769,
+        "precision_at_recall_0.90": 0.9162609542356378,
+        "precision_at_recall_0.90_threshold": 0.019871799379126153,
+        "fpr": 0.009,
+        "confusion_matrix": [
+          [
+            991,
+            9
+          ],
+          [
+            2650,
+            1531
+          ]
+        ],
+        "accuracy": 0.4867786141671492,
+        "source": "experiments/modern_phishing_ood/predictions/bec_poisoned_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 0.9968253968253968,
+        "recall": 0.30040660129155705,
+        "f1": 0.4616798382650248,
+        "roc_auc": 0.8974620904089932,
+        "pr_auc": 0.9720011600216287,
+        "precision_at_recall_0.90": 0.9225300318705565,
+        "precision_at_recall_0.90_threshold": 0.13608164092077246,
+        "fpr": 0.004,
+        "confusion_matrix": [
+          [
+            996,
+            4
+          ],
+          [
+            2925,
+            1256
+          ]
+        ],
+        "accuracy": 0.4346651225632117,
+        "source": "experiments/modern_phishing_ood/predictions/bec_poisoned_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 5181,
+        "n_phish": 4181,
+        "n_legit": 1000,
+        "precision": 1.0,
+        "recall": 0.23439368572111935,
+        "f1": 0.3797713621391203,
+        "roc_auc": 0.9613642669217892,
+        "pr_auc": 0.99063420889423,
+        "precision_at_recall_0.90": 0.9731820526044352,
+        "precision_at_recall_0.90_threshold": 0.00013609108282253146,
+        "fpr": 0.0,
+        "confusion_matrix": [
+          [
+            1000,
+            0
+          ],
+          [
+            3201,
+            980
+          ]
+        ],
+        "accuracy": 0.3821656050955414,
+        "source": "experiments/modern_phishing_ood/predictions/bec_poisoned_distilbert_predictions.csv"
+      }
+    },
+    "phishfuzzer": {
+      "roberta": {
+        "n": 205,
+        "n_phish": 103,
+        "n_legit": 102,
+        "precision": 0.5109489051094891,
+        "recall": 0.6796116504854369,
+        "f1": 0.5833333333333334,
+        "roc_auc": 0.5711022272986865,
+        "pr_auc": 0.6145102685094116,
+        "precision_at_recall_0.90": 0.5077720207253886,
+        "precision_at_recall_0.90_threshold": 0.0013964488171041012,
+        "fpr": 0.6568627450980392,
+        "confusion_matrix": [
+          [
+            35,
+            67
+          ],
+          [
+            33,
+            70
+          ]
+        ],
+        "accuracy": 0.5121951219512195,
+        "source": "experiments/modern_phishing_ood/predictions/phishfuzzer_roberta_predictions.csv"
+      },
+      "bilstm": {
+        "n": 205,
+        "n_phish": 103,
+        "n_legit": 102,
+        "precision": 0.53125,
+        "recall": 0.49514563106796117,
+        "f1": 0.5125628140703518,
+        "roc_auc": 0.5149438416143156,
+        "pr_auc": 0.5769726067994712,
+        "precision_at_recall_0.90": 0.5099009900990099,
+        "precision_at_recall_0.90_threshold": 2.1408910154359388e-09,
+        "fpr": 0.4411764705882353,
+        "confusion_matrix": [
+          [
+            57,
+            45
+          ],
+          [
+            52,
+            51
+          ]
+        ],
+        "accuracy": 0.526829268292683,
+        "source": "experiments/modern_phishing_ood/predictions/phishfuzzer_bilstm_predictions.csv"
+      },
+      "tfidf_svm": {
+        "n": 205,
+        "n_phish": 103,
+        "n_legit": 102,
+        "precision": 0.5263157894736842,
+        "recall": 0.6796116504854369,
+        "f1": 0.5932203389830508,
+        "roc_auc": 0.5818579859128117,
+        "pr_auc": 0.6379279781106251,
+        "precision_at_recall_0.90": 0.5027027027027027,
+        "precision_at_recall_0.90_threshold": 0.0623754897281165,
+        "fpr": 0.6176470588235294,
+        "confusion_matrix": [
+          [
+            39,
+            63
+          ],
+          [
+            33,
+            70
+          ]
+        ],
+        "accuracy": 0.5317073170731708,
+        "source": "experiments/modern_phishing_ood/predictions/phishfuzzer_tfidf_svm_predictions.csv"
+      },
+      "tfidf_lr": {
+        "n": 205,
+        "n_phish": 103,
+        "n_legit": 102,
+        "precision": 0.5238095238095238,
+        "recall": 0.7475728155339806,
+        "f1": 0.616,
+        "roc_auc": 0.5603464686845612,
+        "pr_auc": 0.5872470512680215,
+        "precision_at_recall_0.90": 0.5102040816326531,
+        "precision_at_recall_0.90_threshold": 0.1632110395095868,
+        "fpr": 0.6862745098039216,
+        "confusion_matrix": [
+          [
+            32,
+            70
+          ],
+          [
+            26,
+            77
+          ]
+        ],
+        "accuracy": 0.5317073170731708,
+        "source": "experiments/modern_phishing_ood/predictions/phishfuzzer_tfidf_lr_predictions.csv"
+      },
+      "distilbert": {
+        "n": 205,
+        "n_phish": 103,
+        "n_legit": 102,
+        "precision": 0.5299145299145299,
+        "recall": 0.6019417475728155,
+        "f1": 0.5636363636363636,
+        "roc_auc": 0.5477822196839901,
+        "pr_auc": 0.5897493858447459,
+        "precision_at_recall_0.90": 0.510752688172043,
+        "precision_at_recall_0.90_threshold": 0.001165031106211245,
+        "fpr": 0.5392156862745098,
+        "confusion_matrix": [
+          [
+            47,
+            55
+          ],
+          [
+            41,
+            62
+          ]
+        ],
+        "accuracy": 0.5317073170731708,
+        "source": "experiments/modern_phishing_ood/predictions/phishfuzzer_distilbert_predictions.csv"
+      }
+    }
+  }
+}

@@ -2,15 +2,15 @@ Subject: Invoice #INV-90821 Due Today
 From: billing@billing-example.com
 To: user@example.org
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0945351111358374057=="
+Content-Type: multipart/mixed; boundary="===============1287010195568088798=="
 
---===============0945351111358374057==
+--===============1287010195568088798==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 Please find attached your monthly invoice.
 
---===============0945351111358374057==
+--===============1287010195568088798==
 Content-Type: application/pdf
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="invoice.pdf"
@@ -39,7 +39,7 @@ ZgowIDEwCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA0MiAwMDAwMCBuIAowMDAwMDAwMTIw
 IDAwMDAwIG4gCjAwMDAwMDAxNzIgMDAwMDAgbiAKMDAwMDAwMDIxMyAwMDAwMCBuIAowMDAwMDAw
 MzQ2IDAwMDAwIG4gCjAwMDAwMDA0MzUgMDAwMDAgbiAKMDAwMDAwMDU2OCAwMDAwMCBuIAowMDAw
 MDAwNzYyIDAwMDAwIG4gCjAwMDAwMDA5NTMgMDAwMDAgbiAKCnRyYWlsZXIKPDwvU2l6ZSAxMC9S
-b290IDEgMCBSL0lEWzxDM0E5QzM5RUMyQjI3OTAyQzNBMDdDNzQxQzRCNUVDMj48NTFGNTBBMTc3
-QjdDRTIzOUQxMUIxNDA5NTVENzNDNzI+XT4+CnN0YXJ0eHJlZgoxMDgwCiUlRU9GCg==
+b290IDEgMCBSL0lEWzw3MEMzODFDMzhFMTdDM0E1QzJCODUwMzE3NDQ0QzJCND48NzM1QUI0RDlG
+MjhERjRFODUxNjdFMjg5OTkxMjI3ODY+XT4+CnN0YXJ0eHJlZgoxMDgwCiUlRU9GCg==
 
---===============0945351111358374057==--
+--===============1287010195568088798==--

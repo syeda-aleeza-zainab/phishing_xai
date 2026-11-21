@@ -943,9 +943,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--labels", type=str, default=None,
                         help="labels.csv path (default: <eval_dir>/labels.csv)")
     parser.add_argument("--checkpoint", type=str, default=None,
-                        help="Trained checkpoint (.pt). For --model roberta: the RoBERTa checkpoint. For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt from run_baselines.py) is loaded instead of fitting; a RoBERTa .pt or a missing file means fit on the real train split (default: Kaggle auto-detect, else results/best_model.pt)")
-    parser.add_argument("--model", choices=["roberta", "tfidf_lr", "tfidf_svm", "bilstm", "rule_based"], default="roberta",
-                        help="Scorer model driving the (a)-(d) ablations (default: roberta). tfidf_lr/tfidf_svm/bilstm fit on the real train split unless --checkpoint points at a saved baseline artefact; rule_based needs no model at all (worst static URL-risk score in the text, NOT a model probability); no checkpoint needed for any of the three.")
+                        help="Trained checkpoint (.pt). For --model roberta: the RoBERTa checkpoint. For --model distilbert: a saved DistilBERT artefact (best_distilbert.pt, best-validation seed) — a missing/wrong-kind checkpoint raises, never refits. For --model tfidf_lr/bilstm: a saved baseline artefact (best_<model>.pt from run_baselines.py) is loaded instead of fitting; a RoBERTa .pt or a missing file means fit on the real train split (default: Kaggle auto-detect, else results/best_model.pt)")
+    parser.add_argument("--model", choices=["roberta", "distilbert", "tfidf_lr", "tfidf_svm", "bilstm", "rule_based"], default="roberta",
+                        help="Scorer model driving the (a)-(d) ablations (default: roberta). distilbert loads a saved best_distilbert.pt artefact (no refit, no untrained fallback); tfidf_lr/tfidf_svm/bilstm fit on the real train split unless --checkpoint points at a saved baseline artefact; rule_based needs no model at all (worst static URL-risk score in the text, NOT a model probability); no checkpoint needed for any of the three.")
     parser.add_argument("--output_dir", type=str, default=None,
                         help="Output directory (default: Kaggle /kaggle/working/results/multimodal_eval, else results/multimodal_eval)")
     parser.add_argument("--max_samples", type=int, default=None,
@@ -1009,11 +1009,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             recall_floor=args.recall_floor, max_samples=None,
         )
     else:
-        # Baseline / rule-based scorer: tfidf_lr/bilstm load a saved
-        # baseline artefact when --checkpoint points at one, else fit on
-        # the real train split; rule_based needs no fit at all; the
-        # checkpoint gate does not apply and its absence is not an error
-        # for any of them.
+        # Baseline / DistilBERT / rule-based scorer: distilbert loads a
+        # saved best_distilbert.pt artefact (a missing/wrong-kind
+        # checkpoint raises — never refits, never falls back to base
+        # weights); tfidf_lr/bilstm load a saved baseline artefact when
+        # --checkpoint points at one, else fit on the real train split;
+        # rule_based needs no fit at all; the checkpoint gate does not
+        # apply and its absence is not an error for any of them except
+        # distilbert, which requires its artefact.
         scorer = load_scorer(
             args.model, checkpoint=ckpt_path, bilstm_epochs=args.bilstm_epochs,
         )
